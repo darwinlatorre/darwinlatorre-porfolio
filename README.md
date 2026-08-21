@@ -38,6 +38,20 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
+## Docker
+
+Build and run the production site at `http://localhost:4321`:
+
+```sh
+docker compose up --build
+```
+
+Stop and remove the container:
+
+```sh
+docker compose down
+```
+
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
