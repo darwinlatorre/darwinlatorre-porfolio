@@ -20,26 +20,24 @@ import SpeedInsights from '@vercel/speed-insights/astro';
 		<Analytics />
 	</head>
 	<body>
-		<main class="viewport">
-			<section class="frame" aria-label="Darwin Latorre portfolio introduction">
-				<button class="menu" type="button" aria-label="Open navigation">
-					<span></span>
-					<span></span>
-					<span></span>
-				</button>
+		<main class="viewport" aria-label="Darwin Latorre portfolio introduction">
+			<button class="menu" type="button" aria-label="Open navigation">
+				<span></span>
+				<span></span>
+				<span></span>
+			</button>
 
-				<h1 class="terminal-line" aria-label="Darwin Latorre">
-					<span class="prompt" aria-hidden="true">&gt;</span>
-					<span>DarwinLatorre</span><span class="cursor" aria-hidden="true">_</span>
-				</h1>
+			<h1 class="terminal-line" aria-label="Darwin Latorre">
+				<span class="prompt" aria-hidden="true">&gt;</span>
+				<span>DarwinLatorre</span><span class="cursor" aria-hidden="true">_</span>
+			</h1>
 
-				<div class="scroll-cue" aria-hidden="true">
-					<span>Scroll</span>
-					<svg viewBox="0 0 16 10" role="presentation">
-						<path d="M2 2.25 8 8l6-5.75"></path>
-					</svg>
-				</div>
-			</section>
+			<div class="scroll-cue" aria-hidden="true">
+				<span>Scroll</span>
+				<svg viewBox="0 0 16 10" role="presentation">
+					<path d="M2 2.25 8 8l6-5.75"></path>
+				</svg>
+			</div>
 		</main>
 	</body>
 </html>
@@ -54,9 +52,14 @@ import SpeedInsights from '@vercel/speed-insights/astro';
 	}
 
 	:global(body) {
+		--page-inset: clamp(0.5rem, 1vw, 1rem);
+
 		margin: 0;
+		width: 100vw;
+		height: 100vh;
+		height: 100dvh;
 		min-width: 320px;
-		min-height: 100svh;
+		padding: var(--page-inset);
 		overflow: hidden;
 		background: #0c0c11;
 		color: #efefef;
@@ -69,17 +72,10 @@ import SpeedInsights from '@vercel/speed-insights/astro';
 	}
 
 	.viewport {
-		display: grid;
-		min-height: 100svh;
-		place-items: center;
-		padding: 6svh 6vw;
-	}
-
-	.frame {
 		position: relative;
 		display: grid;
-		width: min(88vw, 100rem);
-		height: min(84svh, 58rem);
+		width: 100%;
+		height: 100%;
 		place-items: center;
 		border: 1px solid #4d3659;
 		border-radius: 3px;
@@ -248,22 +244,13 @@ import SpeedInsights from '@vercel/speed-insights/astro';
 	}
 
 	@media (max-width: 40rem) {
-		.viewport {
-			padding: 4svh 1rem;
-		}
-
-		.frame {
-			width: calc(100vw - 2rem);
-			height: 88svh;
-		}
-
 		.terminal-line {
 			letter-spacing: -0.055em;
 		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.frame,
+		.viewport,
 		.menu,
 		.terminal-line,
 		.scroll-cue,
