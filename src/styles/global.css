@@ -1,0 +1,27 @@
+* {
+	box-sizing: border-box;
+}
+
+html {
+	background: #0c0c11;
+}
+
+body {
+	--page-inset: clamp(0.5rem, 1vw, 1rem);
+
+	margin: 0;
+	width: 100vw;
+	height: 100vh;
+	height: 100dvh;
+	min-width: 320px;
+	padding: var(--page-inset);
+	overflow: hidden;
+	background: #0c0c11;
+	color: #efefef;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+		'Liberation Mono', monospace;
+}
+
+button {
+	font: inherit;
+}
