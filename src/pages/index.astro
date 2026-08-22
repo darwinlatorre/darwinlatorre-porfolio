@@ -8,13 +8,268 @@ import SpeedInsights from '@vercel/speed-insights/astro';
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<meta
+			name="description"
+			content="Darwin Latorre's personal portfolio and selected work."
+		/>
+		<meta name="theme-color" content="#0c0c11" />
+		<title>Darwin Latorre</title>
 		<SpeedInsights />
 		<Analytics />
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<main class="viewport">
+			<section class="frame" aria-label="Darwin Latorre portfolio introduction">
+				<button class="menu" type="button" aria-label="Open navigation">
+					<span></span>
+					<span></span>
+					<span></span>
+				</button>
+
+				<h1 class="terminal-line" aria-label="Darwin Latorre">
+					<span class="prompt" aria-hidden="true">&gt;</span>
+					<span>DarwinLatorre</span><span class="cursor" aria-hidden="true">_</span>
+				</h1>
+
+				<div class="scroll-cue" aria-hidden="true">
+					<span>Scroll</span>
+					<svg viewBox="0 0 16 10" role="presentation">
+						<path d="M2 2.25 8 8l6-5.75"></path>
+					</svg>
+				</div>
+			</section>
+		</main>
 	</body>
 </html>
+
+<style>
+	:global(*) {
+		box-sizing: border-box;
+	}
+
+	:global(html) {
+		background: #0c0c11;
+	}
+
+	:global(body) {
+		margin: 0;
+		min-width: 320px;
+		min-height: 100svh;
+		overflow: hidden;
+		background: #0c0c11;
+		color: #efefef;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+			'Liberation Mono', monospace;
+	}
+
+	button {
+		font: inherit;
+	}
+
+	.viewport {
+		display: grid;
+		min-height: 100svh;
+		place-items: center;
+		padding: 6svh 6vw;
+	}
+
+	.frame {
+		position: relative;
+		display: grid;
+		width: min(88vw, 100rem);
+		height: min(84svh, 58rem);
+		place-items: center;
+		border: 1px solid #4d3659;
+		border-radius: 3px;
+		background: #0e0e14;
+		animation: frame-enter 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+
+	.menu {
+		position: absolute;
+		top: clamp(1.25rem, 2.5vw, 2.35rem);
+		left: clamp(1.25rem, 2.5vw, 2.35rem);
+		display: grid;
+		width: 2rem;
+		height: 1.75rem;
+		padding: 0.35rem 0.25rem;
+		align-content: space-between;
+		border: 0;
+		background: transparent;
+		cursor: pointer;
+		animation: detail-enter 550ms ease-out 450ms both;
+	}
+
+	.menu span {
+		display: block;
+		width: 1.35rem;
+		height: 1px;
+		background: #715081;
+		transition: background-color 180ms ease, transform 180ms ease;
+	}
+
+	.menu:hover span,
+	.menu:focus-visible span {
+		background: #a96ed3;
+	}
+
+	.menu:hover span:nth-child(2),
+	.menu:focus-visible span:nth-child(2) {
+		transform: translateX(2px);
+	}
+
+	.menu:focus-visible {
+		outline: 1px solid #715081;
+		outline-offset: 4px;
+	}
+
+	.menu:active {
+		transform: scale(0.97);
+	}
+
+	.terminal-line {
+		display: flex;
+		margin: 0;
+		align-items: baseline;
+		white-space: nowrap;
+		font-size: clamp(1.45rem, 7.25vw, 3.5rem);
+		font-weight: 500;
+		letter-spacing: -0.045em;
+		line-height: 1;
+		animation: title-enter 750ms cubic-bezier(0.22, 1, 0.36, 1) 160ms both;
+	}
+
+	.prompt {
+		margin-right: 0.32em;
+		color: #a96ed3;
+		text-shadow: 0 0 7px rgb(169 110 211 / 18%);
+	}
+
+	.cursor {
+		color: #a96ed3;
+		text-shadow: 0 0 7px rgb(169 110 211 / 16%);
+		animation: cursor-blink 1.2s step-end 1.15s infinite;
+	}
+
+	.scroll-cue {
+		position: absolute;
+		bottom: clamp(1.25rem, 2.5vw, 2.35rem);
+		left: 50%;
+		display: grid;
+		transform: translateX(-50%);
+		place-items: center;
+		gap: 0.55rem;
+		color: #938a99;
+		font-size: 0.68rem;
+		letter-spacing: 0.08em;
+		animation: detail-enter-centered 550ms ease-out 650ms both;
+	}
+
+	.scroll-cue svg {
+		width: 0.75rem;
+		height: auto;
+		overflow: visible;
+		animation: scroll-drift 1.8s ease-in-out 1.2s infinite;
+	}
+
+	.scroll-cue path {
+		fill: none;
+		stroke: #715081;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		stroke-width: 1.25;
+	}
+
+	@keyframes frame-enter {
+		from {
+			opacity: 0;
+			transform: scale(0.995);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	@keyframes title-enter {
+		from {
+			opacity: 0;
+			transform: translateY(8px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes detail-enter {
+		from {
+			opacity: 0;
+			transform: translateY(4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@keyframes detail-enter-centered {
+		from {
+			opacity: 0;
+			transform: translate(-50%, 4px);
+		}
+		to {
+			opacity: 1;
+			transform: translate(-50%, 0);
+		}
+	}
+
+	@keyframes cursor-blink {
+		0%,
+		45% {
+			opacity: 1;
+		}
+		46%,
+		100% {
+			opacity: 0.16;
+		}
+	}
+
+	@keyframes scroll-drift {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(3px);
+		}
+	}
+
+	@media (max-width: 40rem) {
+		.viewport {
+			padding: 4svh 1rem;
+		}
+
+		.frame {
+			width: calc(100vw - 2rem);
+			height: 88svh;
+		}
+
+		.terminal-line {
+			letter-spacing: -0.055em;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.frame,
+		.menu,
+		.terminal-line,
+		.scroll-cue,
+		.scroll-cue svg,
+		.cursor {
+			animation: none;
+		}
+	}
+</style>
