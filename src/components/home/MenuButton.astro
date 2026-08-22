@@ -95,8 +95,8 @@ const menuItems = [
 <style>
 	.menu-shell {
 		position: absolute;
-		top: clamp(1.25rem, 2.5vw, 2.35rem);
-		left: clamp(1.25rem, 2.5vw, 2.35rem);
+		top: var(--control-offset);
+		left: var(--control-offset);
 		z-index: 10;
 		animation: detail-enter 550ms ease-out 450ms both;
 	}
@@ -118,15 +118,16 @@ const menuItems = [
 		display: block;
 		width: 1.35rem;
 		height: 1px;
-		background: #715081;
+		background: var(--color-accent-muted);
 		transform-origin: center;
-		transition: background-color 180ms ease, opacity 180ms ease, transform 220ms ease;
+		transition: background-color var(--duration-fast) ease,
+			opacity var(--duration-fast) ease, transform 220ms ease;
 	}
 
 	.menu-trigger:hover span,
 	.menu-trigger:focus-visible span,
 	.is-open .menu-trigger span {
-		background: #a96ed3;
+		background: var(--color-accent);
 	}
 
 	.menu-trigger:hover span:nth-child(2),
@@ -135,7 +136,7 @@ const menuItems = [
 	}
 
 	.menu-trigger:focus-visible {
-		outline: 1px solid #715081;
+		outline: var(--border-width) solid var(--color-accent-muted);
 		outline-offset: 4px;
 	}
 
@@ -160,15 +161,15 @@ const menuItems = [
 		position: absolute;
 		top: -0.75rem;
 		left: -0.75rem;
-		width: min(19rem, calc(100vw - 3.5rem));
+		width: min(17rem, calc(100vw - 3.5rem));
 		padding: 1.1rem 1.35rem 1.4rem;
 		visibility: hidden;
-		border: 1px solid #4d3659;
-		border-radius: 2px;
-		background: #121118;
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--radius-small);
+		background: var(--color-surface-raised);
 		opacity: 0;
 		transform: translateX(-12px);
-		transition: opacity 200ms ease, transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+		transition: opacity 200ms ease, transform 280ms var(--ease-out),
 			visibility 0s linear 280ms;
 	}
 
@@ -182,7 +183,7 @@ const menuItems = [
 	.menu-panel ul {
 		position: relative;
 		display: grid;
-		margin: 2.8rem 0 0;
+		margin: 2.35rem 0 0;
 		padding: 0;
 		list-style: none;
 	}
@@ -192,7 +193,7 @@ const menuItems = [
 		top: 0.25rem;
 		bottom: 1.5rem;
 		left: 0.28rem;
-		border-left: 2px dotted #715081;
+		border-left: 2px dotted var(--color-accent-muted);
 		content: '';
 		opacity: 0.78;
 	}
@@ -214,7 +215,7 @@ const menuItems = [
 		top: 50%;
 		left: 0.28rem;
 		width: 1.05rem;
-		border-top: 2px dotted #715081;
+		border-top: 2px dotted var(--color-accent-muted);
 		content: '';
 		opacity: 0.78;
 	}
@@ -248,11 +249,11 @@ const menuItems = [
 		width: 1.35rem;
 		height: auto;
 		fill: none;
-		stroke: #938a99;
+		stroke: var(--color-text-muted);
 		stroke-linecap: round;
 		stroke-linejoin: round;
 		stroke-width: 1.5;
-		transition: stroke 180ms ease;
+		transition: stroke var(--duration-fast) ease;
 	}
 
 	.menu-panel li > a {
@@ -262,26 +263,26 @@ const menuItems = [
 		align-items: center;
 		align-self: stretch;
 		gap: 0.6rem;
-		color: #938a99;
+		color: var(--color-text-muted);
 		font-size: 1.05rem;
 		letter-spacing: 0.035em;
 		text-decoration: none;
-		transition: color 180ms ease, transform 180ms ease;
+		transition: color var(--duration-fast) ease, transform var(--duration-fast) ease;
 	}
 
 	.menu-panel li > a:hover,
 	.menu-panel li > a:focus-visible {
-		color: #efefef;
+		color: var(--color-text);
 		transform: translateX(3px);
 	}
 
 	.menu-panel li > a:hover .folder-icon,
 	.menu-panel li > a:focus-visible .folder-icon {
-		stroke: #a96ed3;
+		stroke: var(--color-accent);
 	}
 
 	.menu-panel li > a:focus-visible {
-		outline: 1px solid #715081;
+		outline: var(--border-width) solid var(--color-accent-muted);
 		outline-offset: 3px;
 	}
 

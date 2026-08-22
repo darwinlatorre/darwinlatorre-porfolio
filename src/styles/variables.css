@@ -1,0 +1,24 @@
+:root {
+	color-scheme: dark;
+
+	--color-background: #0c0c11;
+	--color-surface: #0e0e14;
+	--color-surface-raised: #121118;
+	--color-text: #efefef;
+	--color-text-muted: #938a99;
+	--color-accent: #a96ed3;
+	--color-accent-muted: #715081;
+	--color-border: #4d3659;
+	--color-accent-glow: rgb(169 110 211 / 18%);
+	--color-accent-glow-faint: rgb(169 110 211 / 16%);
+
+	--font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+		'Liberation Mono', monospace;
+	--page-inset: clamp(0.5rem, 1vw, 1rem);
+	--control-offset: clamp(1.25rem, 2.5vw, 2.35rem);
+	--border-width: 1px;
+	--radius-small: 2px;
+	--radius-frame: 3px;
+	--duration-fast: 180ms;
+	--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
