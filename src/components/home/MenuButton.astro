@@ -1,3 +1,13 @@
+---
+const menuItems = [
+	{ label: 'About', href: '#about' },
+	{ label: 'Projects', href: '#projects' },
+	{ label: 'Experience', href: '#experience' },
+	{ label: 'Services', href: '#services' },
+	{ label: 'Certificates', href: '#certificates' },
+];
+---
+
 <div class="menu-shell" data-menu>
 	<button
 		class="menu-trigger"
@@ -21,11 +31,19 @@
 		inert
 	>
 		<ul>
-			<li><a href="#about">About</a></li>
-			<li><a href="#projects">Projects</a></li>
-			<li><a href="#experience">Experience</a></li>
-			<li><a href="#services">Services</a></li>
-			<li><a href="#certificates">Certificates</a></li>
+			{
+				menuItems.map((item) => (
+					<li>
+						<a href={item.href}>
+							<svg class="folder-icon" viewBox="0 0 28 24" aria-hidden="true">
+								<path d="M2 5.5h8l2.2 2.5H26v13.5H2z"></path>
+								<path d="M2 8h24"></path>
+							</svg>
+							<span>{item.label}</span>
+						</a>
+					</li>
+				))
+			}
 		</ul>
 	</nav>
 </div>
@@ -77,8 +95,8 @@
 <style>
 	.menu-shell {
 		position: absolute;
-		top: clamp(1.25rem, 2.5vw, 2.35rem);
-		left: clamp(1.25rem, 2.5vw, 2.35rem);
+		top: var(--control-offset);
+		left: var(--control-offset);
 		z-index: 10;
 		animation: detail-enter 550ms ease-out 450ms both;
 	}
@@ -100,15 +118,16 @@
 		display: block;
 		width: 1.35rem;
 		height: 1px;
-		background: #715081;
+		background: var(--color-accent-muted);
 		transform-origin: center;
-		transition: background-color 180ms ease, opacity 180ms ease, transform 220ms ease;
+		transition: background-color var(--duration-fast) ease,
+			opacity var(--duration-fast) ease, transform 220ms ease;
 	}
 
 	.menu-trigger:hover span,
 	.menu-trigger:focus-visible span,
 	.is-open .menu-trigger span {
-		background: #a96ed3;
+		background: var(--color-accent);
 	}
 
 	.menu-trigger:hover span:nth-child(2),
@@ -117,7 +136,7 @@
 	}
 
 	.menu-trigger:focus-visible {
-		outline: 1px solid #715081;
+		outline: var(--border-width) solid var(--color-accent-muted);
 		outline-offset: 4px;
 	}
 
@@ -142,38 +161,63 @@
 		position: absolute;
 		top: -0.75rem;
 		left: -0.75rem;
-		width: min(14rem, calc(100vw - 3.5rem));
-		padding: 4.15rem 1.5rem 1.45rem;
+		width: min(17rem, calc(100vw - 3.5rem));
+		padding: 1.1rem 1.35rem 1.4rem;
 		visibility: hidden;
-		border: 1px solid #4d3659;
-		border-radius: 0.25rem 1.5rem 1.5rem 1.5rem;
-		background: #121118;
+		border: var(--border-width) solid var(--color-border);
+		border-radius: var(--radius-small);
+		background: var(--color-surface-raised);
 		opacity: 0;
-		transform: translate(-6px, -6px) scale(0.72);
-		transform-origin: top left;
-		transition: opacity 220ms ease, transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
-			visibility 0s linear 320ms;
+		transform: translateX(-12px);
+		transition: opacity 200ms ease, transform 280ms var(--ease-out),
+			visibility 0s linear 280ms;
 	}
 
 	.is-open .menu-panel {
 		visibility: visible;
 		opacity: 1;
-		transform: translate(0, 0) scale(1);
+		transform: translateX(0);
 		transition-delay: 0s;
 	}
 
 	.menu-panel ul {
+		position: relative;
 		display: grid;
-		margin: 0;
+		margin: 2.35rem 0 0;
 		padding: 0;
-		gap: 0.2rem;
 		list-style: none;
 	}
 
+	.menu-panel ul::before {
+		position: absolute;
+		top: 0.25rem;
+		bottom: 1.5rem;
+		left: 0.28rem;
+		border-left: 2px dotted var(--color-accent-muted);
+		content: '';
+		opacity: 0.78;
+	}
+
 	.menu-panel li {
+		position: relative;
+		display: grid;
+		min-height: 3rem;
+		grid-template-columns: 1.55rem minmax(0, 1fr);
+		align-items: center;
+		column-gap: 0.6rem;
 		opacity: 0;
 		transform: translateY(5px);
 		transition: opacity 180ms ease, transform 220ms ease;
+	}
+
+	.menu-panel li::before {
+		position: absolute;
+		top: 50%;
+		left: 0.28rem;
+		width: 1.05rem;
+		border-top: 2px dotted var(--color-accent-muted);
+		content: '';
+		opacity: 0.78;
 	}
 
 	.is-open .menu-panel li {
@@ -201,32 +245,44 @@
 		transition-delay: 210ms;
 	}
 
-	.menu-panel a {
-		display: flex;
+	.folder-icon {
+		width: 1.35rem;
+		height: auto;
+		fill: none;
+		stroke: var(--color-text-muted);
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		stroke-width: 1.5;
+		transition: stroke var(--duration-fast) ease;
+	}
+
+	.menu-panel li > a {
+		display: grid;
+		grid-column: 2;
+		grid-template-columns: 1.4rem minmax(0, 1fr);
 		align-items: center;
-		gap: 0.65rem;
-		padding: 0.65rem 0;
-		color: #938a99;
-		font-size: 0.9rem;
+		align-self: stretch;
+		gap: 0.6rem;
+		color: var(--color-text-muted);
+		font-size: 1.05rem;
 		letter-spacing: 0.035em;
 		text-decoration: none;
-		transition: color 180ms ease, transform 180ms ease;
+		transition: color var(--duration-fast) ease, transform var(--duration-fast) ease;
 	}
 
-	.menu-panel a::before {
-		content: '>';
-		color: #a96ed3;
-		font-size: 0.9em;
-	}
-
-	.menu-panel a:hover,
-	.menu-panel a:focus-visible {
-		color: #efefef;
+	.menu-panel li > a:hover,
+	.menu-panel li > a:focus-visible {
+		color: var(--color-text);
 		transform: translateX(3px);
 	}
 
-	.menu-panel a:focus-visible {
-		outline: 1px solid #715081;
+	.menu-panel li > a:hover .folder-icon,
+	.menu-panel li > a:focus-visible .folder-icon {
+		stroke: var(--color-accent);
+	}
+
+	.menu-panel li > a:focus-visible {
+		outline: var(--border-width) solid var(--color-accent-muted);
 		outline-offset: 3px;
 	}
 
@@ -246,7 +302,8 @@
 		.menu-trigger span,
 		.menu-panel,
 		.menu-panel li,
-		.menu-panel a {
+		.menu-panel a,
+		.folder-icon {
 			animation: none;
 			transition-duration: 0.01ms;
 		}
