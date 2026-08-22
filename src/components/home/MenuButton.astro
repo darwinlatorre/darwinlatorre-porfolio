@@ -202,13 +202,21 @@
 	}
 
 	.menu-panel a {
-		display: block;
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
 		padding: 0.65rem 0;
 		color: #938a99;
-		font-size: 0.82rem;
+		font-size: 0.9rem;
 		letter-spacing: 0.035em;
 		text-decoration: none;
 		transition: color 180ms ease, transform 180ms ease;
+	}
+
+	.menu-panel a::before {
+		content: '>';
+		color: #a96ed3;
+		font-size: 0.9em;
 	}
 
 	.menu-panel a:hover,
