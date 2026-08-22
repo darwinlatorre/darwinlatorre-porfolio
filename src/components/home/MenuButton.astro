@@ -1,0 +1,66 @@
+<button class="menu" type="button" aria-label="Open navigation">
+	<span></span>
+	<span></span>
+	<span></span>
+</button>
+
+<style>
+	.menu {
+		position: absolute;
+		top: clamp(1.25rem, 2.5vw, 2.35rem);
+		left: clamp(1.25rem, 2.5vw, 2.35rem);
+		display: grid;
+		width: 2rem;
+		height: 1.75rem;
+		padding: 0.35rem 0.25rem;
+		align-content: space-between;
+		border: 0;
+		background: transparent;
+		cursor: pointer;
+		animation: detail-enter 550ms ease-out 450ms both;
+	}
+
+	.menu span {
+		display: block;
+		width: 1.35rem;
+		height: 1px;
+		background: #715081;
+		transition: background-color 180ms ease, transform 180ms ease;
+	}
+
+	.menu:hover span,
+	.menu:focus-visible span {
+		background: #a96ed3;
+	}
+
+	.menu:hover span:nth-child(2),
+	.menu:focus-visible span:nth-child(2) {
+		transform: translateX(2px);
+	}
+
+	.menu:focus-visible {
+		outline: 1px solid #715081;
+		outline-offset: 4px;
+	}
+
+	.menu:active {
+		transform: scale(0.97);
+	}
+
+	@keyframes detail-enter {
+		from {
+			opacity: 0;
+			transform: translateY(4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.menu {
+			animation: none;
+		}
+	}
+</style>
