@@ -1,3 +1,13 @@
+---
+const menuItems = [
+	{ label: 'About', href: '#about' },
+	{ label: 'Projects', href: '#projects' },
+	{ label: 'Experience', href: '#experience' },
+	{ label: 'Services', href: '#services' },
+	{ label: 'Certificates', href: '#certificates' },
+];
+---
+
 <div class="menu-shell" data-menu>
 	<button
 		class="menu-trigger"
@@ -20,12 +30,19 @@
 		data-menu-panel
 		inert
 	>
+		<a class="menu-home" href="#">Home</a>
 		<ul>
-			<li><a href="#about">About</a></li>
-			<li><a href="#projects">Projects</a></li>
-			<li><a href="#experience">Experience</a></li>
-			<li><a href="#services">Services</a></li>
-			<li><a href="#certificates">Certificates</a></li>
+			{
+				menuItems.map((item) => (
+					<li>
+						<svg class="folder-icon" viewBox="0 0 28 24" aria-hidden="true">
+							<path d="M2 5.5h8l2.2 2.5H26v13.5H2z"></path>
+							<path d="M2 8h24"></path>
+						</svg>
+						<a href={item.href}>{item.label}</a>
+					</li>
+				))
+			}
 		</ul>
 	</nav>
 </div>
@@ -142,38 +159,85 @@
 		position: absolute;
 		top: -0.75rem;
 		left: -0.75rem;
-		width: min(14rem, calc(100vw - 3.5rem));
-		padding: 4.15rem 1.5rem 1.45rem;
+		width: min(19rem, calc(100vw - 3.5rem));
+		padding: 1.1rem 1.35rem 1.4rem;
 		visibility: hidden;
 		border: 1px solid #4d3659;
-		border-radius: 0.25rem 1.5rem 1.5rem 1.5rem;
+		border-radius: 2px;
 		background: #121118;
 		opacity: 0;
-		transform: translate(-6px, -6px) scale(0.72);
-		transform-origin: top left;
-		transition: opacity 220ms ease, transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
-			visibility 0s linear 320ms;
+		transform: translateX(-12px);
+		transition: opacity 200ms ease, transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+			visibility 0s linear 280ms;
 	}
 
 	.is-open .menu-panel {
 		visibility: visible;
 		opacity: 1;
-		transform: translate(0, 0) scale(1);
+		transform: translateX(0);
 		transition-delay: 0s;
 	}
 
+	.menu-home {
+		display: inline-flex;
+		margin-left: 2.25rem;
+		align-items: center;
+		min-height: 1.75rem;
+		color: #efefef;
+		font-size: 1.05rem;
+		letter-spacing: 0.02em;
+		text-decoration: none;
+		transition: color 180ms ease;
+	}
+
+	.menu-home:hover,
+	.menu-home:focus-visible {
+		color: #a96ed3;
+	}
+
+	.menu-home:focus-visible {
+		outline: 1px solid #715081;
+		outline-offset: 3px;
+	}
+
 	.menu-panel ul {
+		position: relative;
 		display: grid;
-		margin: 0;
+		margin: 1rem 0 0;
 		padding: 0;
-		gap: 0.2rem;
 		list-style: none;
 	}
 
+	.menu-panel ul::before {
+		position: absolute;
+		top: 0.25rem;
+		bottom: 1.5rem;
+		left: 0.28rem;
+		border-left: 3px dotted #715081;
+		content: '';
+		opacity: 0.78;
+	}
+
 	.menu-panel li {
+		position: relative;
+		display: grid;
+		min-height: 3rem;
+		grid-template-columns: 1.55rem 1.7rem minmax(0, 1fr);
+		align-items: center;
+		column-gap: 0.6rem;
 		opacity: 0;
 		transform: translateY(5px);
 		transition: opacity 180ms ease, transform 220ms ease;
+	}
+
+	.menu-panel li::before {
+		position: absolute;
+		top: 50%;
+		left: 0.28rem;
+		width: 1.05rem;
+		border-top: 3px dotted #715081;
+		content: '';
+		opacity: 0.78;
 	}
 
 	.is-open .menu-panel li {
@@ -201,31 +265,43 @@
 		transition-delay: 210ms;
 	}
 
-	.menu-panel a {
+	.folder-icon {
+		z-index: 1;
+		grid-column: 2;
+		width: 1.6rem;
+		height: auto;
+		fill: none;
+		stroke: #938a99;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		stroke-width: 1.7;
+		transition: stroke 180ms ease;
+	}
+
+	.menu-panel li > a {
 		display: flex;
+		grid-column: 3;
 		align-items: center;
-		gap: 0.65rem;
-		padding: 0.65rem 0;
+		align-self: stretch;
 		color: #938a99;
-		font-size: 0.9rem;
+		font-size: 1.05rem;
 		letter-spacing: 0.035em;
 		text-decoration: none;
 		transition: color 180ms ease, transform 180ms ease;
 	}
 
-	.menu-panel a::before {
-		content: '>';
-		color: #a96ed3;
-		font-size: 0.9em;
-	}
-
-	.menu-panel a:hover,
-	.menu-panel a:focus-visible {
+	.menu-panel li > a:hover,
+	.menu-panel li > a:focus-visible {
 		color: #efefef;
 		transform: translateX(3px);
 	}
 
-	.menu-panel a:focus-visible {
+	.menu-panel li:has(a:hover) .folder-icon,
+	.menu-panel li:has(a:focus-visible) .folder-icon {
+		stroke: #a96ed3;
+	}
+
+	.menu-panel li > a:focus-visible {
 		outline: 1px solid #715081;
 		outline-offset: 3px;
 	}
@@ -246,7 +322,8 @@
 		.menu-trigger span,
 		.menu-panel,
 		.menu-panel li,
-		.menu-panel a {
+		.menu-panel a,
+		.folder-icon {
 			animation: none;
 			transition-duration: 0.01ms;
 		}
