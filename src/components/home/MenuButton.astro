@@ -30,16 +30,17 @@ const menuItems = [
 		data-menu-panel
 		inert
 	>
-		<a class="menu-home" href="#">Home</a>
 		<ul>
 			{
 				menuItems.map((item) => (
 					<li>
-						<svg class="folder-icon" viewBox="0 0 28 24" aria-hidden="true">
-							<path d="M2 5.5h8l2.2 2.5H26v13.5H2z"></path>
-							<path d="M2 8h24"></path>
-						</svg>
-						<a href={item.href}>{item.label}</a>
+						<a href={item.href}>
+							<svg class="folder-icon" viewBox="0 0 28 24" aria-hidden="true">
+								<path d="M2 5.5h8l2.2 2.5H26v13.5H2z"></path>
+								<path d="M2 8h24"></path>
+							</svg>
+							<span>{item.label}</span>
+						</a>
 					</li>
 				))
 			}
@@ -178,32 +179,10 @@ const menuItems = [
 		transition-delay: 0s;
 	}
 
-	.menu-home {
-		display: inline-flex;
-		margin-left: 2.25rem;
-		align-items: center;
-		min-height: 1.75rem;
-		color: #efefef;
-		font-size: 1.05rem;
-		letter-spacing: 0.02em;
-		text-decoration: none;
-		transition: color 180ms ease;
-	}
-
-	.menu-home:hover,
-	.menu-home:focus-visible {
-		color: #a96ed3;
-	}
-
-	.menu-home:focus-visible {
-		outline: 1px solid #715081;
-		outline-offset: 3px;
-	}
-
 	.menu-panel ul {
 		position: relative;
 		display: grid;
-		margin: 1rem 0 0;
+		margin: 2.8rem 0 0;
 		padding: 0;
 		list-style: none;
 	}
@@ -213,7 +192,7 @@ const menuItems = [
 		top: 0.25rem;
 		bottom: 1.5rem;
 		left: 0.28rem;
-		border-left: 3px dotted #715081;
+		border-left: 2px dotted #715081;
 		content: '';
 		opacity: 0.78;
 	}
@@ -222,7 +201,7 @@ const menuItems = [
 		position: relative;
 		display: grid;
 		min-height: 3rem;
-		grid-template-columns: 1.55rem 1.7rem minmax(0, 1fr);
+		grid-template-columns: 1.55rem minmax(0, 1fr);
 		align-items: center;
 		column-gap: 0.6rem;
 		opacity: 0;
@@ -235,7 +214,7 @@ const menuItems = [
 		top: 50%;
 		left: 0.28rem;
 		width: 1.05rem;
-		border-top: 3px dotted #715081;
+		border-top: 2px dotted #715081;
 		content: '';
 		opacity: 0.78;
 	}
@@ -266,23 +245,23 @@ const menuItems = [
 	}
 
 	.folder-icon {
-		z-index: 1;
-		grid-column: 2;
-		width: 1.6rem;
+		width: 1.35rem;
 		height: auto;
 		fill: none;
 		stroke: #938a99;
 		stroke-linecap: round;
 		stroke-linejoin: round;
-		stroke-width: 1.7;
+		stroke-width: 1.5;
 		transition: stroke 180ms ease;
 	}
 
 	.menu-panel li > a {
-		display: flex;
-		grid-column: 3;
+		display: grid;
+		grid-column: 2;
+		grid-template-columns: 1.4rem minmax(0, 1fr);
 		align-items: center;
 		align-self: stretch;
+		gap: 0.6rem;
 		color: #938a99;
 		font-size: 1.05rem;
 		letter-spacing: 0.035em;
@@ -296,8 +275,8 @@ const menuItems = [
 		transform: translateX(3px);
 	}
 
-	.menu-panel li:has(a:hover) .folder-icon,
-	.menu-panel li:has(a:focus-visible) .folder-icon {
+	.menu-panel li > a:hover .folder-icon,
+	.menu-panel li > a:focus-visible .folder-icon {
 		stroke: #a96ed3;
 	}
 
