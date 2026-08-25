@@ -26,7 +26,7 @@ import FileTree from './FileTree.astro';
 
 		<div class="divider reveal" aria-hidden="true"></div>
 
-		<div class="navigation reveal">
+		<div class="navigation reveal" data-tree-scroll>
 			<FileTree />
 		</div>
 	</div>
@@ -35,8 +35,13 @@ import FileTree from './FileTree.astro';
 
 <script>
 	const homeDetailsScreens = document.querySelectorAll<HTMLElement>('[data-home-details]');
+	const pageScroller = document.querySelector<HTMLElement>('[data-page-scroll]');
+	const scrollCue = document.querySelector<HTMLElement>('[data-shared-scroll-cue]');
+	const mobileViewport = window.matchMedia('(max-width: 48rem)');
 
 	for (const section of homeDetailsScreens) {
+		const treeScroll = section.querySelector<HTMLElement>('[data-tree-scroll]');
+
 		section.dataset.animate = 'true';
 
 		const observer = new IntersectionObserver(
@@ -52,6 +57,24 @@ import FileTree from './FileTree.astro';
 		);
 
 		observer.observe(section);
+
+		if (treeScroll && scrollCue) {
+			const syncTreeEnd = () => {
+				const atEnd = treeScroll.scrollTop + treeScroll.clientHeight >= treeScroll.scrollHeight - 1;
+				const isCurrent = Math.abs(section.getBoundingClientRect().top) <= 2;
+
+				scrollCue.classList.toggle(
+					'is-tree-end',
+					mobileViewport.matches && isCurrent && atEnd,
+				);
+			};
+
+			treeScroll.addEventListener('scroll', syncTreeEnd, { passive: true });
+			pageScroller?.addEventListener('scroll', syncTreeEnd, { passive: true });
+			window.addEventListener('resize', syncTreeEnd);
+			mobileViewport.addEventListener('change', syncTreeEnd);
+			window.requestAnimationFrame(syncTreeEnd);
+		}
 	}
 </script>
 
@@ -116,7 +139,9 @@ import FileTree from './FileTree.astro';
 	}
 
 	.name .cursor {
+		display: inline-block;
 		animation: cursor-blink 1.2s step-end infinite;
+		will-change: opacity;
 	}
 
 	.actions {
@@ -209,9 +234,10 @@ import FileTree from './FileTree.astro';
 		.home-details-content {
 			display: grid;
 			padding: 0.75rem 1.35rem;
+			overflow: hidden;
 			grid-template-columns: 1fr;
-			grid-template-rows: auto 1px auto;
-			align-content: start;
+			grid-template-rows: auto 1px minmax(0, 1fr);
+			align-items: stretch;
 			gap: 1.35rem;
 		}
 
@@ -238,7 +264,14 @@ import FileTree from './FileTree.astro';
 
 		.navigation {
 			width: min(23rem, 100%);
+			min-height: 0;
 			margin: 0 auto;
+			overflow-y: auto;
+			scrollbar-width: none;
+		}
+
+		.navigation::-webkit-scrollbar {
+			display: none;
 		}
 
 	}

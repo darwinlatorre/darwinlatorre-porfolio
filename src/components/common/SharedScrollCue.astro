@@ -36,6 +36,15 @@ import { ChevronDown } from '@lucide/astro';
 			initialLabel.style.transform = `translateY(${-3 * transition}px)`;
 			discoverLabel.style.opacity = `${transition}`;
 			discoverLabel.style.transform = `translateY(${3 * (1 - transition)}px)`;
+
+			if (scrollCue) {
+				const inDetails = progress >= 0.5;
+				scrollCue.href = inDetails ? '#about' : '#home-details';
+				scrollCue.setAttribute(
+					'aria-label',
+					inDetails ? 'Go to the About section' : 'Go to the next Home view',
+				);
+			}
 		};
 
 		const requestRender = () => {
@@ -48,8 +57,13 @@ import { ChevronDown } from '@lucide/astro';
 		reducedMotion.addEventListener('change', requestRender);
 
 		scrollCue?.addEventListener('click', (event) => {
+			const progress = scrollContainer.scrollTop / scrollContainer.clientHeight;
+			const target = document.querySelector(progress >= 0.5 ? '#about' : '#home-details');
+
+			if (!target) return;
+
 			event.preventDefault();
-			document.querySelector('#home-details')?.scrollIntoView({
+			target.scrollIntoView({
 				behavior: reducedMotion.matches ? 'auto' : 'smooth',
 				block: 'start',
 			});
@@ -76,8 +90,18 @@ import { ChevronDown } from '@lucide/astro';
 	}
 
 	.scroll-cue:hover,
-	.scroll-cue:focus-visible {
+	.scroll-cue:focus-visible,
+	.scroll-cue.is-tree-end {
 		color: var(--color-text);
+	}
+
+	.scroll-cue.is-tree-end {
+		text-shadow: 0 0 7px var(--color-accent-glow);
+	}
+
+	.scroll-cue.is-tree-end :global(.scroll-icon) {
+		color: var(--color-accent);
+		animation-duration: 1.1s;
 	}
 
 	.scroll-cue:focus-visible {

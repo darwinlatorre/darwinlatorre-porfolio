@@ -168,9 +168,11 @@
 	}
 
 	.cursor {
+		display: inline-block;
 		color: var(--color-accent);
 		text-shadow: 0 0 7px var(--color-accent-glow-faint);
 		animation: cursor-blink 1.2s step-end infinite;
+		will-change: opacity;
 	}
 
 	@keyframes cursor-blink {
