@@ -1,5 +1,5 @@
 <h1 class="shared-name" data-shared-name>
-	<button class="name-action" type="button" aria-label="Copy >Darwinlatorre_" data-name-action>
+	<button class="name-action" type="button" aria-label="Copy email address" data-name-action>
 		<span class="prompt" aria-hidden="true">&gt;</span>
 		<span>Darwinlatorre</span><span class="cursor" aria-hidden="true">_</span>
 	</button>
@@ -45,7 +45,7 @@
 			menu.setAttribute('aria-hidden', String(menuProgress > 0.5));
 			nameAction.setAttribute(
 				'aria-label',
-				rawProgress >= 0.5 ? 'Return to home' : 'Copy >Darwinlatorre_',
+				rawProgress >= 0.5 ? 'Return to home' : 'Copy email address',
 			);
 
 			if (menuProgress > 0 && menuTrigger?.getAttribute('aria-expanded') === 'true') {
@@ -78,7 +78,7 @@
 				return;
 			}
 
-			const value = '>Darwinlatorre_';
+			const value = 'contact@darwinlatorre.com';
 
 			try {
 				await navigator.clipboard.writeText(value);
