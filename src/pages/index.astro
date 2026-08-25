@@ -1,8 +1,31 @@
 ---
 import Hero from '../components/home/Hero.astro';
+import About from '../components/about/About.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout>
-	<Hero />
+	<main class="page-scroll">
+		<Hero />
+		<About />
+	</main>
 </BaseLayout>
+
+<style>
+	.page-scroll {
+		display: flex;
+		width: 100%;
+		height: 100vh;
+		height: 100dvh;
+		overflow-x: hidden;
+		overflow-y: auto;
+		flex-direction: column;
+		scroll-behavior: smooth;
+		scroll-snap-type: y mandatory;
+		scrollbar-width: none;
+	}
+
+	.page-scroll::-webkit-scrollbar {
+		display: none;
+	}
+</style>

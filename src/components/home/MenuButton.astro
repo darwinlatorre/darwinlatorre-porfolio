@@ -6,6 +6,12 @@ const menuItems = [
 	{ label: 'Services', href: '#services' },
 	{ label: 'Certificates', href: '#certificates' },
 ];
+
+interface Props {
+	id?: string;
+}
+
+const { id = 'site-menu' } = Astro.props;
 ---
 
 <div class="menu-shell" data-menu>
@@ -13,7 +19,7 @@ const menuItems = [
 		class="menu-trigger"
 		type="button"
 		aria-label="Open navigation"
-		aria-controls="site-menu"
+		aria-controls={id}
 		aria-expanded="false"
 		data-menu-trigger
 	>
@@ -23,7 +29,7 @@ const menuItems = [
 	</button>
 
 	<nav
-		id="site-menu"
+		id={id}
 		class="menu-panel"
 		aria-label="Primary navigation"
 		aria-hidden="true"
@@ -94,10 +100,10 @@ const menuItems = [
 
 <style>
 	.menu-shell {
-		position: fixed;
-		top: calc(var(--page-inset) + var(--control-offset));
-		left: calc(var(--page-inset) + var(--control-offset));
-		z-index: 40;
+		position: absolute;
+		top: var(--control-offset);
+		left: var(--control-offset);
+		z-index: 10;
 		animation: detail-enter 550ms ease-out 450ms both;
 	}
 

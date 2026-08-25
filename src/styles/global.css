@@ -18,16 +18,21 @@ body {
 	font-family: var(--font-mono);
 }
 
-body::after {
-	position: fixed;
-	z-index: 100;
-	inset: var(--page-inset);
-	border: var(--border-width) solid var(--color-border);
-	border-radius: var(--radius-frame);
-	content: '';
-	pointer-events: none;
-}
-
 button {
 	font: inherit;
+}
+
+.screen {
+	position: relative;
+	width: calc(100% - (2 * var(--page-inset)));
+	min-height: calc(100vh - (2 * var(--page-inset)));
+	min-height: calc(100dvh - (2 * var(--page-inset)));
+	margin: var(--page-inset);
+	flex: 0 0 calc(100vh - (2 * var(--page-inset)));
+	flex-basis: calc(100dvh - (2 * var(--page-inset)));
+	scroll-snap-align: start;
+	scroll-snap-stop: always;
+	border: var(--border-width) solid var(--color-border);
+	border-radius: var(--radius-frame);
+	background: var(--color-surface);
 }

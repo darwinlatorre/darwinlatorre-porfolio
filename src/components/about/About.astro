@@ -1,0 +1,307 @@
+---
+import MenuButton from '../home/MenuButton.astro';
+import SiteIdentifier from '../common/SiteIdentifier.astro';
+import CommandButton from './CommandButton.astro';
+import FileTree from './FileTree.astro';
+---
+
+<section id="about" class="screen about" aria-labelledby="about-title" data-about-screen>
+	<MenuButton id="about-site-menu" />
+
+	<div class="site-name reveal">
+		<SiteIdentifier />
+	</div>
+
+	<div class="about-content">
+		<div class="introduction">
+			<div class="heading-group">
+				<p class="greeting reveal">Hi, I'm</p>
+				<h2 id="about-title" class="name reveal">Dark<span aria-hidden="true">_</span></h2>
+			</div>
+
+			<div class="actions reveal">
+				<CommandButton label="Pull Contact" href="#contact" />
+				<CommandButton label="Pull CV" href="#cv" />
+			</div>
+		</div>
+
+		<div class="divider reveal" aria-hidden="true"></div>
+
+		<div class="navigation reveal">
+			<FileTree />
+		</div>
+	</div>
+
+	<div class="scroll-cue reveal" aria-hidden="true">
+		<span>Scroll to discover</span>
+		<svg viewBox="0 0 16 10" role="presentation">
+			<path d="M2 2.25 8 8l6-5.75"></path>
+		</svg>
+	</div>
+</section>
+
+<script>
+	const aboutSections = document.querySelectorAll<HTMLElement>('[data-about-screen]');
+
+	for (const section of aboutSections) {
+		section.dataset.animate = 'true';
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (!entry.isIntersecting) continue;
+
+					section.classList.add('is-visible');
+					observer.unobserve(section);
+				}
+			},
+			{ threshold: 0.35 },
+		);
+
+		observer.observe(section);
+	}
+</script>
+
+<style>
+	.about {
+		display: grid;
+		overflow: hidden;
+	}
+
+	.site-name {
+		position: absolute;
+		top: var(--control-offset);
+		left: 50%;
+		transform: translateX(-50%);
+	}
+
+	.about-content {
+		display: grid;
+		width: min(78rem, 100%);
+		height: 100%;
+		margin: 0 auto;
+		padding: clamp(5.5rem, 12vh, 8rem) clamp(2rem, 7vw, 6rem)
+			clamp(5rem, 10vh, 7rem);
+		grid-template-columns: minmax(0, 1.08fr) 1px minmax(18rem, 0.82fr);
+		align-items: center;
+		gap: clamp(2.5rem, 5vw, 5.5rem);
+	}
+
+	.introduction {
+		display: grid;
+		width: min(28rem, 100%);
+		justify-self: center;
+		gap: clamp(2.5rem, 6vh, 4.5rem);
+		transform: translateY(-2vh);
+	}
+
+	.heading-group {
+		display: grid;
+		gap: 0.18em;
+	}
+
+	.greeting,
+	.name {
+		margin: 0;
+		font-size: clamp(3rem, 5vw, 4.5rem);
+		font-weight: 400;
+		letter-spacing: -0.055em;
+		line-height: 1.04;
+	}
+
+	.greeting {
+		color: var(--color-text);
+	}
+
+	.name,
+	.name span {
+		color: var(--color-accent);
+	}
+
+	.actions {
+		display: grid;
+		gap: 0.85rem;
+	}
+
+	.divider {
+		width: 1px;
+		height: min(52vh, 29rem);
+		background: color-mix(in srgb, var(--color-border) 68%, transparent);
+	}
+
+	.navigation {
+		justify-self: start;
+	}
+
+	.scroll-cue {
+		position: absolute;
+		bottom: var(--control-offset);
+		left: 50%;
+		display: grid;
+		transform: translateX(-50%);
+		place-items: center;
+		gap: 0.5rem;
+		color: var(--color-text-muted);
+		font-size: 0.64rem;
+		letter-spacing: 0.055em;
+	}
+
+	.scroll-cue svg {
+		width: 0.72rem;
+		overflow: visible;
+		animation: scroll-drift 1.8s ease-in-out infinite;
+	}
+
+	.scroll-cue path {
+		fill: none;
+		stroke: var(--color-accent-muted);
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		stroke-width: 1.25;
+	}
+
+	.about[data-animate='true'] .reveal {
+		opacity: 0;
+	}
+
+	.about[data-animate='true'] .site-name,
+	.about[data-animate='true'] .greeting,
+	.about[data-animate='true'] .name,
+	.about[data-animate='true'] .actions,
+	.about[data-animate='true'] .divider,
+	.about[data-animate='true'] .navigation,
+	.about[data-animate='true'] .scroll-cue {
+		transition: opacity 480ms ease, transform 600ms var(--ease-out);
+	}
+
+	.about[data-animate='true'] .greeting,
+	.about[data-animate='true'] .name,
+	.about[data-animate='true'] .actions,
+	.about[data-animate='true'] .navigation {
+		transform: translateY(8px);
+	}
+
+	.about.is-visible .reveal {
+		opacity: 1;
+	}
+
+	.about.is-visible .site-name {
+		transform: translateX(-50%);
+		transition-delay: 40ms;
+	}
+
+	.about.is-visible .greeting {
+		transform: translateY(0);
+		transition-delay: 90ms;
+	}
+
+	.about.is-visible .name {
+		transform: translateY(0);
+		transition-delay: 150ms;
+	}
+
+	.about.is-visible .actions {
+		transform: translateY(0);
+		transition-delay: 210ms;
+	}
+
+	.about.is-visible .divider {
+		transition-delay: 230ms;
+	}
+
+	.about.is-visible .navigation {
+		transform: translateY(0);
+		transition-delay: 270ms;
+	}
+
+	.about.is-visible .scroll-cue {
+		transition-delay: 360ms;
+	}
+
+	@keyframes scroll-drift {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(3px);
+		}
+	}
+
+	@media (max-width: 64rem) {
+		.about-content {
+			padding-inline: clamp(1.5rem, 4vw, 3.5rem);
+			grid-template-columns: minmax(0, 1fr) 1px minmax(16rem, 0.85fr);
+			gap: clamp(1.75rem, 3.5vw, 3rem);
+		}
+
+		.greeting,
+		.name {
+			font-size: clamp(2.5rem, 5vw, 3.5rem);
+		}
+	}
+
+	@media (max-width: 48rem) {
+		.about-content {
+			display: grid;
+			padding: 4.75rem 1.35rem 4.5rem;
+			overflow-y: auto;
+			grid-template-columns: 1fr;
+			grid-template-rows: auto 1px auto;
+			align-content: start;
+			gap: 1.35rem;
+			scrollbar-width: none;
+		}
+
+		.about-content::-webkit-scrollbar {
+			display: none;
+		}
+
+		.introduction {
+			width: min(23rem, 100%);
+			gap: 1.65rem;
+			transform: none;
+		}
+
+		.greeting,
+		.name {
+			font-size: clamp(2rem, 10vw, 2.6rem);
+		}
+
+		.actions {
+			gap: 0.65rem;
+		}
+
+		.divider {
+			width: min(23rem, 100%);
+			height: 1px;
+			margin: 0 auto;
+		}
+
+		.navigation {
+			width: min(23rem, 100%);
+			margin: 0 auto;
+		}
+
+		.scroll-cue {
+			bottom: 1rem;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.about[data-animate='true'] .reveal {
+			opacity: 1;
+			transform: none;
+			transition: none;
+		}
+
+		.about[data-animate='true'] .site-name,
+		.about[data-animate='true'] .scroll-cue {
+			transform: translateX(-50%);
+		}
+
+		.scroll-cue svg {
+			animation: none;
+		}
+	}
+</style>
