@@ -1,8 +1,8 @@
 ---
 import Home from '../components/home/Home.astro';
-import MenuButton from '../components/home/MenuButton.astro';
-import SharedName from '../components/common/SharedName.astro';
-import SharedScrollCue from '../components/common/SharedScrollCue.astro';
+import MenuButton from '../components/shell/MenuButton.astro';
+import SharedName from '../components/shell/SharedName.astro';
+import SharedScrollCue from '../components/shell/SharedScrollCue.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
@@ -15,6 +15,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 		<Home />
 	</main>
 </BaseLayout>
+
+<script>
+	import '../scripts/home-interactions';
+</script>
 
 <style>
 	.page-scroll {
@@ -32,5 +36,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 	.page-scroll::-webkit-scrollbar {
 		display: none;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.page-scroll {
+			scroll-behavior: auto;
+		}
 	}
 </style>

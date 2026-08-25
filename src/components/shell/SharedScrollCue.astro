@@ -1,0 +1,88 @@
+---
+import { ChevronDown } from '@lucide/astro';
+---
+
+<a class="scroll-cue" href="#home-details" aria-label="Go to the next view" data-shared-scroll-cue>
+	<span class="scroll-labels">
+		<span data-scroll-initial>Scroll</span>
+		<span data-scroll-discover>Scroll to discover</span>
+	</span>
+	<ChevronDown class="scroll-icon" size={12} stroke-width={1.25} aria-hidden="true" />
+</a>
+
+<style>
+	.scroll-cue {
+		position: fixed;
+		bottom: calc(var(--page-inset) + var(--control-offset));
+		left: 50%;
+		z-index: 30;
+		display: grid;
+		transform: translateX(-50%);
+		place-items: center;
+		gap: 0.55rem;
+		color: var(--color-text-muted);
+		font-size: 0.68rem;
+		letter-spacing: 0.08em;
+		text-decoration: none;
+		cursor: pointer;
+		transition: color var(--duration-fast) ease;
+	}
+
+	.scroll-cue:hover,
+	.scroll-cue:focus-visible,
+	.scroll-cue.is-tree-end {
+		color: var(--color-text);
+	}
+
+	.scroll-cue.is-tree-end {
+		text-shadow: 0 0 7px var(--color-accent-glow);
+	}
+
+	.scroll-cue.is-tree-end :global(.scroll-icon) {
+		color: var(--color-accent);
+		animation-duration: 1.1s;
+	}
+
+	.scroll-cue:focus-visible {
+		outline: 1px solid var(--color-accent-muted);
+		outline-offset: 5px;
+	}
+
+	.scroll-labels {
+		display: grid;
+		place-items: center;
+	}
+
+	.scroll-labels span {
+		grid-area: 1 / 1;
+		white-space: nowrap;
+	}
+
+	.scroll-labels span:last-child {
+		opacity: 0;
+	}
+
+	:global(.scroll-icon) {
+		width: 0.75rem;
+		height: auto;
+		overflow: visible;
+		color: var(--color-accent-muted);
+		animation: scroll-drift 1.8s ease-in-out infinite;
+	}
+
+	@keyframes scroll-drift {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(3px);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		:global(.scroll-icon) {
+			animation: none;
+		}
+	}
+</style>

@@ -88,13 +88,16 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 
 	for (const group of treeGroups) {
 		const toggle = group.querySelector<HTMLButtonElement>('[data-tree-toggle]');
+		const children = group.querySelector<HTMLElement>('.tree-children');
 
-		if (!toggle) continue;
+		if (!toggle || !children || toggle.getAttribute('aria-controls') !== children.id) continue;
 
 		toggle.addEventListener('click', () => {
 			const expanded = toggle.getAttribute('aria-expanded') === 'true';
 			toggle.setAttribute('aria-expanded', String(!expanded));
 			group.classList.toggle('is-collapsed', expanded);
+			children.inert = expanded;
+			children.setAttribute('aria-hidden', String(expanded));
 		});
 	}
 </script>
