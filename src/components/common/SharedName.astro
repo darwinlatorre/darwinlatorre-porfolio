@@ -1,16 +1,20 @@
-<h1 class="shared-name" aria-label="Darwin Latorre" data-shared-name>
-	<span class="prompt" aria-hidden="true">&gt;</span>
-	<span>Darwinlatorre</span><span class="cursor" aria-hidden="true">_</span>
+<h1 class="shared-name" data-shared-name>
+	<button class="name-action" type="button" aria-label="Copy >Darwinlatorre_" data-name-action>
+		<span class="prompt" aria-hidden="true">&gt;</span>
+		<span>Darwinlatorre</span><span class="cursor" aria-hidden="true">_</span>
+	</button>
 </h1>
 
 <script>
 	const scroller = document.querySelector<HTMLElement>('[data-page-scroll]');
 	const sharedName = document.querySelector<HTMLElement>('[data-shared-name]');
+	const nameAction = sharedName?.querySelector<HTMLButtonElement>('[data-name-action]');
 	const menu = document.querySelector<HTMLElement>('[data-menu]');
 	const menuTrigger = menu?.querySelector<HTMLButtonElement>('[data-menu-trigger]');
 
-	if (scroller && sharedName && menu) {
+	if (scroller && sharedName && nameAction && menu) {
 		let frameId = 0;
+		let feedbackTimer = 0;
 		let startFontSize = 0;
 		let endFontSize = 0;
 		const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -39,6 +43,10 @@
 			menu.style.opacity = `${1 - menuProgress}`;
 			menu.inert = menuProgress > 0.5;
 			menu.setAttribute('aria-hidden', String(menuProgress > 0.5));
+			nameAction.setAttribute(
+				'aria-label',
+				rawProgress >= 0.5 ? 'Return to home' : 'Copy >Darwinlatorre_',
+			);
 
 			if (menuProgress > 0 && menuTrigger?.getAttribute('aria-expanded') === 'true') {
 				menuTrigger.click();
@@ -58,6 +66,39 @@
 			requestRender();
 		});
 		reducedMotion.addEventListener('change', requestRender);
+
+		nameAction.addEventListener('click', async () => {
+			const inSecondSection = scroller.scrollTop / scroller.clientHeight >= 0.5;
+
+			if (inSecondSection) {
+				document.querySelector('#home')?.scrollIntoView({
+					behavior: reducedMotion.matches ? 'auto' : 'smooth',
+					block: 'start',
+				});
+				return;
+			}
+
+			const value = '>Darwinlatorre_';
+
+			try {
+				await navigator.clipboard.writeText(value);
+			} catch {
+				const textarea = document.createElement('textarea');
+				textarea.value = value;
+				textarea.style.position = 'fixed';
+				textarea.style.opacity = '0';
+				document.body.append(textarea);
+				textarea.select();
+				document.execCommand('copy');
+				textarea.remove();
+			}
+
+			nameAction.dataset.copied = 'true';
+			window.clearTimeout(feedbackTimer);
+			feedbackTimer = window.setTimeout(() => {
+				delete nameAction.dataset.copied;
+			}, 1200);
+		});
 	}
 </script>
 
@@ -78,6 +119,45 @@
 		letter-spacing: -0.045em;
 		line-height: 1;
 		pointer-events: none;
+	}
+
+	.name-action {
+		position: relative;
+		display: flex;
+		padding: 0;
+		align-items: baseline;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		letter-spacing: inherit;
+		line-height: inherit;
+		cursor: pointer;
+		pointer-events: auto;
+	}
+
+	.name-action::after {
+		position: absolute;
+		top: calc(100% + 0.75rem);
+		left: 50%;
+		color: var(--color-text-muted);
+		content: 'Copied';
+		font-size: 0.62rem;
+		font-weight: 400;
+		letter-spacing: 0.02em;
+		opacity: 0;
+		transform: translate(-50%, 3px);
+		transition: opacity var(--duration-fast) ease, transform var(--duration-fast) ease;
+	}
+
+	.name-action[data-copied='true']::after {
+		opacity: 1;
+		transform: translate(-50%, 0);
+	}
+
+	.name-action:focus-visible {
+		outline: 1px solid var(--color-accent-muted);
+		outline-offset: 6px;
 	}
 
 	.prompt {
