@@ -57,20 +57,31 @@ import FileTree from './FileTree.astro';
 
 <style>
 	.home-details {
+		--header-space: calc(var(--page-inset) + var(--control-offset) + 1.75rem);
+		--footer-space: calc(var(--page-inset) + var(--control-offset) + 2.75rem);
+
 		display: grid;
 		overflow: hidden;
+		grid-template-rows: var(--header-space) minmax(0, 1fr) var(--footer-space);
 	}
 
 	.home-details-content {
 		display: grid;
 		width: min(78rem, 100%);
 		height: 100%;
+		min-height: 0;
 		margin: 0 auto;
-		padding: clamp(5.5rem, 12vh, 8rem) clamp(2rem, 7vw, 6rem)
-			clamp(5rem, 10vh, 7rem);
+		padding: clamp(0.5rem, 1.5vh, 1rem) clamp(2rem, 7vw, 6rem);
+		overflow-y: auto;
+		grid-row: 2;
 		grid-template-columns: minmax(0, 1.08fr) 1px minmax(18rem, 0.82fr);
 		align-items: center;
 		gap: clamp(2.5rem, 5vw, 5.5rem);
+		scrollbar-width: none;
+	}
+
+	.home-details-content::-webkit-scrollbar {
+		display: none;
 	}
 
 	.introduction {
@@ -197,17 +208,11 @@ import FileTree from './FileTree.astro';
 	@media (max-width: 48rem) {
 		.home-details-content {
 			display: grid;
-			padding: 2.5rem 1.35rem 6.5rem;
-			overflow-y: auto;
+			padding: 0.75rem 1.35rem;
 			grid-template-columns: 1fr;
 			grid-template-rows: auto 1px auto;
 			align-content: start;
 			gap: 1.35rem;
-			scrollbar-width: none;
-		}
-
-		.home-details-content::-webkit-scrollbar {
-			display: none;
 		}
 
 		.introduction {

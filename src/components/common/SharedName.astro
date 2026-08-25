@@ -18,7 +18,6 @@
 		let startFontSize = 0;
 		let endFontSize = 0;
 		const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-		const compactViewport = window.matchMedia('(max-width: 40rem)');
 
 		const measure = () => {
 			sharedName.style.fontSize = '';
@@ -37,15 +36,10 @@
 			const top = startTop + (endTop - startTop) * progress;
 			const translateY = -50 * (1 - progress);
 			const menuProgress = Math.min(1, progress * 1.5);
-			const nameOpacity = compactViewport.matches ? 1 - progress : 1;
-			const nameIsHidden = nameOpacity <= 0.01;
 
 			sharedName.style.top = `${top}px`;
 			sharedName.style.fontSize = `${fontSize}px`;
 			sharedName.style.transform = `translate(-50%, ${translateY}%)`;
-			sharedName.style.opacity = `${nameOpacity}`;
-			sharedName.setAttribute('aria-hidden', String(nameIsHidden));
-			nameAction.disabled = nameIsHidden;
 			menu.style.opacity = `${1 - menuProgress}`;
 			menu.inert = menuProgress > 0.5;
 			menu.setAttribute('aria-hidden', String(menuProgress > 0.5));
@@ -72,7 +66,6 @@
 			requestRender();
 		});
 		reducedMotion.addEventListener('change', requestRender);
-		compactViewport.addEventListener('change', requestRender);
 
 		nameAction.addEventListener('click', async () => {
 			const inSecondSection = scroller.scrollTop / scroller.clientHeight >= 0.5;
