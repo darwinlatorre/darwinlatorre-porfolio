@@ -12,13 +12,34 @@ body {
 	height: 100vh;
 	height: 100dvh;
 	min-width: 320px;
-	padding: var(--page-inset);
 	overflow: hidden;
 	background: var(--color-background);
 	color: var(--color-text);
 	font-family: var(--font-mono);
 }
 
+body::after {
+	position: fixed;
+	z-index: 100;
+	inset: var(--page-inset);
+	border: var(--border-width) solid var(--color-border);
+	border-radius: var(--radius-frame);
+	content: '';
+	pointer-events: none;
+}
+
 button {
 	font: inherit;
+}
+
+.screen {
+	position: relative;
+	width: 100%;
+	min-height: 100vh;
+	min-height: 100dvh;
+	flex: 0 0 100vh;
+	flex-basis: 100dvh;
+	scroll-snap-align: start;
+	scroll-snap-stop: always;
+	background: var(--color-surface);
 }

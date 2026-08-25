@@ -1,4 +1,6 @@
 ---
+import { Folder } from '@lucide/astro';
+
 const menuItems = [
 	{ label: 'About', href: '#about' },
 	{ label: 'Projects', href: '#projects' },
@@ -6,6 +8,12 @@ const menuItems = [
 	{ label: 'Services', href: '#services' },
 	{ label: 'Certificates', href: '#certificates' },
 ];
+
+interface Props {
+	id?: string;
+}
+
+const { id = 'site-menu' } = Astro.props;
 ---
 
 <div class="menu-shell" data-menu>
@@ -13,7 +21,7 @@ const menuItems = [
 		class="menu-trigger"
 		type="button"
 		aria-label="Open navigation"
-		aria-controls="site-menu"
+		aria-controls={id}
 		aria-expanded="false"
 		data-menu-trigger
 	>
@@ -23,7 +31,7 @@ const menuItems = [
 	</button>
 
 	<nav
-		id="site-menu"
+		id={id}
 		class="menu-panel"
 		aria-label="Primary navigation"
 		aria-hidden="true"
@@ -35,10 +43,7 @@ const menuItems = [
 				menuItems.map((item) => (
 					<li>
 						<a href={item.href}>
-							<svg class="folder-icon" viewBox="0 0 28 24" aria-hidden="true">
-								<path d="M2 5.5h8l2.2 2.5H26v13.5H2z"></path>
-								<path d="M2 8h24"></path>
-							</svg>
+							<Folder class="folder-icon" size={22} stroke-width={1.5} aria-hidden="true" />
 							<span>{item.label}</span>
 						</a>
 					</li>
@@ -94,11 +99,10 @@ const menuItems = [
 
 <style>
 	.menu-shell {
-		position: absolute;
-		top: var(--control-offset);
-		left: var(--control-offset);
-		z-index: 10;
-		animation: detail-enter 550ms ease-out 450ms both;
+		position: fixed;
+		top: calc(var(--page-inset) + var(--control-offset));
+		left: calc(var(--page-inset) + var(--control-offset));
+		z-index: 40;
 	}
 
 	.menu-trigger {
@@ -112,6 +116,7 @@ const menuItems = [
 		border: 0;
 		background: transparent;
 		cursor: pointer;
+		animation: detail-enter 550ms ease-out 450ms both;
 	}
 
 	.menu-trigger span {
@@ -245,15 +250,11 @@ const menuItems = [
 		transition-delay: 210ms;
 	}
 
-	.folder-icon {
+	:global(.folder-icon) {
 		width: 1.35rem;
 		height: auto;
-		fill: none;
-		stroke: var(--color-text-muted);
-		stroke-linecap: round;
-		stroke-linejoin: round;
-		stroke-width: 1.5;
-		transition: stroke var(--duration-fast) ease;
+		color: var(--color-text-muted);
+		transition: color var(--duration-fast) ease;
 	}
 
 	.menu-panel li > a {
@@ -276,9 +277,9 @@ const menuItems = [
 		transform: translateX(3px);
 	}
 
-	.menu-panel li > a:hover .folder-icon,
-	.menu-panel li > a:focus-visible .folder-icon {
-		stroke: var(--color-accent);
+	.menu-panel li > a:hover :global(.folder-icon),
+	.menu-panel li > a:focus-visible :global(.folder-icon) {
+		color: var(--color-accent);
 	}
 
 	.menu-panel li > a:focus-visible {
@@ -303,7 +304,7 @@ const menuItems = [
 		.menu-panel,
 		.menu-panel li,
 		.menu-panel a,
-		.folder-icon {
+		:global(.folder-icon) {
 			animation: none;
 			transition-duration: 0.01ms;
 		}

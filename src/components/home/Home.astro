@@ -1,0 +1,18 @@
+---
+import Hero from './Hero.astro';
+import HomeDetails from './HomeDetails.astro';
+---
+
+<section id="home" class="home" aria-label="Home">
+	<Hero />
+	<HomeDetails />
+</section>
+
+<style>
+	.home {
+		display: flex;
+		width: 100%;
+		flex: 0 0 auto;
+		flex-direction: column;
+	}
+</style>

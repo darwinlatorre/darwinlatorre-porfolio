@@ -1,8 +1,46 @@
 ---
-import Hero from '../components/home/Hero.astro';
+import Home from '../components/home/Home.astro';
+import MenuButton from '../components/shell/MenuButton.astro';
+import SharedName from '../components/shell/SharedName.astro';
+import SharedScrollCue from '../components/shell/SharedScrollCue.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout>
-	<Hero />
+	<MenuButton id="site-menu" />
+	<SharedName />
+	<SharedScrollCue />
+
+	<main class="page-scroll" data-page-scroll>
+		<Home />
+	</main>
 </BaseLayout>
+
+<script>
+	import '../scripts/home-interactions';
+</script>
+
+<style>
+	.page-scroll {
+		display: flex;
+		width: 100%;
+		height: 100vh;
+		height: 100dvh;
+		overflow-x: hidden;
+		overflow-y: auto;
+		flex-direction: column;
+		scroll-behavior: smooth;
+		scroll-snap-type: y mandatory;
+		scrollbar-width: none;
+	}
+
+	.page-scroll::-webkit-scrollbar {
+		display: none;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.page-scroll {
+			scroll-behavior: auto;
+		}
+	}
+</style>

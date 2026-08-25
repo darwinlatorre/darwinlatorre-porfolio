@@ -1,0 +1,94 @@
+---
+interface Props {
+	label: string;
+	href: string;
+}
+
+const { label, href } = Astro.props;
+---
+
+<a class="command-link" href={href}>
+	<span class="command-label"><span aria-hidden="true">&gt;</span> {label}</span>
+	<span class="arrow" aria-hidden="true">&rarr;</span>
+</a>
+
+<style>
+	.command-link {
+		--corner-cut: 0.75rem;
+
+		position: relative;
+		display: flex;
+		width: min(23rem, 100%);
+		height: var(--command-height, 3.5rem);
+		padding: 0 1.15rem;
+		isolation: isolate;
+		align-items: center;
+		justify-content: space-between;
+		clip-path: polygon(
+			0 0,
+			calc(100% - var(--corner-cut)) 0,
+			100% var(--corner-cut),
+			100% 100%,
+			0 100%
+		);
+		background: var(--color-border);
+		color: var(--color-text);
+		font-size: 0.82rem;
+		letter-spacing: 0.025em;
+		text-decoration: none;
+		transition: background-color var(--duration-fast) ease;
+	}
+
+	.command-link::before {
+		position: absolute;
+		z-index: -1;
+		inset: var(--border-width);
+		clip-path: inherit;
+		background: var(--color-surface);
+		content: '';
+		transition: background-color var(--duration-fast) ease;
+	}
+
+	.command-label span,
+	.arrow {
+		color: var(--color-accent);
+	}
+
+	.command-label span {
+		transition: color var(--duration-fast) ease;
+	}
+
+	.arrow {
+		font-size: 1rem;
+		transition: color var(--duration-fast) ease, transform var(--duration-fast) ease;
+	}
+
+	.command-link:hover,
+	.command-link:focus-visible {
+		background: var(--color-accent-muted);
+	}
+
+	.command-link:hover::before,
+	.command-link:focus-visible::before {
+		background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface));
+	}
+
+	.command-link:hover .arrow,
+	.command-link:focus-visible .arrow {
+		transform: translateX(4px);
+	}
+
+	.command-link:focus-visible {
+		outline: 1px solid var(--color-accent);
+		outline-offset: 4px;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.command-link,
+		.command-link::before,
+		.command-label span,
+		.arrow {
+			transition: none;
+		}
+	}
+</style>
