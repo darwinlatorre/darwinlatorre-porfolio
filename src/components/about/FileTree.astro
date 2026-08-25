@@ -1,5 +1,5 @@
 ---
-import TreeIcon from './TreeIcon.astro';
+import { ChevronDown, FileText, Folder, House } from '@lucide/astro';
 
 const projectItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
@@ -7,13 +7,13 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 
 <nav class="file-tree" aria-label="Portfolio sections">
 	<a class="tree-row is-active" href="#home" aria-current="page">
-		<TreeIcon type="home" />
+		<House class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
 		<span>Home</span>
 	</a>
 
 	<div class="root-children">
 		<a class="tree-row" href="#about">
-			<TreeIcon type="folder" />
+			<Folder class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
 			<span>About</span>
 		</a>
 
@@ -25,11 +25,9 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 				aria-controls="projects-tree"
 				data-tree-toggle
 			>
-				<TreeIcon type="folder" />
+				<Folder class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
 				<span>Projects</span>
-				<svg class="chevron" viewBox="0 0 16 16" aria-hidden="true">
-					<path d="m4 6 4 4 4-4"></path>
-				</svg>
+				<ChevronDown class="chevron" size={13} stroke-width={1.5} aria-hidden="true" />
 			</button>
 
 			<div id="projects-tree" class="tree-children">
@@ -37,7 +35,7 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 					{
 						projectItems.map((item, index) => (
 							<a href={`#project-${index + 1}`}>
-								<TreeIcon type="file" />
+								<FileText class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
 								<span>{item}</span>
 							</a>
 						))
@@ -47,12 +45,12 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 		</div>
 
 		<a class="tree-row" href="#experience">
-			<TreeIcon type="folder" />
+			<Folder class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
 			<span>Experience</span>
 		</a>
 
 		<a class="tree-row" href="#services">
-			<TreeIcon type="folder" />
+			<Folder class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
 			<span>Services</span>
 		</a>
 
@@ -64,11 +62,9 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 				aria-controls="certificates-tree"
 				data-tree-toggle
 			>
-				<TreeIcon type="folder" />
+				<Folder class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
 				<span>Certificates</span>
-				<svg class="chevron" viewBox="0 0 16 16" aria-hidden="true">
-					<path d="m4 6 4 4 4-4"></path>
-				</svg>
+				<ChevronDown class="chevron" size={13} stroke-width={1.5} aria-hidden="true" />
 			</button>
 
 			<div id="certificates-tree" class="tree-children">
@@ -76,7 +72,7 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 					{
 						certificateItems.map((item, index) => (
 							<a href={`#certificate-${index + 1}`}>
-								<TreeIcon type="file" />
+								<FileText class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
 								<span>{item}</span>
 							</a>
 						))
@@ -154,18 +150,19 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 		color: var(--color-accent);
 	}
 
-	.chevron {
+	:global(.tree-icon) {
+		display: block;
+		width: 1rem;
+		height: 1rem;
+	}
+
+	:global(.chevron) {
 		width: 0.8rem;
 		height: 0.8rem;
-		fill: none;
-		stroke: currentColor;
-		stroke-linecap: round;
-		stroke-linejoin: round;
-		stroke-width: 1.5;
 		transition: transform 220ms ease;
 	}
 
-	.tree-group.is-collapsed .chevron {
+	.tree-group.is-collapsed :global(.chevron) {
 		transform: rotate(-90deg);
 	}
 
@@ -253,7 +250,7 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 
 	@media (prefers-reduced-motion: reduce) {
 		.tree-row,
-		.chevron,
+		:global(.chevron),
 		.tree-children,
 		.tree-children a {
 			transition: none;

@@ -1,11 +1,13 @@
+---
+import { ChevronDown } from '@lucide/astro';
+---
+
 <a class="scroll-cue" href="#about" aria-label="Go to the next section" data-shared-scroll-cue>
 	<span class="scroll-labels">
 		<span data-scroll-initial>Scroll</span>
 		<span data-scroll-discover>Scroll to discover</span>
 	</span>
-	<svg viewBox="0 0 16 10" role="presentation">
-		<path d="M2 2.25 8 8l6-5.75"></path>
-	</svg>
+	<ChevronDown class="scroll-icon" size={12} stroke-width={1.25} aria-hidden="true" />
 </a>
 
 <script>
@@ -97,19 +99,12 @@
 		opacity: 0;
 	}
 
-	.scroll-cue svg {
+	:global(.scroll-icon) {
 		width: 0.75rem;
 		height: auto;
 		overflow: visible;
+		color: var(--color-accent-muted);
 		animation: scroll-drift 1.8s ease-in-out infinite;
-	}
-
-	.scroll-cue path {
-		fill: none;
-		stroke: var(--color-accent-muted);
-		stroke-linecap: round;
-		stroke-linejoin: round;
-		stroke-width: 1.25;
 	}
 
 	@keyframes scroll-drift {
@@ -123,7 +118,7 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.scroll-cue svg {
+		:global(.scroll-icon) {
 			animation: none;
 		}
 	}
