@@ -1,22 +1,16 @@
 ---
-import MenuButton from '../home/MenuButton.astro';
-import SiteIdentifier from '../common/SiteIdentifier.astro';
 import CommandButton from './CommandButton.astro';
 import FileTree from './FileTree.astro';
 ---
 
 <section id="about" class="screen about" aria-labelledby="about-title" data-about-screen>
-	<MenuButton id="about-site-menu" />
-
-	<div class="site-name reveal">
-		<SiteIdentifier />
-	</div>
-
 	<div class="about-content">
 		<div class="introduction">
 			<div class="heading-group">
 				<p class="greeting reveal">Hi, I'm</p>
-				<h2 id="about-title" class="name reveal">Dark<span aria-hidden="true">_</span></h2>
+				<h2 id="about-title" class="name reveal">
+					Dark<span class="cursor" aria-hidden="true">_</span>
+				</h2>
 			</div>
 
 			<div class="actions reveal">
@@ -32,12 +26,6 @@ import FileTree from './FileTree.astro';
 		</div>
 	</div>
 
-	<div class="scroll-cue reveal" aria-hidden="true">
-		<span>Scroll to discover</span>
-		<svg viewBox="0 0 16 10" role="presentation">
-			<path d="M2 2.25 8 8l6-5.75"></path>
-		</svg>
-	</div>
 </section>
 
 <script>
@@ -66,13 +54,6 @@ import FileTree from './FileTree.astro';
 	.about {
 		display: grid;
 		overflow: hidden;
-	}
-
-	.site-name {
-		position: absolute;
-		top: var(--control-offset);
-		left: 50%;
-		transform: translateX(-50%);
 	}
 
 	.about-content {
@@ -118,6 +99,10 @@ import FileTree from './FileTree.astro';
 		color: var(--color-accent);
 	}
 
+	.name .cursor {
+		animation: cursor-blink 1.2s step-end infinite;
+	}
+
 	.actions {
 		display: grid;
 		gap: 0.85rem;
@@ -133,44 +118,15 @@ import FileTree from './FileTree.astro';
 		justify-self: start;
 	}
 
-	.scroll-cue {
-		position: absolute;
-		bottom: var(--control-offset);
-		left: 50%;
-		display: grid;
-		transform: translateX(-50%);
-		place-items: center;
-		gap: 0.5rem;
-		color: var(--color-text-muted);
-		font-size: 0.64rem;
-		letter-spacing: 0.055em;
-	}
-
-	.scroll-cue svg {
-		width: 0.72rem;
-		overflow: visible;
-		animation: scroll-drift 1.8s ease-in-out infinite;
-	}
-
-	.scroll-cue path {
-		fill: none;
-		stroke: var(--color-accent-muted);
-		stroke-linecap: round;
-		stroke-linejoin: round;
-		stroke-width: 1.25;
-	}
-
 	.about[data-animate='true'] .reveal {
 		opacity: 0;
 	}
 
-	.about[data-animate='true'] .site-name,
 	.about[data-animate='true'] .greeting,
 	.about[data-animate='true'] .name,
 	.about[data-animate='true'] .actions,
 	.about[data-animate='true'] .divider,
-	.about[data-animate='true'] .navigation,
-	.about[data-animate='true'] .scroll-cue {
+	.about[data-animate='true'] .navigation {
 		transition: opacity 480ms ease, transform 600ms var(--ease-out);
 	}
 
@@ -183,11 +139,6 @@ import FileTree from './FileTree.astro';
 
 	.about.is-visible .reveal {
 		opacity: 1;
-	}
-
-	.about.is-visible .site-name {
-		transform: translateX(-50%);
-		transition-delay: 40ms;
 	}
 
 	.about.is-visible .greeting {
@@ -214,17 +165,14 @@ import FileTree from './FileTree.astro';
 		transition-delay: 270ms;
 	}
 
-	.about.is-visible .scroll-cue {
-		transition-delay: 360ms;
-	}
-
-	@keyframes scroll-drift {
+	@keyframes cursor-blink {
 		0%,
-		100% {
-			transform: translateY(0);
+		45% {
+			opacity: 1;
 		}
-		50% {
-			transform: translateY(3px);
+		46%,
+		100% {
+			opacity: 0.16;
 		}
 	}
 
@@ -283,25 +231,18 @@ import FileTree from './FileTree.astro';
 			margin: 0 auto;
 		}
 
-		.scroll-cue {
-			bottom: 1rem;
-		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
+		.name .cursor {
+			animation: none;
+		}
+
 		.about[data-animate='true'] .reveal {
 			opacity: 1;
 			transform: none;
 			transition: none;
 		}
 
-		.about[data-animate='true'] .site-name,
-		.about[data-animate='true'] .scroll-cue {
-			transform: translateX(-50%);
-		}
-
-		.scroll-cue svg {
-			animation: none;
-		}
 	}
 </style>
