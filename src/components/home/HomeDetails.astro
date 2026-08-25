@@ -3,12 +3,17 @@ import CommandButton from './CommandButton.astro';
 import FileTree from './FileTree.astro';
 ---
 
-<section id="about" class="screen about" aria-labelledby="about-title" data-about-screen>
-	<div class="about-content">
+<div
+	id="home-details"
+	class="screen home-details"
+	aria-labelledby="home-details-title"
+	data-home-details
+>
+	<div class="home-details-content">
 		<div class="introduction">
 			<div class="heading-group">
 				<p class="greeting reveal">Hi, I'm</p>
-				<h2 id="about-title" class="name reveal">
+				<h2 id="home-details-title" class="name reveal">
 					Dark<span class="cursor" aria-hidden="true">_</span>
 				</h2>
 			</div>
@@ -26,12 +31,12 @@ import FileTree from './FileTree.astro';
 		</div>
 	</div>
 
-</section>
+</div>
 
 <script>
-	const aboutSections = document.querySelectorAll<HTMLElement>('[data-about-screen]');
+	const homeDetailsScreens = document.querySelectorAll<HTMLElement>('[data-home-details]');
 
-	for (const section of aboutSections) {
+	for (const section of homeDetailsScreens) {
 		section.dataset.animate = 'true';
 
 		const observer = new IntersectionObserver(
@@ -51,12 +56,12 @@ import FileTree from './FileTree.astro';
 </script>
 
 <style>
-	.about {
+	.home-details {
 		display: grid;
 		overflow: hidden;
 	}
 
-	.about-content {
+	.home-details-content {
 		display: grid;
 		width: min(78rem, 100%);
 		height: 100%;
@@ -118,49 +123,49 @@ import FileTree from './FileTree.astro';
 		justify-self: start;
 	}
 
-	.about[data-animate='true'] .reveal {
+	.home-details[data-animate='true'] .reveal {
 		opacity: 0;
 	}
 
-	.about[data-animate='true'] .greeting,
-	.about[data-animate='true'] .name,
-	.about[data-animate='true'] .actions,
-	.about[data-animate='true'] .divider,
-	.about[data-animate='true'] .navigation {
+	.home-details[data-animate='true'] .greeting,
+	.home-details[data-animate='true'] .name,
+	.home-details[data-animate='true'] .actions,
+	.home-details[data-animate='true'] .divider,
+	.home-details[data-animate='true'] .navigation {
 		transition: opacity 480ms ease, transform 600ms var(--ease-out);
 	}
 
-	.about[data-animate='true'] .greeting,
-	.about[data-animate='true'] .name,
-	.about[data-animate='true'] .actions,
-	.about[data-animate='true'] .navigation {
+	.home-details[data-animate='true'] .greeting,
+	.home-details[data-animate='true'] .name,
+	.home-details[data-animate='true'] .actions,
+	.home-details[data-animate='true'] .navigation {
 		transform: translateY(8px);
 	}
 
-	.about.is-visible .reveal {
+	.home-details.is-visible .reveal {
 		opacity: 1;
 	}
 
-	.about.is-visible .greeting {
+	.home-details.is-visible .greeting {
 		transform: translateY(0);
 		transition-delay: 90ms;
 	}
 
-	.about.is-visible .name {
+	.home-details.is-visible .name {
 		transform: translateY(0);
 		transition-delay: 150ms;
 	}
 
-	.about.is-visible .actions {
+	.home-details.is-visible .actions {
 		transform: translateY(0);
 		transition-delay: 210ms;
 	}
 
-	.about.is-visible .divider {
+	.home-details.is-visible .divider {
 		transition-delay: 230ms;
 	}
 
-	.about.is-visible .navigation {
+	.home-details.is-visible .navigation {
 		transform: translateY(0);
 		transition-delay: 270ms;
 	}
@@ -177,7 +182,7 @@ import FileTree from './FileTree.astro';
 	}
 
 	@media (max-width: 64rem) {
-		.about-content {
+		.home-details-content {
 			padding-inline: clamp(1.5rem, 4vw, 3.5rem);
 			grid-template-columns: minmax(0, 1fr) 1px minmax(16rem, 0.85fr);
 			gap: clamp(1.75rem, 3.5vw, 3rem);
@@ -190,7 +195,7 @@ import FileTree from './FileTree.astro';
 	}
 
 	@media (max-width: 48rem) {
-		.about-content {
+		.home-details-content {
 			display: grid;
 			padding: 4.75rem 1.35rem 4.5rem;
 			overflow-y: auto;
@@ -201,7 +206,7 @@ import FileTree from './FileTree.astro';
 			scrollbar-width: none;
 		}
 
-		.about-content::-webkit-scrollbar {
+		.home-details-content::-webkit-scrollbar {
 			display: none;
 		}
 
@@ -238,7 +243,7 @@ import FileTree from './FileTree.astro';
 			animation: none;
 		}
 
-		.about[data-animate='true'] .reveal {
+		.home-details[data-animate='true'] .reveal {
 			opacity: 1;
 			transform: none;
 			transition: none;

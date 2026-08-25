@@ -2,7 +2,7 @@
 import { ChevronDown } from '@lucide/astro';
 ---
 
-<a class="scroll-cue" href="#about" aria-label="Go to the next section" data-shared-scroll-cue>
+<a class="scroll-cue" href="#home-details" aria-label="Go to the next view" data-shared-scroll-cue>
 	<span class="scroll-labels">
 		<span data-scroll-initial>Scroll</span>
 		<span data-scroll-discover>Scroll to discover</span>
@@ -49,7 +49,7 @@ import { ChevronDown } from '@lucide/astro';
 
 		scrollCue?.addEventListener('click', (event) => {
 			event.preventDefault();
-			document.querySelector('#about')?.scrollIntoView({
+			document.querySelector('#home-details')?.scrollIntoView({
 				behavior: reducedMotion.matches ? 'auto' : 'smooth',
 				block: 'start',
 			});
