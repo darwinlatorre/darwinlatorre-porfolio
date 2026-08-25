@@ -1,37 +1,164 @@
 ---
 import MenuButton from './MenuButton.astro';
+import SecondScreen from './SecondScreen.astro';
 ---
 
-<main class="hero" aria-label="Darwin Latorre portfolio introduction">
+<div class="experience" data-experience>
 	<MenuButton />
 
-	<h1 class="terminal-line" aria-label="Darwin Latorre">
-		<span class="prompt" aria-hidden="true">&gt;</span>
+	<h1 class="shared-name" aria-label="Darwin Latorre" data-shared-name>
+		<span class="prompt" aria-hidden="true" data-name-prompt>&gt;</span>
 		<span>Darwinlatorre</span><span class="cursor" aria-hidden="true">_</span>
 	</h1>
 
+	<div class="screens" data-screens>
+		<section class="full-screen hero-screen" aria-label="Darwin Latorre introduction"></section>
+		<SecondScreen />
+	</div>
+
 	<div class="scroll-cue" aria-hidden="true">
-		<span>Scroll</span>
+		<span class="scroll-labels">
+			<span data-scroll-initial>Scroll</span>
+			<span data-scroll-discover>Scroll to discover</span>
+		</span>
 		<svg viewBox="0 0 16 10" role="presentation">
 			<path d="M2 2.25 8 8l6-5.75"></path>
 		</svg>
 	</div>
-</main>
+</div>
+
+<script>
+	import gsap from 'gsap';
+	import ScrollTrigger from 'gsap/ScrollTrigger';
+
+	gsap.registerPlugin(ScrollTrigger);
+
+	const experiences = document.querySelectorAll<HTMLElement>('[data-experience]');
+
+	for (const experience of experiences) {
+		const screens = experience.querySelector<HTMLElement>('[data-screens]');
+		const secondScreen = experience.querySelector<HTMLElement>('[data-second-screen]');
+		const sharedName = experience.querySelector<HTMLElement>('[data-shared-name]');
+		const prompt = experience.querySelector<HTMLElement>('[data-name-prompt]');
+		const initialLabel = experience.querySelector<HTMLElement>('[data-scroll-initial]');
+		const discoverLabel = experience.querySelector<HTMLElement>('[data-scroll-discover]');
+		const revealItems = gsap.utils.toArray<HTMLElement>('[data-second-reveal]', experience);
+
+		if (!screens || !secondScreen || !sharedName || !prompt || !initialLabel || !discoverLabel) {
+			continue;
+		}
+
+		const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const getHeaderScale = () => {
+			const heroSize = Number.parseFloat(getComputedStyle(sharedName).fontSize);
+			const headerSize = window.matchMedia('(max-width: 40rem)').matches ? 18 : 21;
+			return headerSize / heroSize;
+		};
+
+		if (reducedMotion) {
+			const observer = new IntersectionObserver(
+				([entry]) => {
+					if (!entry) return;
+
+					if (entry.isIntersecting) {
+						gsap.set(sharedName, {
+							top: 'calc(var(--page-inset) + var(--control-offset))',
+							xPercent: -50,
+							yPercent: 0,
+							scale: getHeaderScale(),
+						});
+						gsap.set(prompt, { display: 'none' });
+						gsap.set(initialLabel, { opacity: 0 });
+						gsap.set(discoverLabel, { opacity: 1 });
+					} else {
+						gsap.set(sharedName, { top: '50%', xPercent: -50, yPercent: -50, scale: 1 });
+						gsap.set(prompt, { clearProps: 'display' });
+						gsap.set(initialLabel, { opacity: 1 });
+						gsap.set(discoverLabel, { opacity: 0 });
+					}
+				},
+				{ root: screens, threshold: 0.6 },
+			);
+
+			observer.observe(secondScreen);
+			continue;
+		}
+
+		gsap.set(sharedName, { xPercent: -50, yPercent: -50, transformOrigin: 'center top' });
+		gsap.set(prompt, { width: prompt.getBoundingClientRect().width, overflow: 'hidden' });
+		gsap.set(discoverLabel, { opacity: 0, y: 5 });
+		gsap.set(revealItems, { opacity: 0, y: 10 });
+
+		const timeline = gsap.timeline({
+			scrollTrigger: {
+				trigger: secondScreen,
+				scroller: screens,
+				start: 'top bottom',
+				end: 'top top',
+				scrub: 0.35,
+				invalidateOnRefresh: true,
+			},
+		});
+
+		timeline
+			.to(
+				sharedName,
+				{
+					top: 'calc(var(--page-inset) + var(--control-offset))',
+					yPercent: 0,
+					scale: getHeaderScale,
+					duration: 1,
+					ease: 'none',
+				},
+				0,
+			)
+			.to(prompt, { width: 0, marginRight: 0, opacity: 0, duration: 0.5, ease: 'none' }, 0.18)
+			.to(initialLabel, { y: -5, opacity: 0, duration: 0.3, ease: 'none' }, 0.2)
+			.to(discoverLabel, { y: 0, opacity: 1, duration: 0.35, ease: 'none' }, 0.42)
+			.to(
+				revealItems,
+				{ y: 0, opacity: 1, stagger: 0.045, duration: 0.28, ease: 'none' },
+				0.34,
+			);
+	}
+</script>
 
 <style>
-	.hero {
+	.experience {
 		position: relative;
-		display: grid;
 		width: 100%;
 		height: 100%;
-		place-items: center;
-		border: var(--border-width) solid var(--color-border);
-		border-radius: var(--radius-frame);
-		background: var(--color-surface);
-		animation: frame-enter 700ms var(--ease-out) both;
 	}
 
-	.terminal-line {
+	.screens {
+		width: 100%;
+		height: 100vh;
+		height: 100dvh;
+		overflow-y: auto;
+		scroll-behavior: smooth;
+		scroll-snap-type: y mandatory;
+		overscroll-behavior-y: contain;
+		scrollbar-width: none;
+	}
+
+	.screens::-webkit-scrollbar {
+		display: none;
+	}
+
+	:global(.full-screen) {
+		width: 100%;
+		height: 100vh;
+		height: 100dvh;
+		scroll-snap-align: start;
+		scroll-snap-stop: always;
+		background: var(--color-surface);
+	}
+
+	.shared-name {
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		z-index: 30;
 		display: flex;
 		margin: 0;
 		align-items: baseline;
@@ -40,10 +167,12 @@ import MenuButton from './MenuButton.astro';
 		font-weight: 500;
 		letter-spacing: -0.045em;
 		line-height: 1;
-		animation: title-enter 750ms var(--ease-out) 160ms both;
+		transform: translate(-50%, -50%);
+		animation: name-enter 750ms ease-out 160ms both;
 	}
 
 	.prompt {
+		display: inline-block;
 		margin-right: 0.32em;
 		color: var(--color-accent);
 		text-shadow: 0 0 7px var(--color-accent-glow);
@@ -56,9 +185,10 @@ import MenuButton from './MenuButton.astro';
 	}
 
 	.scroll-cue {
-		position: absolute;
-		bottom: var(--control-offset);
+		position: fixed;
+		bottom: calc(var(--page-inset) + var(--control-offset));
 		left: 50%;
+		z-index: 30;
 		display: grid;
 		transform: translateX(-50%);
 		place-items: center;
@@ -66,7 +196,19 @@ import MenuButton from './MenuButton.astro';
 		color: var(--color-text-muted);
 		font-size: 0.68rem;
 		letter-spacing: 0.08em;
+		pointer-events: none;
 		animation: detail-enter-centered 550ms ease-out 650ms both;
+	}
+
+	.scroll-labels {
+		position: relative;
+		display: grid;
+		place-items: center;
+	}
+
+	.scroll-labels > span {
+		grid-area: 1 / 1;
+		white-space: nowrap;
 	}
 
 	.scroll-cue svg {
@@ -84,25 +226,12 @@ import MenuButton from './MenuButton.astro';
 		stroke-width: 1.25;
 	}
 
-	@keyframes frame-enter {
+	@keyframes name-enter {
 		from {
 			opacity: 0;
-			transform: scale(0.995);
 		}
 		to {
 			opacity: 1;
-			transform: scale(1);
-		}
-	}
-
-	@keyframes title-enter {
-		from {
-			opacity: 0;
-			transform: translateY(8px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
 		}
 	}
 
@@ -139,14 +268,17 @@ import MenuButton from './MenuButton.astro';
 	}
 
 	@media (max-width: 40rem) {
-		.terminal-line {
+		.shared-name {
 			letter-spacing: -0.055em;
 		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.hero,
-		.terminal-line,
+		.screens {
+			scroll-behavior: auto;
+		}
+
+		.shared-name,
 		.scroll-cue,
 		.scroll-cue svg,
 		.cursor {

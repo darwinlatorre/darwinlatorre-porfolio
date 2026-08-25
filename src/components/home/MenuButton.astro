@@ -94,10 +94,10 @@ const menuItems = [
 
 <style>
 	.menu-shell {
-		position: absolute;
-		top: var(--control-offset);
-		left: var(--control-offset);
-		z-index: 10;
+		position: fixed;
+		top: calc(var(--page-inset) + var(--control-offset));
+		left: calc(var(--page-inset) + var(--control-offset));
+		z-index: 40;
 		animation: detail-enter 550ms ease-out 450ms both;
 	}
 
