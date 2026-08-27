@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "check": "astro check",
     "preview": "astro preview",
     "astro": "astro",
     "lint": "eslint .",
@@ -21,6 +22,7 @@
     "simple-icons": "^16.28.0"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.10",
     "@eslint/js": "^10.0.1",
     "eslint": "^10.9.0",
     "eslint-plugin-astro": "^3.1.0",

@@ -38,6 +38,11 @@ import { ChevronDown } from '@lucide/astro';
 		cursor: default;
 	}
 
+	.scroll-cue.is-terminal :global(.scroll-icon) {
+		opacity: 0.45;
+		animation: none;
+	}
+
 	.scroll-cue.is-tree-end {
 		text-shadow: 0 0 7px var(--color-accent-glow);
 	}

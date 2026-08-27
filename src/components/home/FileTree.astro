@@ -6,7 +6,7 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 ---
 
 <nav class="file-tree" aria-label="Portfolio sections">
-	<a class="tree-row is-active" href="#home" aria-current="page">
+	<a class="tree-row is-active" href="#home">
 		<House class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
 		<span>Home</span>
 	</a>
@@ -54,7 +54,12 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 			<span>Services</span>
 		</a>
 
-		<div class="tree-group" data-tree-group>
+		<a class="tree-row certificates-mobile" href="#certificates">
+			<Folder class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
+			<span>Certificates</span>
+		</a>
+
+		<div class="tree-group certificates-expandable" data-tree-group>
 			<button
 				class="tree-row tree-toggle"
 				type="button"
@@ -119,6 +124,10 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 
 	button.tree-row {
 		cursor: pointer;
+	}
+
+	.certificates-mobile {
+		display: none;
 	}
 
 	.tree-row:hover,
@@ -242,18 +251,26 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 		}
 
 		.tree-row {
-			min-height: 2rem;
+			min-height: 2.75rem;
 			-webkit-tap-highlight-color: transparent;
 		}
 
 		.tree-children a {
-			min-height: 1.625rem;
+			min-height: 2.75rem;
 			font-size: 0.7rem;
 			-webkit-tap-highlight-color: transparent;
 		}
 
 		.root-children {
 			padding-left: 1.25rem;
+		}
+
+		.certificates-mobile {
+			display: grid;
+		}
+
+		.certificates-expandable {
+			display: none;
 		}
 	}
 

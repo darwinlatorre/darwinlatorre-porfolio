@@ -1,5 +1,6 @@
 ---
 import { siGithub, siX } from 'simple-icons';
+import TechnologyDialog from './TechnologyDialog.astro';
 
 const socialLinks = [
 	{
@@ -18,10 +19,16 @@ const socialLinks = [
 		icon: siX,
 	},
 ];
+
 ---
 
 <section id="about" class="screen about" aria-label="About" data-about>
-	<div class="about-content">
+	<div
+		class="about-content"
+		tabindex="0"
+		aria-label="About terminal content"
+		data-about-content
+	>
 		<div class="terminal-layout">
 			<section class="terminal-block">
 				<p class="command-line" data-about-marker>
@@ -54,10 +61,16 @@ const socialLinks = [
 						<span>experience_years:</span>
 						<strong>3+</strong>
 					</div>
-					<div class="stat-row" data-about-stat-value>
+					<button
+						class="stat-row stat-trigger"
+						type="button"
+						aria-haspopup="dialog"
+						data-technologies-open
+						data-about-stat-value
+					>
 						<span>technologies_used:</span>
 						<strong>16+</strong>
-					</div>
+					</button>
 				</div>
 			</section>
 
@@ -109,6 +122,7 @@ const socialLinks = [
 								placeholder="show"
 								autocomplete="off"
 								spellcheck="false"
+								enterkeyhint="send"
 								aria-describedby="terminal-response"
 								data-terminal-input
 							/>
@@ -130,60 +144,9 @@ const socialLinks = [
 			</section>
 		</div>
 	</div>
+
+	<TechnologyDialog />
 </section>
-
-<script>
-	const form = document.querySelector<HTMLFormElement>('[data-terminal-form]');
-	const input = form?.querySelector<HTMLInputElement>('[data-terminal-input]');
-	const mirror = form?.querySelector<HTMLElement>('[data-terminal-mirror]');
-	const response = document.querySelector<HTMLElement>('[data-terminal-response]');
-
-	const responses: Record<string, string> = {
-		show: 'about | stats | links',
-		'show about':
-			'DevOps and Backend Engineer focused on reliable cloud infrastructure and scalable applications.',
-		'show stats': 'experience_years: 3+ | technologies_used: 16+',
-		'show links': 'LinkedIn | GitHub | X',
-		help: 'show [about|stats|links] | clear',
-	};
-	const syncCursor = () => {
-		if (input && mirror) mirror.textContent = input.value;
-	};
-
-	form?.addEventListener('submit', (event) => {
-		event.preventDefault();
-		if (!input || !response) return;
-
-		const command = input.value.trim().toLowerCase();
-		input.value = '';
-		syncCursor();
-
-		if (!command) return;
-		if (command === 'clear') {
-			response.textContent = '';
-			response.hidden = true;
-			return;
-		}
-
-		response.textContent = responses[command] ?? `command not found: ${command}`;
-		response.hidden = false;
-	});
-
-	input?.addEventListener('keydown', (event) => {
-		if (event.key === 'Tab' && !input.value) {
-			event.preventDefault();
-			input.value = 'show ';
-			syncCursor();
-		}
-
-		if (event.key === 'Escape') {
-			input.value = '';
-			syncCursor();
-		}
-	});
-
-	input?.addEventListener('input', syncCursor);
-</script>
 
 <style>
 	.about {
@@ -210,6 +173,10 @@ const socialLinks = [
 
 	.about-content::-webkit-scrollbar {
 		display: none;
+	}
+
+	.about-content.is-scroll-contained {
+		overscroll-behavior-y: contain;
 	}
 
 	.terminal-layout {
@@ -300,6 +267,27 @@ const socialLinks = [
 	.stat-row strong {
 		font: inherit;
 		font-weight: 400;
+	}
+
+	button.stat-row {
+		padding: 0;
+		border: 0;
+		background: transparent;
+		font-family: inherit;
+		text-align: left;
+		cursor: pointer;
+		transition: color var(--duration-fast) ease, transform var(--duration-fast) ease;
+	}
+
+	button.stat-row:hover,
+	button.stat-row:focus-visible {
+		color: var(--color-accent);
+		transform: translateX(3px);
+	}
+
+	button.stat-row:focus-visible {
+		outline: 1px solid var(--color-accent-muted);
+		outline-offset: 4px;
 	}
 
 	.social-links {
@@ -517,11 +505,17 @@ const socialLinks = [
 			flex-basis: 100%;
 		}
 
+		.command-form input {
+			font-size: 1rem;
+			scroll-margin-block: 35dvh;
+		}
+
 		.terminal-response {
 			margin-left: 0.6rem;
 			padding-left: 1.15rem;
 			font-size: clamp(0.72rem, 3.2vw, 0.85rem);
 		}
+
 	}
 
 	@media (max-width: 48rem) and (max-height: 42rem) {
@@ -561,5 +555,6 @@ const socialLinks = [
 		.input-cursor {
 			animation: none;
 		}
+
 	}
 </style>

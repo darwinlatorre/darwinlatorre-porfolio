@@ -1,5 +1,5 @@
 ---
-import { Folder } from '@lucide/astro';
+import { Folder, House } from '@lucide/astro';
 
 const menuItems = [
 	{ label: 'About', href: '#about' },
@@ -38,18 +38,27 @@ const { id = 'site-menu' } = Astro.props;
 		data-menu-panel
 		inert
 	>
-		<ul>
-			{
-				menuItems.map((item) => (
-					<li>
-						<a href={item.href}>
-							<Folder class="folder-icon" size={22} stroke-width={1.5} aria-hidden="true" />
-							<span>{item.label}</span>
-						</a>
-					</li>
-				))
-			}
-		</ul>
+		<div class="menu-tree">
+			<a class="menu-root" href="#home" aria-label="Go to Home">
+				<House class="menu-icon" size={22} stroke-width={1.5} aria-hidden="true" />
+				<span>Home</span>
+			</a>
+
+			<div class="menu-branches">
+				<ul>
+					{
+						menuItems.map((item) => (
+							<li>
+								<a href={item.href}>
+									<Folder class="menu-icon" size={22} stroke-width={1.5} aria-hidden="true" />
+									<span>{item.label}</span>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+		</div>
 	</nav>
 </div>
 
@@ -61,6 +70,7 @@ const { id = 'site-menu' } = Astro.props;
 		const panel = menu.querySelector<HTMLElement>('[data-menu-panel]');
 
 		if (!trigger || !panel) continue;
+		const abortController = new AbortController();
 
 		const setOpen = (open: boolean) => {
 			menu.classList.toggle('is-open', open);
@@ -70,29 +80,47 @@ const { id = 'site-menu' } = Astro.props;
 			panel.inert = !open;
 		};
 
-		trigger.addEventListener('click', () => {
-			setOpen(trigger.getAttribute('aria-expanded') !== 'true');
+		trigger.addEventListener(
+			'click',
+			() => {
+				setOpen(trigger.getAttribute('aria-expanded') !== 'true');
+			},
+			{ signal: abortController.signal },
+		);
+		menu.addEventListener('menu:close', () => setOpen(false), {
+			signal: abortController.signal,
 		});
 
 		panel.querySelectorAll('a').forEach((link) => {
-			link.addEventListener('click', () => setOpen(false));
+			link.addEventListener('click', () => setOpen(false), { signal: abortController.signal });
 		});
 
-		document.addEventListener('click', (event) => {
-			if (
-				menu.classList.contains('is-open') &&
-				event.target instanceof Node &&
-				!menu.contains(event.target)
-			) {
-				setOpen(false);
-			}
-		});
+		document.addEventListener(
+			'click',
+			(event) => {
+				if (
+					menu.classList.contains('is-open') &&
+					event.target instanceof Node &&
+					!menu.contains(event.target)
+				) {
+					setOpen(false);
+				}
+			},
+			{ signal: abortController.signal },
+		);
 
-		document.addEventListener('keydown', (event) => {
-			if (event.key === 'Escape' && menu.classList.contains('is-open')) {
-				setOpen(false);
-				trigger.focus();
-			}
+		document.addEventListener(
+			'keydown',
+			(event) => {
+				if (event.key === 'Escape' && menu.classList.contains('is-open')) {
+					setOpen(false);
+					trigger.focus();
+				}
+			},
+			{ signal: abortController.signal },
+		);
+		document.addEventListener('astro:before-swap', () => abortController.abort(), {
+			once: true,
 		});
 	}
 </script>
@@ -109,9 +137,9 @@ const { id = 'site-menu' } = Astro.props;
 		position: relative;
 		z-index: 2;
 		display: grid;
-		width: 2rem;
-		height: 1.75rem;
-		padding: 0.35rem 0.25rem;
+		width: 2.75rem;
+		height: 2.75rem;
+		padding: 0.8rem 0.7rem;
 		align-content: space-between;
 		border: 0;
 		background: transparent;
@@ -167,7 +195,11 @@ const { id = 'site-menu' } = Astro.props;
 		top: -0.75rem;
 		left: -0.75rem;
 		width: min(17rem, calc(100vw - 3.5rem));
+		max-height: calc(100dvh - 2 * (var(--page-inset) + var(--control-offset)));
 		padding: 1.1rem 1.35rem 1.4rem;
+		overflow-y: auto;
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-accent-muted) transparent;
 		visibility: hidden;
 		border: var(--border-width) solid var(--color-border);
 		border-radius: var(--radius-small);
@@ -185,31 +217,61 @@ const { id = 'site-menu' } = Astro.props;
 		transition-delay: 0s;
 	}
 
+	.menu-tree {
+		display: grid;
+		margin-top: 2.35rem;
+	}
+
+	.menu-root {
+		display: grid;
+		min-height: 2.5rem;
+		grid-template-columns: 1.35rem minmax(0, 1fr);
+		align-items: center;
+		gap: 0.65rem;
+		color: var(--color-accent);
+		font-size: 1.05rem;
+		letter-spacing: 0.035em;
+		text-decoration: none;
+		transition: color var(--duration-fast) ease, transform var(--duration-fast) ease;
+	}
+
+	.menu-root:hover,
+	.menu-root:focus-visible {
+		color: var(--color-text);
+		transform: translateX(3px);
+	}
+
+	.menu-root:focus-visible {
+		outline: var(--border-width) solid var(--color-accent-muted);
+		outline-offset: 3px;
+	}
+
+	.menu-branches {
+		position: relative;
+		padding-left: 1.8rem;
+	}
+
+	.menu-branches::before {
+		position: absolute;
+		top: 0;
+		bottom: 1.35rem;
+		left: 0.67rem;
+		border-left: 1px dotted var(--color-accent-muted);
+		content: '';
+		opacity: 0.82;
+	}
+
 	.menu-panel ul {
 		position: relative;
 		display: grid;
-		margin: 2.35rem 0 0;
+		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
 
-	.menu-panel ul::before {
-		position: absolute;
-		top: 0.25rem;
-		bottom: 1.5rem;
-		left: 0.28rem;
-		border-left: 2px dotted var(--color-accent-muted);
-		content: '';
-		opacity: 0.78;
-	}
-
 	.menu-panel li {
 		position: relative;
-		display: grid;
-		min-height: 3rem;
-		grid-template-columns: 1.55rem minmax(0, 1fr);
-		align-items: center;
-		column-gap: 0.6rem;
+		min-height: 2.65rem;
 		opacity: 0;
 		transform: translateY(5px);
 		transition: opacity 180ms ease, transform 220ms ease;
@@ -218,9 +280,9 @@ const { id = 'site-menu' } = Astro.props;
 	.menu-panel li::before {
 		position: absolute;
 		top: 50%;
-		left: 0.28rem;
-		width: 1.05rem;
-		border-top: 2px dotted var(--color-accent-muted);
+		left: -1.13rem;
+		width: 0.95rem;
+		border-top: 1px dotted var(--color-accent-muted);
 		content: '';
 		opacity: 0.78;
 	}
@@ -250,17 +312,26 @@ const { id = 'site-menu' } = Astro.props;
 		transition-delay: 210ms;
 	}
 
-	:global(.folder-icon) {
+	:global(.menu-icon) {
 		width: 1.35rem;
 		height: auto;
 		color: var(--color-text-muted);
 		transition: color var(--duration-fast) ease;
 	}
 
+	.menu-root :global(.menu-icon) {
+		color: var(--color-accent);
+	}
+
+	.menu-root:hover :global(.menu-icon),
+	.menu-root:focus-visible :global(.menu-icon) {
+		color: var(--color-text);
+	}
+
 	.menu-panel li > a {
 		display: grid;
-		grid-column: 2;
-		grid-template-columns: 1.4rem minmax(0, 1fr);
+		min-height: 2.65rem;
+		grid-template-columns: 1.35rem minmax(0, 1fr);
 		align-items: center;
 		align-self: stretch;
 		gap: 0.6rem;
@@ -277,8 +348,8 @@ const { id = 'site-menu' } = Astro.props;
 		transform: translateX(3px);
 	}
 
-	.menu-panel li > a:hover :global(.folder-icon),
-	.menu-panel li > a:focus-visible :global(.folder-icon) {
+	.menu-panel li > a:hover :global(.menu-icon),
+	.menu-panel li > a:focus-visible :global(.menu-icon) {
 		color: var(--color-accent);
 	}
 
@@ -304,7 +375,7 @@ const { id = 'site-menu' } = Astro.props;
 		.menu-panel,
 		.menu-panel li,
 		.menu-panel a,
-		:global(.folder-icon) {
+		:global(.menu-icon) {
 			animation: none;
 			transition-duration: 0.01ms;
 		}
