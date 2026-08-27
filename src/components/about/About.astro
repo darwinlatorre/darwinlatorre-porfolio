@@ -448,10 +448,16 @@ const socialLinks = [
 			--about-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.5rem);
 		}
 
-		.about-content {
-			padding-inline: 2rem;
-			align-items: start;
-		}
+	.about-content {
+		padding-inline: 2rem;
+		align-items: start;
+		overflow: hidden;
+		scrollbar-width: initial;
+	}
+
+	.about-content::-webkit-scrollbar {
+		display: initial;
+	}
 
 		.terminal-layout {
 			padding-top: 0.5rem;
@@ -541,16 +547,7 @@ const socialLinks = [
 			--about-footer-space: calc(var(--page-inset) + var(--control-offset) + 2rem);
 		}
 
-		.about-content {
-			overflow: hidden;
-			scrollbar-width: initial;
-		}
-
-		.about-content::-webkit-scrollbar {
-			display: initial;
-		}
-
-		.terminal-layout {
+			.terminal-layout {
 			gap: 1.1rem;
 		}
 
