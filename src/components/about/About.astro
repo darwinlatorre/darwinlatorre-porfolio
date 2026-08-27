@@ -518,10 +518,36 @@ const socialLinks = [
 
 	}
 
+	@media (max-height: 50rem) {
+		.social-links {
+			display: flex;
+			gap: 2rem;
+			width: fit-content;
+		}
+
+		.social-links a {
+			grid-template-columns: auto;
+			gap: 0;
+		}
+
+		.social-name {
+			display: none;
+		}
+	}
+
 	@media (max-width: 48rem) and (max-height: 42rem) {
 		.about {
 			--about-header-space: calc(var(--page-inset) + var(--control-offset) + 2.25rem);
 			--about-footer-space: calc(var(--page-inset) + var(--control-offset) + 2rem);
+		}
+
+		.about-content {
+			overflow: hidden;
+			scrollbar-width: initial;
+		}
+
+		.about-content::-webkit-scrollbar {
+			display: initial;
 		}
 
 		.terminal-layout {
