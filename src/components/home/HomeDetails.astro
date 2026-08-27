@@ -9,7 +9,7 @@ import FileTree from './FileTree.astro';
 	aria-labelledby="home-details-title"
 	data-home-details
 >
-	<div class="home-details-content">
+	<div class="home-details-content" data-home-details-content>
 		<div class="introduction">
 			<div class="heading-group">
 				<p class="greeting reveal">Hi, I'm</p>
@@ -210,7 +210,7 @@ import FileTree from './FileTree.astro';
 	@media (max-width: 48rem) {
 		.home-details-content {
 			display: grid;
-			padding: 0.75rem 1.35rem;
+			padding: 0.75rem 2rem;
 			overflow: hidden;
 			grid-template-columns: 1fr;
 			grid-template-rows: auto 1px minmax(0, 1fr);
