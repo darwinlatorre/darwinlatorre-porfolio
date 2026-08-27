@@ -251,12 +251,12 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 		}
 
 		.tree-row {
-			min-height: 1.75rem;
+			min-height: 1.9rem;
 			-webkit-tap-highlight-color: transparent;
 		}
 
 		.tree-children a {
-			min-height: 1.75rem;
+			min-height: 1.9rem;
 			font-size: 0.7rem;
 			-webkit-tap-highlight-color: transparent;
 		}
@@ -271,6 +271,16 @@ const certificateItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
 
 		.certificates-expandable {
 			display: none;
+		}
+	}
+
+	@media (max-width: 48rem) and (min-height: 42.01rem) {
+		.certificates-mobile {
+			display: none;
+		}
+
+		.certificates-expandable {
+			display: block;
 		}
 	}
 
