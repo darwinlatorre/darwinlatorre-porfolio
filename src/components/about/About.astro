@@ -22,12 +22,13 @@ const socialLinks = [
 
 ---
 
-<section id="about" class="screen about" aria-label="About" data-about>
+<section id="about" class="screen about" aria-label="About" data-about data-terminal-root>
 	<div
 		class="about-content"
 		tabindex="0"
 		aria-label="About terminal content"
 		data-about-content
+		data-terminal-scroll
 	>
 		<div class="terminal-layout">
 			<section class="terminal-block">
@@ -152,6 +153,7 @@ const socialLinks = [
 	.about {
 		--about-header-space: calc(var(--page-inset) + var(--control-offset) + 3.75rem);
 		--about-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.75rem);
+		--about-font-size: var(--terminal-font-size);
 
 		display: grid;
 		overflow: hidden;
@@ -196,7 +198,7 @@ const socialLinks = [
 		align-items: baseline;
 		gap: 0.8rem;
 		color: var(--color-text);
-		font-size: clamp(0.9rem, 1.4vw, 1.2rem);
+		font-size: var(--about-font-size);
 		letter-spacing: 0.015em;
 		line-height: 1.4;
 	}
@@ -241,7 +243,7 @@ const socialLinks = [
 		width: min(64rem, 100%);
 		margin: 0;
 		color: color-mix(in srgb, var(--color-text) 92%, var(--color-text-muted));
-		font-size: clamp(1rem, 1.55vw, 1.35rem);
+		font-size: clamp(1.08rem, 1.55vw, 1.35rem);
 		letter-spacing: -0.018em;
 		line-height: 1.55;
 	}
@@ -259,7 +261,7 @@ const socialLinks = [
 		justify-content: start;
 		gap: 0.9rem;
 		color: var(--color-text);
-		font-size: clamp(0.95rem, 1.35vw, 1.18rem);
+		font-size: var(--about-font-size);
 		letter-spacing: 0.01em;
 		line-height: 1.3;
 	}
@@ -342,7 +344,7 @@ const socialLinks = [
 	}
 
 	.social-name {
-		font-size: clamp(0.9rem, 1.25vw, 1.08rem);
+		font-size: var(--about-font-size);
 		letter-spacing: 0.01em;
 	}
 
@@ -445,7 +447,7 @@ const socialLinks = [
 		padding: 0.35rem 0 0.35rem clamp(1.5rem, 3vw, 2.9rem);
 		border-left: 1px solid var(--color-accent-muted);
 		color: var(--color-text-muted);
-		font-size: clamp(0.82rem, 1.15vw, 1rem);
+		font-size: var(--about-font-size);
 		line-height: 1.45;
 	}
 
@@ -478,7 +480,7 @@ const socialLinks = [
 		.command-line {
 			flex-wrap: wrap;
 			gap: 0.25rem 0.65rem;
-			font-size: clamp(0.72rem, 3.4vw, 0.9rem);
+			font-size: var(--about-font-size);
 		}
 
 		.command-output {
@@ -487,13 +489,13 @@ const socialLinks = [
 		}
 
 		.description-output p {
-			font-size: clamp(0.82rem, 3.8vw, 0.98rem);
+			font-size: clamp(1.08rem, 1.55vw, 1.35rem);
 			line-height: 1.5;
 		}
 
 		.stat-row {
 			gap: 0.7rem;
-			font-size: clamp(0.8rem, 3.6vw, 0.95rem);
+			font-size: var(--about-font-size);
 		}
 
 		.social-links {
@@ -519,14 +521,14 @@ const socialLinks = [
 		}
 
 		.command-form input {
-			font-size: 1rem;
+			font-size: var(--about-font-size);
 			scroll-margin-block: 35dvh;
 		}
 
 		.terminal-response {
 			margin-left: 0.6rem;
 			padding-left: 1.15rem;
-			font-size: clamp(0.72rem, 3.2vw, 0.85rem);
+			font-size: var(--about-font-size);
 		}
 
 	}
@@ -563,7 +565,7 @@ const socialLinks = [
 		}
 
 		.description-output p {
-			font-size: clamp(0.75rem, 3.3vw, 0.86rem);
+			font-size: clamp(1.08rem, 1.55vw, 1.35rem);
 			line-height: 1.4;
 		}
 	}

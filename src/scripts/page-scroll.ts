@@ -30,6 +30,12 @@ const initializePageScroll = () => {
 	const aboutSocials = about?.querySelectorAll<HTMLElement>('[data-about-social]') ?? [];
 	const technologyDialog = about?.querySelector<HTMLDialogElement>('[data-technologies-dialog]');
 	const experience = document.querySelector<HTMLElement>('[data-experience]');
+	const experienceContent = experience?.querySelector<HTMLElement>('[data-experience-content]');
+	const experienceCommand = experience?.querySelector<HTMLElement>('[data-experience-command]');
+	const experienceEntries =
+		experience?.querySelectorAll<HTMLElement>('[data-experience-entry]') ?? [];
+	const experienceSummary = experience?.querySelector<HTMLElement>('[data-experience-summary]');
+	const experienceReady = experience?.querySelector<HTMLElement>('[data-experience-ready]');
 	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 	const mobileViewport = window.matchMedia('(max-width: 48rem)');
 	const abortController = new AbortController();
@@ -49,7 +55,7 @@ const initializePageScroll = () => {
 	let detailsTop = scroller.clientHeight;
 	let aboutTop = scroller.clientHeight * 2;
 	let experienceTop = scroller.clientHeight * 3;
-	let bypassAboutLock = false;
+	let bypassSectionLocks = false;
 	let bypassTimer = 0;
 	let treeNavigation: TreeNavigation | null = null;
 
@@ -71,26 +77,37 @@ const initializePageScroll = () => {
 		element.style.transform = `translateY(${offset * (1 - progress)}px)`;
 	};
 	const beginProgrammaticNavigation = () => {
-		bypassAboutLock = true;
+		bypassSectionLocks = true;
 		window.clearTimeout(bypassTimer);
-		bypassTimer = window.setTimeout(() => {
-			bypassAboutLock = false;
-		}, 1500);
+		bypassTimer = window.setTimeout(endProgrammaticNavigation, 1500);
 	};
-	const endProgrammaticNavigation = () => {
-		bypassAboutLock = false;
+	function endProgrammaticNavigation() {
+		bypassSectionLocks = false;
 		window.clearTimeout(bypassTimer);
-	};
-	const getAboutScrollState = () => {
-		if (!aboutContent) return { scrollable: false, atStart: true, atEnd: true };
+		const pageTop = scroller?.scrollTop ?? 0;
 
-		const scrollable = aboutContent.scrollHeight > aboutContent.clientHeight + 1;
+		const normalizeContentPosition = (
+			content: HTMLElement | null | undefined,
+			sectionTop: number,
+		) => {
+			if (!content) return;
+			if (pageTop < sectionTop - 2) content.scrollTop = 0;
+			if (pageTop > sectionTop + 2) content.scrollTop = content.scrollHeight;
+		};
+
+		normalizeContentPosition(aboutContent, aboutTop);
+		normalizeContentPosition(experienceContent, experienceTop);
+	}
+	const getScrollState = (content: HTMLElement | null | undefined) => {
+		if (!content) return { scrollable: false, atStart: true, atEnd: true };
+
+		const scrollable = content.scrollHeight > content.clientHeight + 1;
 		return {
 			scrollable,
-			atStart: !scrollable || aboutContent.scrollTop <= 1,
+			atStart: !scrollable || content.scrollTop <= 1,
 			atEnd:
 				!scrollable ||
-				aboutContent.scrollTop + aboutContent.clientHeight >= aboutContent.scrollHeight - 1,
+				content.scrollTop + content.clientHeight >= content.scrollHeight - 1,
 		};
 	};
 
@@ -132,15 +149,30 @@ const initializePageScroll = () => {
 				? 1
 				: 0
 			: rawAboutProgress;
+		const rawExperienceProgress = clamp(
+			(scroller.scrollTop - aboutTop) / Math.max(experienceTop - aboutTop, 1),
+		);
+		const experienceProgress = reducedMotion.matches
+			? rawExperienceProgress >= 0.5
+				? 1
+				: 0
+			: rawExperienceProgress;
 		const inExperience = scroller.scrollTop >= experienceTop - 2;
 		const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience;
-		const aboutScrollState = getAboutScrollState();
+		const aboutScrollState = getScrollState(aboutContent);
+		const experienceScrollState = getScrollState(experienceContent);
 
 		aboutContent?.classList.toggle(
 			'is-scroll-contained',
 			aboutScrollState.scrollable &&
 				!aboutScrollState.atStart &&
 				!aboutScrollState.atEnd,
+		);
+		experienceContent?.classList.toggle(
+			'is-scroll-contained',
+			experienceScrollState.scrollable &&
+				!experienceScrollState.atStart &&
+				!experienceScrollState.atEnd,
 		);
 
 		if (sharedName && nameAction) {
@@ -191,10 +223,18 @@ const initializePageScroll = () => {
 			initialLabel.style.transform = `translateY(${-3 * labelTransition}px)`;
 			discoverLabel.style.opacity = `${labelTransition * aboutLabelOpacity}`;
 			discoverLabel.style.transform = `translateY(${3 * (1 - labelTransition)}px)`;
-			scrollCue.classList.toggle('is-terminal', inExperience);
+			scrollCue.classList.toggle(
+				'is-terminal',
+				inExperience && experienceScrollState.atEnd,
+			);
 			if (inExperience) {
-				scrollCue.removeAttribute('href');
-				scrollCue.setAttribute('aria-label', 'End of current portfolio content');
+				if (experienceScrollState.atEnd) {
+					scrollCue.removeAttribute('href');
+					scrollCue.setAttribute('aria-label', 'End of current portfolio content');
+				} else {
+					scrollCue.href = '#experience';
+					scrollCue.setAttribute('aria-label', 'Continue through the Experience content');
+				}
 			} else if (inAbout) {
 				if (aboutScrollState.atEnd) {
 					scrollCue.href = '#experience';
@@ -226,10 +266,6 @@ const initializePageScroll = () => {
 		if (homeDetails) homeDetails.inert = aboutProgress >= 0.2;
 
 		const markerProgress = range(aboutProgress, 0.2, 0.4);
-		if (about) {
-			const aboutIsInteractive = aboutProgress >= 0.65 && !inExperience;
-			about.inert = !aboutIsInteractive;
-		}
 		reveal(aboutMarker, markerProgress, 8);
 		if (aboutLine) aboutLine.style.transform = `scaleY(${markerProgress})`;
 		reveal(aboutDescription, range(aboutProgress, 0.35, 0.6), 22);
@@ -243,27 +279,38 @@ const initializePageScroll = () => {
 			reveal(social, range(aboutProgress, start, start + 0.18), 14);
 		});
 		reveal(aboutTerminalCommand, range(aboutProgress, 0.82, 0.98), 10);
+
+		if (about) about.inert = aboutProgress < 0.65 || experienceProgress >= 0.2;
+		if (experience) experience.inert = experienceProgress < 0.65;
+		reveal(experienceCommand, range(experienceProgress, 0.18, 0.38), 8);
+		experienceEntries.forEach((entry, index) => {
+			const start = 0.32 + index * 0.18;
+			reveal(entry, range(experienceProgress, start, start + 0.28), 20);
+		});
+		reveal(experienceSummary, range(experienceProgress, 0.68, 0.86), 12);
+		reveal(experienceReady, range(experienceProgress, 0.82, 0.98), 8);
 	};
 
 	const requestRender = () => {
 		if (frameId) return;
 		frameId = window.requestAnimationFrame(render);
 	};
-	const enforceAboutBoundary = () => {
-		if (!aboutContent || bypassAboutLock) return;
+	const enforceSectionBoundary = (content: HTMLElement | null | undefined, sectionTop: number) => {
+		if (!content || bypassSectionLocks) return;
 
-		const { atStart, atEnd } = getAboutScrollState();
+		const { atStart, atEnd } = getScrollState(content);
 		const pageTop = scroller.scrollTop;
-		const movingBelowAbout = pageTop > aboutTop + 2;
-		const movingAboveAbout = pageTop < aboutTop - 2;
+		const movingBelowSection = pageTop > sectionTop + 2;
+		const movingAboveSection = pageTop < sectionTop - 2;
 
-		if ((movingBelowAbout && !atEnd) || (movingAboveAbout && !atStart)) {
-			aboutContent.scrollTop += pageTop - aboutTop;
-			scroller.scrollTop = aboutTop;
+		if ((movingBelowSection && !atEnd) || (movingAboveSection && !atStart)) {
+			content.scrollTop += pageTop - sectionTop;
+			scroller.scrollTop = sectionTop;
 		}
 	};
 	const handlePageScroll = () => {
-		enforceAboutBoundary();
+		enforceSectionBoundary(aboutContent, aboutTop);
+		enforceSectionBoundary(experienceContent, experienceTop);
 		requestRender();
 	};
 
@@ -280,14 +327,18 @@ const initializePageScroll = () => {
 			signal: abortController.signal,
 		});
 	}
-	const aboutResizeObserver =
-		aboutContent && typeof ResizeObserver !== 'undefined'
-			? new ResizeObserver(requestRender)
-			: null;
+	const contentResizeObserver =
+		typeof ResizeObserver !== 'undefined' ? new ResizeObserver(requestRender) : null;
 	if (aboutContent) {
-		aboutResizeObserver?.observe(aboutContent);
+		contentResizeObserver?.observe(aboutContent);
 		if (aboutContent.firstElementChild) {
-			aboutResizeObserver?.observe(aboutContent.firstElementChild);
+			contentResizeObserver?.observe(aboutContent.firstElementChild);
+		}
+	}
+	if (experienceContent) {
+		contentResizeObserver?.observe(experienceContent);
+		if (experienceContent.firstElementChild) {
+			contentResizeObserver?.observe(experienceContent.firstElementChild);
 		}
 	}
 
@@ -302,31 +353,35 @@ const initializePageScroll = () => {
 		passive: true,
 		signal: abortController.signal,
 	});
+	experienceContent?.addEventListener('scroll', requestRender, {
+		passive: true,
+		signal: abortController.signal,
+	});
 	window.addEventListener('resize', handleResize, { signal: abortController.signal });
 	reducedMotion.addEventListener('change', requestRender, { signal: abortController.signal });
 	mobileViewport.addEventListener('change', requestRender, { signal: abortController.signal });
 	document.addEventListener(
 		'keydown',
 		(event) => {
-			if (!aboutContent) return;
-			if (technologyDialog?.open || event.target !== aboutContent) return;
+			if (technologyDialog?.open) return;
 			const inExperience = scroller.scrollTop >= experienceTop - 2;
 			const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience;
-			if (!inAbout) return;
-			const { atStart, atEnd } = getAboutScrollState();
+			const activeContent = inExperience ? experienceContent : inAbout ? aboutContent : null;
+			if (!activeContent || event.target !== activeContent) return;
+			const { atStart, atEnd } = getScrollState(activeContent);
 			let amount = 0;
 			if (event.key === 'ArrowDown') amount = 48;
 			if (event.key === 'ArrowUp') amount = -48;
 			if (event.key === 'PageDown' || (event.key === ' ' && !event.shiftKey)) {
-				amount = aboutContent.clientHeight * 0.8;
+				amount = activeContent.clientHeight * 0.8;
 			}
 			if (event.key === 'PageUp' || (event.key === ' ' && event.shiftKey)) {
-				amount = aboutContent.clientHeight * -0.8;
+				amount = activeContent.clientHeight * -0.8;
 			}
 
 			if ((amount > 0 && !atEnd) || (amount < 0 && !atStart)) {
 				event.preventDefault();
-				aboutContent.scrollBy({
+				activeContent.scrollBy({
 					top: amount,
 					behavior: reducedMotion.matches ? 'auto' : 'smooth',
 				});
@@ -377,9 +432,18 @@ const initializePageScroll = () => {
 			const inDetails = scroller.scrollTop / Math.max(detailsTop, 1) >= 0.5;
 			const inExperience = scroller.scrollTop >= experienceTop - 2;
 			const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience;
-			if (inExperience) return;
+			const experienceScrollState = getScrollState(experienceContent);
+			if (inExperience) {
+				if (experienceScrollState.atEnd) return;
+				event.preventDefault();
+				experienceContent?.scrollBy({
+					top: experienceContent.clientHeight * 0.8,
+					behavior: reducedMotion.matches ? 'auto' : 'smooth',
+				});
+				return;
+			}
 
-			const aboutScrollState = getAboutScrollState();
+			const aboutScrollState = getScrollState(aboutContent);
 			if (inAbout && !aboutScrollState.atEnd) {
 				event.preventDefault();
 				aboutContent?.scrollBy({
@@ -408,7 +472,7 @@ const initializePageScroll = () => {
 		() => {
 			abortController.abort();
 			treeNavigation?.disconnect();
-			aboutResizeObserver?.disconnect();
+			contentResizeObserver?.disconnect();
 			clipboard?.dispose();
 			window.cancelAnimationFrame(frameId);
 			window.clearTimeout(bypassTimer);
@@ -419,7 +483,8 @@ const initializePageScroll = () => {
 
 	if (getFragmentTarget(location.hash)) beginProgrammaticNavigation();
 	measure();
-	enforceAboutBoundary();
+	enforceSectionBoundary(aboutContent, aboutTop);
+	enforceSectionBoundary(experienceContent, experienceTop);
 	render();
 };
 

@@ -1,7 +1,513 @@
-<section id="experience" class="screen experience" aria-label="Experience" data-experience></section>
+---
+const experiences = [
+	{
+		role: 'DevOps Engineer',
+		company: 'Asmet Salud EPS',
+		start: '2025-01',
+		end: '2026-03',
+		startLabel: 'Jan 2025',
+		endLabel: 'Mar 2026',
+		highlights: [
+			'Implemented CI/CD pipelines with Jenkins and GitLab for deploying Spring Boot microservices on AWS using EKS.',
+			'Managed on-premises Kubernetes clusters running production Spring Boot microservices, monitored with Prometheus and Grafana.',
+			'Provisioned and maintained AWS infrastructure using Terraform and Terragrunt, including EKS, IAM, Secrets Manager, VPC, and RDS.',
+			'Collaborated with development teams using GitLab, Jira, and Agile methodologies.',
+		],
+	},
+	{
+		role: 'IT Infrastructure Professional',
+		company: 'Asmet Salud EPS',
+		start: '2024-06',
+		end: '2024-12',
+		startLabel: 'Jun 2024',
+		endLabel: 'Dec 2024',
+		highlights: [
+			'Developed a password management system with high availability (HA) and a disaster recovery plan (DRP).',
+			'Managed AWS and on-premises infrastructure, Active Directory, networks, backups, and database backups.',
+			'Migrated JBoss and WebLogic applications from Java 7 to Java 11, including servers and code.',
+		],
+	},
+];
+---
+
+<section
+	id="experience"
+	class="screen experience"
+	aria-label="Experience"
+	data-experience
+	data-terminal-root
+>
+	<div
+		class="experience-content"
+		tabindex="0"
+		aria-label="Professional experience terminal content"
+		data-experience-content
+		data-terminal-scroll
+	>
+		<div class="experience-terminal">
+			<p class="command-line" data-experience-command>
+				<span class="prompt">
+					<span>user@</span><span class="prompt-host">darwinlatorre:</span><span>~$</span>
+				</span>
+				<code>tail -n 100 experience.log</code>
+			</p>
+
+			<div class="experience-log" aria-label="Employment history">
+				{
+					experiences.map((experience) => (
+						<details class="experience-entry" open data-experience-entry>
+							<summary>
+								<span class="entry-marker" aria-hidden="true">&gt;</span>
+								<span class="entry-title">
+									<span class="entry-period"
+										>[<time datetime={experience.start}>{experience.startLabel}</time><span
+											aria-hidden="true"> - </span
+										><time datetime={experience.end}>{experience.endLabel}</time>]</span
+									>
+									<span>{experience.role} @ {experience.company}</span>
+								</span>
+								<span class="entry-state" aria-hidden="true">
+									<span class="state-open">[-]</span><span class="state-closed">[+]</span>
+								</span>
+							</summary>
+
+							<ul>
+								{experience.highlights.map((highlight) => <li>{highlight}</li>)}
+							</ul>
+						</details>
+					))
+				}
+			</div>
+
+			<p class="experience-summary" data-experience-summary>
+				<span aria-hidden="true">&gt;</span>
+				<strong>[SUMMARY]:</strong> {'{ AWS, Kubernetes, Terraform, Jenkins, Spring Boot, GitLab CI/CD }'}
+			</p>
+
+			<section class="interactive-block" data-experience-ready>
+				<form class="command-form" data-terminal-form>
+					<label class="command-line" for="experience-command">
+						<span class="prompt">
+							<span>user@</span><span class="prompt-host">darwinlatorre:</span><span>~$</span>
+						</span>
+						<span class="terminal-input-shell">
+							<input
+								id="experience-command"
+								name="command"
+								type="text"
+								placeholder="show"
+								autocomplete="off"
+								spellcheck="false"
+								enterkeyhint="send"
+								aria-describedby="experience-terminal-response"
+								data-terminal-input
+							/>
+							<span class="cursor-track" aria-hidden="true">
+								<span class="input-mirror" data-terminal-mirror></span>
+								<span class="terminal-cursor">_</span>
+							</span>
+						</span>
+					</label>
+				</form>
+				<p
+					id="experience-terminal-response"
+					class="terminal-response"
+					role="status"
+					aria-live="polite"
+					data-terminal-response
+					hidden
+				></p>
+			</section>
+		</div>
+	</div>
+</section>
+
+<script>
+	const initializeExperienceEntries = () => {
+		const root = document.querySelector<HTMLElement>('[data-experience]');
+		if (!root || root.dataset.entriesReady === 'true') return;
+
+		root.dataset.entriesReady = 'true';
+		const entries = [...root.querySelectorAll<HTMLDetailsElement>('[data-experience-entry]')];
+		const mobileViewport = window.matchMedia('(max-width: 48rem)');
+		const syncEntries = () => {
+			entries.forEach((entry, index) => {
+				entry.open = !mobileViewport.matches || index === 0;
+			});
+		};
+
+		syncEntries();
+		mobileViewport.addEventListener('change', syncEntries);
+		document.addEventListener(
+			'astro:before-swap',
+			() => {
+				mobileViewport.removeEventListener('change', syncEntries);
+				delete root.dataset.entriesReady;
+			},
+			{ once: true },
+		);
+	};
+
+	initializeExperienceEntries();
+	document.addEventListener('astro:page-load', initializeExperienceEntries);
+</script>
 
 <style>
 	.experience {
+		--experience-header-space: calc(var(--page-inset) + var(--control-offset) + 4.75rem);
+		--experience-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.25rem);
+		--experience-magenta: #dc7fc3;
+
+		display: grid;
 		overflow: hidden;
+		grid-template-rows: var(--experience-header-space) minmax(0, 1fr) var(--experience-footer-space);
+	}
+
+	.experience-content {
+		display: grid;
+		width: min(80rem, 100%);
+		height: 100%;
+		min-height: 0;
+		margin: 0 auto;
+		padding: 0.75rem clamp(2rem, 5vw, 4.5rem);
+		overflow-y: auto;
+		grid-row: 2;
+		align-items: safe center;
+		scrollbar-width: none;
+	}
+
+	.experience-content::-webkit-scrollbar {
+		display: none;
+	}
+
+	.experience-content.is-scroll-contained {
+		overscroll-behavior-y: contain;
+	}
+
+	.experience-terminal {
+		display: grid;
+		width: 100%;
+		padding-block: 0.5rem;
+		gap: clamp(1.5rem, 3.2vh, 2.8rem);
+	}
+
+	.command-line {
+		display: flex;
+		margin: 0;
+		align-items: baseline;
+		gap: 0.65rem;
+		color: var(--color-text);
+		font-size: var(--terminal-font-size);
+		letter-spacing: 0.01em;
+		line-height: 1.45;
+	}
+
+	.command-line code {
+		color: var(--color-text);
+		font: inherit;
+	}
+
+	.prompt {
+		display: inline-flex;
+		flex: 0 0 auto;
+		color: var(--color-accent);
+	}
+
+	.prompt-host {
+		color: color-mix(in srgb, var(--color-text-muted) 65%, var(--color-text));
+	}
+
+	.experience-log {
+		display: grid;
+		gap: clamp(1rem, 1.8vh, 1.45rem);
+	}
+
+	.experience-entry {
+		display: grid;
+		gap: clamp(1rem, 1.8vh, 1.45rem);
+	}
+
+	.experience-entry:not(:last-child)::after {
+		display: block;
+		width: min(40rem, 52%);
+		border-top: 1px dashed var(--color-accent);
+		content: '';
+	}
+
+	.experience-entry summary {
+		display: flex;
+		width: fit-content;
+		max-width: 100%;
+		align-items: baseline;
+		gap: 0.65rem;
+		color: color-mix(in srgb, var(--color-accent) 88%, var(--color-text));
+		font-size: var(--terminal-font-size);
+		line-height: 1.5;
+		list-style: none;
+		cursor: pointer;
+	}
+
+	.experience-entry summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.experience-entry summary:focus-visible {
+		outline: 1px solid var(--color-accent-muted);
+		outline-offset: 5px;
+	}
+
+	.entry-marker,
+	.entry-state {
+		flex: 0 0 auto;
+	}
+
+	.entry-title {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 0.5rem;
+	}
+
+	.entry-period {
+		color: var(--experience-magenta);
+	}
+
+	.entry-state {
+		display: none;
+		margin-left: auto;
+	}
+
+	.state-closed,
+	.experience-entry:not([open]) .state-open {
+		display: none;
+	}
+
+	.experience-entry:not([open]) .state-closed {
+		display: inline;
+	}
+
+	.experience-entry ul {
+		display: grid;
+		margin: 0;
+		padding-left: clamp(1.35rem, 2vw, 2.6rem);
+		gap: clamp(0.35rem, 0.8vh, 0.65rem);
+		list-style: none;
+	}
+
+	.experience-entry li {
+		position: relative;
+		padding-left: 1rem;
+		color: color-mix(in srgb, var(--color-text) 91%, var(--color-text-muted));
+		font-size: var(--terminal-font-size);
+		line-height: 1.5;
+	}
+
+	.experience-entry li::before {
+		position: absolute;
+		left: 0;
+		color: var(--color-accent);
+		content: '•';
+	}
+
+	.experience-summary {
+		display: flex;
+		width: min(100%, 66rem);
+		margin: 0;
+		padding-top: clamp(1.3rem, 2.6vh, 2.2rem);
+		border-top: 1px dashed var(--color-accent);
+		gap: 0.65rem;
+		color: var(--color-text);
+		font-size: var(--terminal-font-size);
+		line-height: 1.5;
+	}
+
+	.experience-summary > span,
+	.experience-summary > strong {
+		flex: 0 0 auto;
+		font-weight: 400;
+	}
+
+	.experience-summary > span {
+		color: var(--color-accent);
+	}
+
+	.experience-summary > strong {
+		color: var(--experience-magenta);
+	}
+
+	.interactive-block {
+		display: grid;
+		min-height: 1.7rem;
+		gap: 0.45rem;
+	}
+
+	.command-form {
+		margin: 0;
+	}
+
+	.command-form .command-line {
+		width: 100%;
+	}
+
+	.terminal-input-shell {
+		position: relative;
+		display: block;
+		width: min(32rem, 100%);
+		min-width: 4rem;
+		flex: 1 1 auto;
+		overflow: hidden;
+	}
+
+	.command-form input {
+		position: relative;
+		z-index: 1;
+		display: block;
+		width: 100%;
+		min-width: 0;
+		padding: 0;
+		border: 0;
+		outline: 0;
+		background: transparent;
+		caret-color: transparent;
+		color: var(--color-text);
+		font: inherit;
+		letter-spacing: inherit;
+		line-height: inherit;
+	}
+
+	.command-form input::placeholder {
+		color: color-mix(in srgb, var(--color-text-muted) 68%, transparent);
+		opacity: 1;
+	}
+
+	.cursor-track {
+		position: absolute;
+		z-index: 2;
+		inset: 0;
+		display: flex;
+		align-items: baseline;
+		overflow: hidden;
+		font: inherit;
+		line-height: inherit;
+		pointer-events: none;
+	}
+
+	.input-mirror {
+		visibility: hidden;
+		flex: 0 0 auto;
+		white-space: pre;
+	}
+
+	.terminal-response {
+		margin: 0;
+		padding-left: 1.35rem;
+		border-left: 1px solid var(--color-accent-muted);
+		color: var(--color-text-muted);
+		font-size: var(--terminal-font-size);
+		line-height: 1.45;
+	}
+
+	.terminal-cursor {
+		color: var(--color-accent);
+		animation: terminal-cursor-blink 1.1s step-end infinite;
+	}
+
+	@keyframes terminal-cursor-blink {
+		0%,
+		48% {
+			opacity: 1;
+		}
+
+		49%,
+		100% {
+			opacity: 0.12;
+		}
+	}
+
+	@media (max-width: 48rem) {
+		.experience {
+			--experience-header-space: calc(var(--page-inset) + var(--control-offset) + 3rem);
+			--experience-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.5rem);
+		}
+
+		.experience-content {
+			padding-inline: 2rem;
+			align-items: start;
+			scrollbar-width: initial;
+		}
+
+		.experience-content::-webkit-scrollbar {
+			display: initial;
+		}
+
+		.experience-terminal {
+			gap: 1.3rem;
+		}
+
+		.command-line {
+			flex-wrap: wrap;
+			gap: 0.2rem 0.55rem;
+			font-size: var(--terminal-font-size);
+		}
+
+		.experience-log {
+			gap: 0.9rem;
+		}
+
+		.experience-entry {
+			gap: 0.9rem;
+		}
+
+		.experience-entry:not(:last-child)::after {
+			width: 72%;
+		}
+
+		.experience-entry summary {
+			width: 100%;
+			min-height: 2.75rem;
+			align-items: flex-start;
+			font-size: var(--terminal-font-size);
+		}
+
+		.entry-title {
+			min-width: 0;
+		}
+
+		.entry-state {
+			display: block;
+		}
+
+		.experience-entry ul {
+			padding-left: 0.65rem;
+			gap: 0.65rem;
+		}
+
+		.experience-entry li {
+			padding-left: 0.9rem;
+			font-size: var(--terminal-font-size);
+			line-height: 1.45;
+		}
+
+		.terminal-input-shell {
+			width: 100%;
+			flex-basis: 100%;
+		}
+
+		.command-form input {
+			font-size: var(--terminal-font-size);
+			scroll-margin-block: 35dvh;
+		}
+
+		.experience-summary {
+			flex-wrap: wrap;
+			padding-top: 1.3rem;
+			gap: 0.25rem 0.55rem;
+			font-size: var(--terminal-font-size);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.terminal-cursor {
+			animation: none;
+		}
 	}
 </style>

@@ -1,6 +1,5 @@
-const initializeAboutInteractions = () => {
-	const root = document.querySelector<HTMLElement>('[data-about]');
-	if (!root || root.dataset.interactionsReady === 'true') return;
+const initializeTerminalInteractions = (root: HTMLElement) => {
+	if (root.dataset.interactionsReady === 'true') return;
 
 	root.dataset.interactionsReady = 'true';
 
@@ -8,8 +7,8 @@ const initializeAboutInteractions = () => {
 	const input = form?.querySelector<HTMLInputElement>('[data-terminal-input]');
 	const mirror = form?.querySelector<HTMLElement>('[data-terminal-mirror]');
 	const response = root.querySelector<HTMLElement>('[data-terminal-response]');
-	const scrollContainer = root.querySelector<HTMLElement>('[data-about-content]');
-	const technologyDialog = root.querySelector<HTMLDialogElement>('[data-technologies-dialog]');
+	const scrollContainer = root.querySelector<HTMLElement>('[data-terminal-scroll]');
+	const technologyDialog = document.querySelector<HTMLDialogElement>('[data-technologies-dialog]');
 	const technologyTrigger = root.querySelector<HTMLButtonElement>('[data-technologies-open]');
 	const technologyClose = technologyDialog?.querySelector<HTMLButtonElement>(
 		'[data-technologies-close]',
@@ -127,6 +126,12 @@ const initializeAboutInteractions = () => {
 		},
 		{ once: true },
 	);
+};
+
+const initializeAboutInteractions = () => {
+	document
+		.querySelectorAll<HTMLElement>('[data-terminal-root]')
+		.forEach(initializeTerminalInteractions);
 };
 
 initializeAboutInteractions();
