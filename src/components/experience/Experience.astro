@@ -131,8 +131,8 @@ const experiences = [
 		const entries = [...root.querySelectorAll<HTMLDetailsElement>('[data-experience-entry]')];
 		const mobileViewport = window.matchMedia('(max-width: 48rem)');
 		const syncEntries = () => {
-			entries.forEach((entry, index) => {
-				entry.open = !mobileViewport.matches || index === 0;
+			entries.forEach((entry) => {
+				entry.open = !mobileViewport.matches;
 			});
 		};
 
