@@ -19,6 +19,7 @@ const initializePageScroll = () => {
 	const homeDetailsContent = homeDetails?.querySelector<HTMLElement>('[data-home-details-content]');
 	const treeScroll = homeDetails?.querySelector<HTMLElement>('[data-tree-scroll]');
 	const about = document.querySelector<HTMLElement>('[data-about]');
+	const aboutContent = about?.querySelector<HTMLElement>('[data-about-content]');
 	const aboutMarker = about?.querySelector<HTMLElement>('[data-about-marker]');
 	const aboutLine = about?.querySelector<HTMLElement>('[data-about-line]');
 	const aboutDescription = about?.querySelector<HTMLElement>('[data-about-description]');
@@ -26,8 +27,15 @@ const initializePageScroll = () => {
 	const aboutSocialCommand = about?.querySelector<HTMLElement>('[data-about-social-command]');
 	const aboutTerminalCommand = about?.querySelector<HTMLElement>('[data-about-terminal-command]');
 	const aboutStatValues = about?.querySelectorAll<HTMLElement>('[data-about-stat-value]') ?? [];
-	const aboutStatLabels = about?.querySelectorAll<HTMLElement>('[data-about-stat-label]') ?? [];
 	const aboutSocials = about?.querySelectorAll<HTMLElement>('[data-about-social]') ?? [];
+	const technologyDialog = about?.querySelector<HTMLDialogElement>('[data-technologies-dialog]');
+	const experience = document.querySelector<HTMLElement>('[data-experience]');
+	const experienceContent = experience?.querySelector<HTMLElement>('[data-experience-content]');
+	const experienceCommand = experience?.querySelector<HTMLElement>('[data-experience-command]');
+	const experienceEntries =
+		experience?.querySelectorAll<HTMLElement>('[data-experience-entry]') ?? [];
+	const experienceSummary = experience?.querySelector<HTMLElement>('[data-experience-summary]');
+	const experienceReady = experience?.querySelector<HTMLElement>('[data-experience-ready]');
 	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 	const mobileViewport = window.matchMedia('(max-width: 48rem)');
 	const abortController = new AbortController();
@@ -40,20 +48,67 @@ const initializePageScroll = () => {
 		: null;
 
 	let frameId = 0;
+	let measurementPending = false;
 	let startFontSize = 0;
 	let endFontSize = 0;
 	let endTop = 0;
 	let detailsTop = scroller.clientHeight;
 	let aboutTop = scroller.clientHeight * 2;
+	let experienceTop = scroller.clientHeight * 3;
+	let bypassSectionLocks = false;
+	let bypassTimer = 0;
 	let treeNavigation: TreeNavigation | null = null;
 
 	const clamp = (value: number) => Math.min(1, Math.max(0, value));
 	const range = (value: number, start: number, end: number) =>
 		clamp((value - start) / (end - start));
+	const getFragmentTarget = (hash: string) => {
+		if (!hash.startsWith('#') || hash.length <= 1) return null;
+
+		try {
+			return document.getElementById(decodeURIComponent(hash.slice(1)));
+		} catch {
+			return null;
+		}
+	};
 	const reveal = (element: HTMLElement | null | undefined, progress: number, offset = 18) => {
 		if (!element) return;
 		element.style.opacity = `${progress}`;
 		element.style.transform = `translateY(${offset * (1 - progress)}px)`;
+	};
+	const beginProgrammaticNavigation = () => {
+		bypassSectionLocks = true;
+		window.clearTimeout(bypassTimer);
+		bypassTimer = window.setTimeout(endProgrammaticNavigation, 1500);
+	};
+	function endProgrammaticNavigation() {
+		bypassSectionLocks = false;
+		window.clearTimeout(bypassTimer);
+		const pageTop = scroller?.scrollTop ?? 0;
+
+		const normalizeContentPosition = (
+			content: HTMLElement | null | undefined,
+			sectionTop: number,
+		) => {
+			if (!content) return;
+			if (pageTop < sectionTop - 2) content.scrollTop = 0;
+			if (pageTop > sectionTop + 2) content.scrollTop = content.scrollHeight;
+		};
+
+		normalizeContentPosition(aboutContent, aboutTop);
+		normalizeContentPosition(experienceContent, experienceTop);
+	}
+	const getScrollState = (content: HTMLElement | null | undefined) => {
+		if (!content) return { scrollable: false, atStart: true, atEnd: true };
+
+		const scrollable = content.scrollHeight > content.clientHeight + 1;
+		return {
+			scrollable,
+			atStart: !scrollable || content.scrollTop <= 1,
+			atEnd:
+				!scrollable ||
+				content.scrollTop + content.clientHeight >= content.scrollHeight - 1,
+		};
 	};
 
 	const measure = () => {
@@ -72,10 +127,17 @@ const initializePageScroll = () => {
 		aboutTop = about
 			? about.getBoundingClientRect().top + scroller.scrollTop
 			: detailsTop + scroller.clientHeight;
+		experienceTop = experience
+			? experience.getBoundingClientRect().top + scroller.scrollTop
+			: aboutTop + scroller.clientHeight;
 	};
 
 	const render = () => {
 		frameId = 0;
+		if (measurementPending) {
+			measurementPending = false;
+			measure();
+		}
 		const rawProgress = clamp(scroller.scrollTop / Math.max(detailsTop, 1));
 		const progress = reducedMotion.matches ? (rawProgress >= 0.5 ? 1 : 0) : rawProgress;
 		const inDetails = rawProgress >= 0.5;
@@ -87,7 +149,31 @@ const initializePageScroll = () => {
 				? 1
 				: 0
 			: rawAboutProgress;
-		const inAbout = scroller.scrollTop >= aboutTop - 2;
+		const rawExperienceProgress = clamp(
+			(scroller.scrollTop - aboutTop) / Math.max(experienceTop - aboutTop, 1),
+		);
+		const experienceProgress = reducedMotion.matches
+			? rawExperienceProgress >= 0.5
+				? 1
+				: 0
+			: rawExperienceProgress;
+		const inExperience = scroller.scrollTop >= experienceTop - 2;
+		const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience;
+		const aboutScrollState = getScrollState(aboutContent);
+		const experienceScrollState = getScrollState(experienceContent);
+
+		aboutContent?.classList.toggle(
+			'is-scroll-contained',
+			aboutScrollState.scrollable &&
+				!aboutScrollState.atStart &&
+				!aboutScrollState.atEnd,
+		);
+		experienceContent?.classList.toggle(
+			'is-scroll-contained',
+			experienceScrollState.scrollable &&
+				!experienceScrollState.atStart &&
+				!experienceScrollState.atEnd,
+		);
 
 		if (sharedName && nameAction) {
 			const startTop = scroller.clientHeight / 2;
@@ -107,14 +193,21 @@ const initializePageScroll = () => {
 		}
 
 		if (menu) {
-			const menuProgress = Math.min(1, progress * 1.5);
-			menu.style.opacity = `${1 - menuProgress}`;
-			menu.inert = menuProgress > 0.5;
-			menu.setAttribute('aria-hidden', String(menuProgress > 0.5));
+			const detailsEntry = Math.min(1, progress * 1.5);
+			const laterSectionEntry = range(aboutProgress, 0.12, 0.42);
+			const menuVisibility = Math.max(1 - detailsEntry, laterSectionEntry);
+			const menuIsHidden = menuVisibility <= 0.5;
 
-			if (menuProgress > 0 && menuTrigger?.getAttribute('aria-expanded') === 'true') {
-				menuTrigger.click();
+			menu.style.opacity = `${menuVisibility}`;
+
+			if (menuIsHidden && menuTrigger?.getAttribute('aria-expanded') === 'true') {
+				menu.dispatchEvent(new Event('menu:close'));
 			}
+			if (menuIsHidden && document.activeElement instanceof Node && menu.contains(document.activeElement)) {
+				nameAction?.focus({ preventScroll: true });
+			}
+			menu.inert = menuIsHidden;
+			menu.setAttribute('aria-hidden', String(menuIsHidden));
 		}
 
 		if (scrollCue && initialLabel && discoverLabel) {
@@ -130,10 +223,26 @@ const initializePageScroll = () => {
 			initialLabel.style.transform = `translateY(${-3 * labelTransition}px)`;
 			discoverLabel.style.opacity = `${labelTransition * aboutLabelOpacity}`;
 			discoverLabel.style.transform = `translateY(${3 * (1 - labelTransition)}px)`;
-			scrollCue.classList.toggle('is-terminal', inAbout);
-			if (inAbout) {
-				scrollCue.removeAttribute('href');
-				scrollCue.setAttribute('aria-label', 'End of current portfolio content');
+			scrollCue.classList.toggle(
+				'is-terminal',
+				inExperience && experienceScrollState.atEnd,
+			);
+			if (inExperience) {
+				if (experienceScrollState.atEnd) {
+					scrollCue.removeAttribute('href');
+					scrollCue.setAttribute('aria-label', 'End of current portfolio content');
+				} else {
+					scrollCue.href = '#experience';
+					scrollCue.setAttribute('aria-label', 'Continue through the Experience content');
+				}
+			} else if (inAbout) {
+				if (aboutScrollState.atEnd) {
+					scrollCue.href = '#experience';
+					scrollCue.setAttribute('aria-label', 'Go to the Experience section');
+				} else {
+					scrollCue.href = '#about';
+					scrollCue.setAttribute('aria-label', 'Continue through the About content');
+				}
 			} else {
 				scrollCue.href = inDetails ? '#about' : '#home-details';
 				scrollCue.setAttribute(
@@ -157,34 +266,56 @@ const initializePageScroll = () => {
 		if (homeDetails) homeDetails.inert = aboutProgress >= 0.2;
 
 		const markerProgress = range(aboutProgress, 0.2, 0.4);
-		if (about) {
-			const aboutIsInteractive = aboutProgress >= 0.65;
-			about.inert = !aboutIsInteractive;
-		}
 		reveal(aboutMarker, markerProgress, 8);
 		if (aboutLine) aboutLine.style.transform = `scaleY(${markerProgress})`;
 		reveal(aboutDescription, range(aboutProgress, 0.35, 0.6), 22);
 
 		reveal(aboutStatCommand, range(aboutProgress, 0.48, 0.64), 10);
 		const statValueProgress = range(aboutProgress, 0.55, 0.74);
-		const statLabelProgress = range(aboutProgress, 0.62, 0.8);
 		for (const value of aboutStatValues) reveal(value, statValueProgress, 14);
-		for (const label of aboutStatLabels) reveal(label, statLabelProgress, 8);
 		reveal(aboutSocialCommand, range(aboutProgress, 0.62, 0.76), 10);
 		aboutSocials.forEach((social, index) => {
 			const start = 0.65 + index * 0.055;
 			reveal(social, range(aboutProgress, start, start + 0.18), 14);
 		});
 		reveal(aboutTerminalCommand, range(aboutProgress, 0.82, 0.98), 10);
+
+		if (about) about.inert = aboutProgress < 0.65 || experienceProgress >= 0.2;
+		if (experience) experience.inert = experienceProgress < 0.65;
+		reveal(experienceCommand, range(experienceProgress, 0.18, 0.38), 8);
+		experienceEntries.forEach((entry, index) => {
+			const start = 0.32 + index * 0.18;
+			reveal(entry, range(experienceProgress, start, start + 0.28), 20);
+		});
+		reveal(experienceSummary, range(experienceProgress, 0.68, 0.86), 12);
+		reveal(experienceReady, range(experienceProgress, 0.82, 0.98), 8);
 	};
 
 	const requestRender = () => {
 		if (frameId) return;
 		frameId = window.requestAnimationFrame(render);
 	};
+	const enforceSectionBoundary = (content: HTMLElement | null | undefined, sectionTop: number) => {
+		if (!content || bypassSectionLocks) return;
+
+		const { atStart, atEnd } = getScrollState(content);
+		const pageTop = scroller.scrollTop;
+		const movingBelowSection = pageTop > sectionTop + 2;
+		const movingAboveSection = pageTop < sectionTop - 2;
+
+		if ((movingBelowSection && !atEnd) || (movingAboveSection && !atStart)) {
+			content.scrollTop += pageTop - sectionTop;
+			scroller.scrollTop = sectionTop;
+		}
+	};
+	const handlePageScroll = () => {
+		enforceSectionBoundary(aboutContent, aboutTop);
+		enforceSectionBoundary(experienceContent, experienceTop);
+		requestRender();
+	};
 
 	const handleResize = () => {
-		measure();
+		measurementPending = true;
 		requestRender();
 	};
 
@@ -196,14 +327,68 @@ const initializePageScroll = () => {
 			signal: abortController.signal,
 		});
 	}
+	const contentResizeObserver =
+		typeof ResizeObserver !== 'undefined' ? new ResizeObserver(requestRender) : null;
+	if (aboutContent) {
+		contentResizeObserver?.observe(aboutContent);
+		if (aboutContent.firstElementChild) {
+			contentResizeObserver?.observe(aboutContent.firstElementChild);
+		}
+	}
+	if (experienceContent) {
+		contentResizeObserver?.observe(experienceContent);
+		if (experienceContent.firstElementChild) {
+			contentResizeObserver?.observe(experienceContent.firstElementChild);
+		}
+	}
 
-	scroller.addEventListener('scroll', requestRender, {
+	scroller.addEventListener('scroll', handlePageScroll, {
+		passive: true,
+		signal: abortController.signal,
+	});
+	scroller.addEventListener('scrollend', endProgrammaticNavigation, {
+		signal: abortController.signal,
+	});
+	aboutContent?.addEventListener('scroll', requestRender, {
+		passive: true,
+		signal: abortController.signal,
+	});
+	experienceContent?.addEventListener('scroll', requestRender, {
 		passive: true,
 		signal: abortController.signal,
 	});
 	window.addEventListener('resize', handleResize, { signal: abortController.signal });
 	reducedMotion.addEventListener('change', requestRender, { signal: abortController.signal });
 	mobileViewport.addEventListener('change', requestRender, { signal: abortController.signal });
+	document.addEventListener(
+		'keydown',
+		(event) => {
+			if (technologyDialog?.open) return;
+			const inExperience = scroller.scrollTop >= experienceTop - 2;
+			const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience;
+			const activeContent = inExperience ? experienceContent : inAbout ? aboutContent : null;
+			if (!activeContent || event.target !== activeContent) return;
+			const { atStart, atEnd } = getScrollState(activeContent);
+			let amount = 0;
+			if (event.key === 'ArrowDown') amount = 48;
+			if (event.key === 'ArrowUp') amount = -48;
+			if (event.key === 'PageDown' || (event.key === ' ' && !event.shiftKey)) {
+				amount = activeContent.clientHeight * 0.8;
+			}
+			if (event.key === 'PageUp' || (event.key === ' ' && event.shiftKey)) {
+				amount = activeContent.clientHeight * -0.8;
+			}
+
+			if ((amount > 0 && !atEnd) || (amount < 0 && !atStart)) {
+				event.preventDefault();
+				activeContent.scrollBy({
+					top: amount,
+					behavior: reducedMotion.matches ? 'auto' : 'smooth',
+				});
+			}
+		},
+		{ signal: abortController.signal },
+	);
 
 	nameAction?.addEventListener(
 		'click',
@@ -214,10 +399,29 @@ const initializePageScroll = () => {
 				return;
 			}
 
+			beginProgrammaticNavigation();
 			document.querySelector('#home')?.scrollIntoView({
 				behavior: reducedMotion.matches ? 'auto' : 'smooth',
 				block: 'start',
 			});
+		},
+		{ signal: abortController.signal },
+	);
+	document.addEventListener(
+		'click',
+		(event) => {
+			if (!(event.target instanceof Element)) return;
+			const link = event.target.closest<HTMLAnchorElement>('a[href^="#"]');
+			if (!link || link === scrollCue) return;
+			if (!getFragmentTarget(link.hash)) return;
+			beginProgrammaticNavigation();
+		},
+		{ capture: true, signal: abortController.signal },
+	);
+	window.addEventListener(
+		'hashchange',
+		() => {
+			if (getFragmentTarget(location.hash)) beginProgrammaticNavigation();
 		},
 		{ signal: abortController.signal },
 	);
@@ -226,10 +430,32 @@ const initializePageScroll = () => {
 		'click',
 		(event) => {
 			const inDetails = scroller.scrollTop / Math.max(detailsTop, 1) >= 0.5;
-			const inAbout = scroller.scrollTop >= aboutTop - 2;
-			if (inAbout) return;
+			const inExperience = scroller.scrollTop >= experienceTop - 2;
+			const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience;
+			const experienceScrollState = getScrollState(experienceContent);
+			if (inExperience) {
+				if (experienceScrollState.atEnd) return;
+				event.preventDefault();
+				experienceContent?.scrollBy({
+					top: experienceContent.clientHeight * 0.8,
+					behavior: reducedMotion.matches ? 'auto' : 'smooth',
+				});
+				return;
+			}
 
-			const target = document.querySelector(inDetails ? '#about' : '#home-details');
+			const aboutScrollState = getScrollState(aboutContent);
+			if (inAbout && !aboutScrollState.atEnd) {
+				event.preventDefault();
+				aboutContent?.scrollBy({
+					top: aboutContent.clientHeight * 0.8,
+					behavior: reducedMotion.matches ? 'auto' : 'smooth',
+				});
+				return;
+			}
+
+			const target = document.querySelector(
+				inAbout ? '#experience' : inDetails ? '#about' : '#home-details',
+			);
 			if (!target) return;
 
 			event.preventDefault();
@@ -246,14 +472,19 @@ const initializePageScroll = () => {
 		() => {
 			abortController.abort();
 			treeNavigation?.disconnect();
+			contentResizeObserver?.disconnect();
 			clipboard?.dispose();
 			window.cancelAnimationFrame(frameId);
+			window.clearTimeout(bypassTimer);
 			delete scroller.dataset.interactionsReady;
 		},
 		{ once: true },
 	);
 
+	if (getFragmentTarget(location.hash)) beginProgrammaticNavigation();
 	measure();
+	enforceSectionBoundary(aboutContent, aboutTop);
+	enforceSectionBoundary(experienceContent, experienceTop);
 	render();
 };
 

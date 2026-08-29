@@ -18,20 +18,7 @@ export const createClipboardFeedback = ({
 			await navigator.clipboard.writeText(value);
 			copied = true;
 		} catch {
-			const textarea = document.createElement('textarea');
-			textarea.value = value;
-			textarea.style.position = 'fixed';
-			textarea.style.opacity = '0';
-			document.body.append(textarea);
-			textarea.select();
-
-			try {
-				copied = document.execCommand('copy');
-			} catch {
-				copied = false;
-			} finally {
-				textarea.remove();
-			}
+			copied = false;
 		}
 
 		trigger.dataset.copied = String(copied);
