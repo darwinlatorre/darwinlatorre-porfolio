@@ -36,6 +36,19 @@ const initializePageScroll = () => {
 		experience?.querySelectorAll<HTMLElement>('[data-experience-entry]') ?? [];
 	const experienceSummary = experience?.querySelector<HTMLElement>('[data-experience-summary]');
 	const experienceReady = experience?.querySelector<HTMLElement>('[data-experience-ready]');
+	const certificates = document.querySelector<HTMLElement>('[data-certificates]');
+	const certificatesContent = certificates?.querySelector<HTMLElement>(
+		'[data-certificates-content]',
+	);
+	const certificatesCommand = certificates?.querySelector<HTMLElement>(
+		'[data-certificates-command]',
+	);
+	const certificatesTitle = certificates?.querySelector<HTMLElement>('[data-certificates-title]');
+	const certificateRules =
+		certificates?.querySelectorAll<HTMLElement>('[data-certificates-rule]') ?? [];
+	const certificateItems =
+		certificates?.querySelectorAll<HTMLElement>('[data-certificate-item]') ?? [];
+	const certificatesReady = certificates?.querySelector<HTMLElement>('[data-certificates-ready]');
 	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 	const mobileViewport = window.matchMedia('(max-width: 48rem)');
 	const abortController = new AbortController();
@@ -55,6 +68,7 @@ const initializePageScroll = () => {
 	let detailsTop = scroller.clientHeight;
 	let aboutTop = scroller.clientHeight * 2;
 	let experienceTop = scroller.clientHeight * 3;
+	let certificatesTop = scroller.clientHeight * 4;
 	let bypassSectionLocks = false;
 	let bypassTimer = 0;
 	let treeNavigation: TreeNavigation | null = null;
@@ -97,6 +111,7 @@ const initializePageScroll = () => {
 
 		normalizeContentPosition(aboutContent, aboutTop);
 		normalizeContentPosition(experienceContent, experienceTop);
+		normalizeContentPosition(certificatesContent, certificatesTop);
 	}
 	const getScrollState = (content: HTMLElement | null | undefined) => {
 		if (!content) return { scrollable: false, atStart: true, atEnd: true };
@@ -130,6 +145,9 @@ const initializePageScroll = () => {
 		experienceTop = experience
 			? experience.getBoundingClientRect().top + scroller.scrollTop
 			: aboutTop + scroller.clientHeight;
+		certificatesTop = certificates
+			? certificates.getBoundingClientRect().top + scroller.scrollTop
+			: experienceTop + scroller.clientHeight;
 	};
 
 	const render = () => {
@@ -157,10 +175,20 @@ const initializePageScroll = () => {
 				? 1
 				: 0
 			: rawExperienceProgress;
-		const inExperience = scroller.scrollTop >= experienceTop - 2;
-		const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience;
+		const rawCertificatesProgress = clamp(
+			(scroller.scrollTop - experienceTop) / Math.max(certificatesTop - experienceTop, 1),
+		);
+		const certificatesProgress = reducedMotion.matches
+			? rawCertificatesProgress >= 0.5
+				? 1
+				: 0
+			: rawCertificatesProgress;
+		const inCertificates = scroller.scrollTop >= certificatesTop - 2;
+		const inExperience = scroller.scrollTop >= experienceTop - 2 && !inCertificates;
+		const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience && !inCertificates;
 		const aboutScrollState = getScrollState(aboutContent);
 		const experienceScrollState = getScrollState(experienceContent);
+		const certificatesScrollState = getScrollState(certificatesContent);
 
 		aboutContent?.classList.toggle(
 			'is-scroll-contained',
@@ -173,6 +201,12 @@ const initializePageScroll = () => {
 			experienceScrollState.scrollable &&
 				!experienceScrollState.atStart &&
 				!experienceScrollState.atEnd,
+		);
+		certificatesContent?.classList.toggle(
+			'is-scroll-contained',
+			certificatesScrollState.scrollable &&
+				!certificatesScrollState.atStart &&
+				!certificatesScrollState.atEnd,
 		);
 
 		if (sharedName && nameAction) {
@@ -225,12 +259,20 @@ const initializePageScroll = () => {
 			discoverLabel.style.transform = `translateY(${3 * (1 - labelTransition)}px)`;
 			scrollCue.classList.toggle(
 				'is-terminal',
-				inExperience && experienceScrollState.atEnd,
+				inCertificates && certificatesScrollState.atEnd,
 			);
-			if (inExperience) {
-				if (experienceScrollState.atEnd) {
+			if (inCertificates) {
+				if (certificatesScrollState.atEnd) {
 					scrollCue.removeAttribute('href');
 					scrollCue.setAttribute('aria-label', 'End of current portfolio content');
+				} else {
+					scrollCue.href = '#certificates';
+					scrollCue.setAttribute('aria-label', 'Continue through the Certificates content');
+				}
+			} else if (inExperience) {
+				if (experienceScrollState.atEnd) {
+					scrollCue.href = '#certificates';
+					scrollCue.setAttribute('aria-label', 'Go to the Certificates section');
 				} else {
 					scrollCue.href = '#experience';
 					scrollCue.setAttribute('aria-label', 'Continue through the Experience content');
@@ -281,7 +323,9 @@ const initializePageScroll = () => {
 		reveal(aboutTerminalCommand, range(aboutProgress, 0.82, 0.98), 10);
 
 		if (about) about.inert = aboutProgress < 0.65 || experienceProgress >= 0.2;
-		if (experience) experience.inert = experienceProgress < 0.65;
+		if (experience) {
+			experience.inert = experienceProgress < 0.65 || certificatesProgress >= 0.2;
+		}
 		reveal(experienceCommand, range(experienceProgress, 0.18, 0.38), 8);
 		experienceEntries.forEach((entry, index) => {
 			const start = 0.32 + index * 0.18;
@@ -289,6 +333,18 @@ const initializePageScroll = () => {
 		});
 		reveal(experienceSummary, range(experienceProgress, 0.68, 0.86), 12);
 		reveal(experienceReady, range(experienceProgress, 0.82, 0.98), 8);
+
+		if (certificates) certificates.inert = certificatesProgress < 0.65;
+		reveal(certificatesCommand, range(certificatesProgress, 0.18, 0.36), 8);
+		reveal(certificatesTitle, range(certificatesProgress, 0.3, 0.48), 12);
+		certificateRules.forEach((rule, index) => {
+			reveal(rule, range(certificatesProgress, 0.38 + index * 0.32, 0.56 + index * 0.3), 0);
+		});
+		certificateItems.forEach((item, index) => {
+			const start = 0.44 + index * 0.065;
+			reveal(item, range(certificatesProgress, start, start + 0.2), 16);
+		});
+		reveal(certificatesReady, range(certificatesProgress, 0.82, 0.98), 8);
 	};
 
 	const requestRender = () => {
@@ -311,6 +367,7 @@ const initializePageScroll = () => {
 	const handlePageScroll = () => {
 		enforceSectionBoundary(aboutContent, aboutTop);
 		enforceSectionBoundary(experienceContent, experienceTop);
+		enforceSectionBoundary(certificatesContent, certificatesTop);
 		requestRender();
 	};
 
@@ -341,6 +398,12 @@ const initializePageScroll = () => {
 			contentResizeObserver?.observe(experienceContent.firstElementChild);
 		}
 	}
+	if (certificatesContent) {
+		contentResizeObserver?.observe(certificatesContent);
+		if (certificatesContent.firstElementChild) {
+			contentResizeObserver?.observe(certificatesContent.firstElementChild);
+		}
+	}
 
 	scroller.addEventListener('scroll', handlePageScroll, {
 		passive: true,
@@ -357,6 +420,10 @@ const initializePageScroll = () => {
 		passive: true,
 		signal: abortController.signal,
 	});
+	certificatesContent?.addEventListener('scroll', requestRender, {
+		passive: true,
+		signal: abortController.signal,
+	});
 	window.addEventListener('resize', handleResize, { signal: abortController.signal });
 	reducedMotion.addEventListener('change', requestRender, { signal: abortController.signal });
 	mobileViewport.addEventListener('change', requestRender, { signal: abortController.signal });
@@ -364,9 +431,16 @@ const initializePageScroll = () => {
 		'keydown',
 		(event) => {
 			if (technologyDialog?.open) return;
-			const inExperience = scroller.scrollTop >= experienceTop - 2;
-			const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience;
-			const activeContent = inExperience ? experienceContent : inAbout ? aboutContent : null;
+			const inCertificates = scroller.scrollTop >= certificatesTop - 2;
+			const inExperience = scroller.scrollTop >= experienceTop - 2 && !inCertificates;
+			const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience && !inCertificates;
+			const activeContent = inCertificates
+				? certificatesContent
+				: inExperience
+					? experienceContent
+					: inAbout
+						? aboutContent
+						: null;
 			if (!activeContent || event.target !== activeContent) return;
 			const { atStart, atEnd } = getScrollState(activeContent);
 			let amount = 0;
@@ -430,11 +504,29 @@ const initializePageScroll = () => {
 		'click',
 		(event) => {
 			const inDetails = scroller.scrollTop / Math.max(detailsTop, 1) >= 0.5;
-			const inExperience = scroller.scrollTop >= experienceTop - 2;
-			const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience;
+			const inCertificates = scroller.scrollTop >= certificatesTop - 2;
+			const inExperience = scroller.scrollTop >= experienceTop - 2 && !inCertificates;
+			const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience && !inCertificates;
+			const certificatesScrollState = getScrollState(certificatesContent);
+			if (inCertificates) {
+				if (certificatesScrollState.atEnd) return;
+				event.preventDefault();
+				certificatesContent?.scrollBy({
+					top: certificatesContent.clientHeight * 0.8,
+					behavior: reducedMotion.matches ? 'auto' : 'smooth',
+				});
+				return;
+			}
 			const experienceScrollState = getScrollState(experienceContent);
 			if (inExperience) {
-				if (experienceScrollState.atEnd) return;
+				if (experienceScrollState.atEnd) {
+					event.preventDefault();
+					document.querySelector('#certificates')?.scrollIntoView({
+						behavior: reducedMotion.matches ? 'auto' : 'smooth',
+						block: 'start',
+					});
+					return;
+				}
 				event.preventDefault();
 				experienceContent?.scrollBy({
 					top: experienceContent.clientHeight * 0.8,
@@ -485,6 +577,7 @@ const initializePageScroll = () => {
 	measure();
 	enforceSectionBoundary(aboutContent, aboutTop);
 	enforceSectionBoundary(experienceContent, experienceTop);
+	enforceSectionBoundary(certificatesContent, certificatesTop);
 	render();
 };
 

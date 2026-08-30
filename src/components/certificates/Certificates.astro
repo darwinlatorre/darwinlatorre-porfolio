@@ -1,0 +1,493 @@
+---
+const certificates = [
+	{
+		id: 'certificate-aws',
+		title: 'AWS Certified Cloud Practitioner',
+		provider: 'coming soon',
+		credentialId: null,
+		href: null,
+	},
+	{
+		id: 'certificate-terraform',
+		title: 'HashiCorp Terraform Associate',
+		provider: 'coming soon',
+		credentialId: null,
+		href: null,
+	},
+	{
+		id: 'certificate-1',
+		title: 'Angular: De cero a experto',
+		provider: 'Udemy',
+		credentialId: 'UC-b2abc958-5ab7-4ca7-b515-f8031e4e84f4',
+		href: 'https://www.udemy.com/certificate/UC-b2abc958-5ab7-4ca7-b515-f8031e4e84f4/',
+	},
+	{
+		id: 'certificate-2',
+		title: 'Unlocking Information Security',
+		provider: 'edX / IsraelX',
+		credentialId: 'e85f29f5874a422cab5a54a637eee525',
+		href: 'https://courses.edx.org/certificates/e85f29f5874a422cab5a54a637eee525',
+	},
+	{
+		id: 'certificate-3',
+		title: 'Curso de Patrones de Diseño Creacionales en JavaScript',
+		provider: 'Platzi',
+		credentialId: '9fc2b486-f07e-4c59-aeae-76f9539304c9',
+		href:
+			'https://platzi.com/p/darwinlatorre_/curso/6933-patrones-diseno-creacionales/diploma/detalle/',
+	},
+	{
+		id: 'certificate-4',
+		title: 'Curso de API REST con Javascript: Fundamentos',
+		provider: 'Platzi',
+		credentialId: '214227fb-a61c-4f9e-841c-a2687721b5cb',
+		href: 'https://platzi.com/p/darwinlatorre_/curso/2985-api/diploma/detalle/',
+	},
+];
+---
+
+<section
+	id="certificates"
+	class="screen certificates"
+	aria-label="Certificates"
+	data-certificates
+	data-terminal-root
+>
+	<div
+		class="certificates-content"
+		tabindex="0"
+		aria-label="Certificates terminal content"
+		data-certificates-content
+		data-terminal-scroll
+	>
+		<div class="certificates-terminal">
+			<p class="command-line" data-certificates-command>
+				<span class="prompt">
+					<span>user@</span><span class="prompt-host">darwinlatorre:</span><span>~$</span>
+				</span>
+				<code>cat certificates.log</code>
+			</p>
+
+			<div class="certificates-output">
+				<p class="output-title" data-certificates-title>
+					<span aria-hidden="true">&gt;</span> [CERTIFICATIONS]
+				</p>
+				<span class="output-rule" aria-hidden="true" data-certificates-rule></span>
+
+				<ul class="certificate-list" aria-label="Certificate links">
+					{
+						certificates.map((certificate) => (
+							<li id={certificate.id} data-certificate-item>
+								{certificate.href ? (
+									<a
+										href={certificate.href}
+										target="_blank"
+										rel="noreferrer"
+										aria-label={`View ${certificate.title} certificate from ${certificate.provider}`}
+									>
+										<span class="certificate-marker" aria-hidden="true">•</span>
+										<span class="certificate-copy">
+											<span class="certificate-name">{certificate.title}</span>
+											<span class="certificate-meta">
+												<span class="credential-id">Credential ID {certificate.credentialId}</span>
+												<span class="certificate-provider">[{certificate.provider}]</span>
+											</span>
+										</span>
+									</a>
+								) : (
+									<span class="certificate-pending">
+										<span class="certificate-marker" aria-hidden="true">•</span>
+										<span class="certificate-copy">
+											<span class="certificate-name">{certificate.title}</span>
+											<span class="certificate-provider">[{certificate.provider}]</span>
+										</span>
+									</span>
+								)}
+							</li>
+						))
+					}
+				</ul>
+
+				<span class="output-rule output-rule-end" aria-hidden="true" data-certificates-rule></span>
+			</div>
+
+			<section class="interactive-block" data-certificates-ready>
+				<form class="command-form" data-terminal-form>
+					<label class="command-line" for="certificates-command">
+						<span class="prompt">
+							<span>user@</span><span class="prompt-host">darwinlatorre:</span><span>~$</span>
+						</span>
+						<span class="terminal-input-shell">
+							<input
+								id="certificates-command"
+								name="command"
+								type="text"
+								placeholder="show"
+								autocomplete="off"
+								spellcheck="false"
+								enterkeyhint="send"
+								aria-describedby="certificates-terminal-response"
+								data-terminal-input
+							/>
+							<span class="cursor-track" aria-hidden="true">
+								<span class="input-mirror" data-terminal-mirror></span>
+								<span class="terminal-cursor">_</span>
+							</span>
+						</span>
+					</label>
+				</form>
+				<p
+					id="certificates-terminal-response"
+					class="terminal-response"
+					role="status"
+					aria-live="polite"
+					data-terminal-response
+					hidden
+				></p>
+			</section>
+		</div>
+	</div>
+</section>
+
+<style>
+	.certificates {
+		--certificates-header-space: calc(var(--page-inset) + var(--control-offset) + 4.75rem);
+		--certificates-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.75rem);
+		--certificates-magenta: #dc7fc3;
+
+		display: grid;
+		overflow: hidden;
+		grid-template-rows:
+			var(--certificates-header-space) minmax(0, 1fr)
+			var(--certificates-footer-space);
+	}
+
+	.certificates-content {
+		display: grid;
+		width: min(80rem, 100%);
+		height: 100%;
+		min-height: 0;
+		margin: 0 auto;
+		padding: 0.75rem clamp(2rem, 5vw, 4.5rem);
+		overflow-y: auto;
+		grid-row: 2;
+		align-items: safe center;
+		scrollbar-width: none;
+	}
+
+	.certificates-content::-webkit-scrollbar {
+		display: none;
+	}
+
+	.certificates-content.is-scroll-contained {
+		overscroll-behavior-y: contain;
+	}
+
+	.certificates-terminal {
+		display: grid;
+		width: 100%;
+		padding-block: 0.5rem;
+		gap: clamp(2rem, 5vh, 4rem);
+	}
+
+	.command-line {
+		display: flex;
+		margin: 0;
+		align-items: baseline;
+		gap: 0.65rem;
+		color: var(--color-text);
+		font-size: var(--terminal-font-size);
+		letter-spacing: 0.01em;
+		line-height: 1.45;
+	}
+
+	.command-line code {
+		color: var(--color-text);
+		font: inherit;
+	}
+
+	.prompt {
+		display: inline-flex;
+		flex: 0 0 auto;
+		color: var(--color-accent);
+	}
+
+	.prompt-host {
+		color: color-mix(in srgb, var(--color-text-muted) 65%, var(--color-text));
+	}
+
+	.certificates-output {
+		display: grid;
+		width: 100%;
+		min-width: 0;
+		gap: clamp(1.4rem, 3vh, 2.2rem);
+	}
+
+	.output-title {
+		margin: 0;
+		color: color-mix(in srgb, var(--color-accent) 88%, var(--color-text));
+		font-size: var(--terminal-font-size);
+		line-height: 1.5;
+	}
+
+	.output-title span {
+		margin-right: 0.65rem;
+	}
+
+	.output-rule {
+		display: block;
+		width: auto;
+		min-width: 0;
+		justify-self: stretch;
+		border-top: 1px dashed var(--color-accent);
+	}
+
+	.certificate-list {
+		display: grid;
+		width: 100%;
+		min-width: 0;
+		margin: 0;
+		padding: 0 clamp(1.35rem, 2vw, 2.6rem);
+		grid-auto-flow: column;
+		grid-template-rows: repeat(3, auto);
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: clamp(1.4rem, 3.4vh, 2.35rem) clamp(2rem, 4vw, 3.5rem);
+		list-style: none;
+	}
+
+	.certificate-list a,
+	.certificate-pending {
+		display: grid;
+		min-height: 3.25rem;
+		grid-template-columns: auto minmax(0, 1fr);
+		grid-template-rows: auto auto;
+		align-items: baseline;
+		align-content: start;
+		gap: 0.2rem 0.75rem;
+		color: var(--color-text);
+		font-size: var(--terminal-font-size);
+		line-height: 1.45;
+		text-decoration: none;
+		transition: color var(--duration-fast) ease, transform var(--duration-fast) ease;
+	}
+
+	.certificate-pending .certificate-provider {
+		color: var(--certificates-magenta);
+		font-size: 0.68em;
+		letter-spacing: 0.015em;
+	}
+
+	.certificate-marker {
+		color: var(--color-accent);
+	}
+
+	.certificate-copy {
+		display: grid;
+		min-width: 0;
+		gap: 0.2rem;
+	}
+
+	.certificate-meta {
+		display: flex;
+		min-width: 0;
+		flex-wrap: wrap;
+		gap: 0.15rem 0.7rem;
+		color: var(--color-text-muted);
+		font-size: 0.68em;
+		letter-spacing: 0.015em;
+		line-height: 1.35;
+	}
+
+	.credential-id {
+		overflow-wrap: anywhere;
+	}
+
+	.certificate-provider {
+		color: var(--color-text-muted);
+		white-space: nowrap;
+		transition: color var(--duration-fast) ease;
+	}
+
+	.certificate-list a:hover,
+	.certificate-list a:focus-visible {
+		color: color-mix(in srgb, var(--color-accent) 72%, var(--color-text));
+		transform: translateX(3px);
+	}
+
+	.certificate-list a:hover .certificate-provider,
+	.certificate-list a:focus-visible .certificate-provider {
+		color: var(--color-accent);
+	}
+
+	.certificate-list a:focus-visible {
+		outline: 1px solid var(--color-accent-muted);
+		outline-offset: 5px;
+	}
+
+	.output-rule-end {
+		margin-top: 0.2rem;
+	}
+
+	.interactive-block {
+		display: grid;
+		min-height: 1.7rem;
+		gap: 0.45rem;
+	}
+
+	.command-form {
+		margin: 0;
+	}
+
+	.command-form .command-line {
+		width: 100%;
+	}
+
+	.terminal-input-shell {
+		position: relative;
+		display: block;
+		width: min(32rem, 100%);
+		min-width: 4rem;
+		flex: 1 1 auto;
+		overflow: hidden;
+	}
+
+	.command-form input {
+		position: relative;
+		z-index: 1;
+		display: block;
+		width: 100%;
+		min-width: 0;
+		padding: 0;
+		border: 0;
+		outline: 0;
+		background: transparent;
+		caret-color: transparent;
+		color: var(--color-text);
+		font: inherit;
+		letter-spacing: inherit;
+		line-height: inherit;
+	}
+
+	.command-form input::placeholder {
+		color: color-mix(in srgb, var(--color-text-muted) 68%, transparent);
+		opacity: 1;
+	}
+
+	.cursor-track {
+		position: absolute;
+		z-index: 2;
+		inset: 0;
+		display: flex;
+		align-items: baseline;
+		overflow: hidden;
+		font: inherit;
+		line-height: inherit;
+		pointer-events: none;
+	}
+
+	.input-mirror {
+		visibility: hidden;
+		flex: 0 0 auto;
+		white-space: pre;
+	}
+
+	.terminal-response {
+		margin: 0;
+		padding-left: 1.35rem;
+		border-left: 1px solid var(--color-accent-muted);
+		color: var(--color-text-muted);
+		font-size: var(--terminal-font-size);
+		line-height: 1.45;
+	}
+
+	.terminal-cursor {
+		color: var(--color-accent);
+		animation: terminal-cursor-blink 1.1s step-end infinite;
+	}
+
+	@keyframes terminal-cursor-blink {
+		0%,
+		48% {
+			opacity: 1;
+		}
+
+		49%,
+		100% {
+			opacity: 0.12;
+		}
+	}
+
+	@media (max-width: 48rem) {
+		.certificates {
+			--certificates-header-space: calc(var(--page-inset) + var(--control-offset) + 3rem);
+			--certificates-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.5rem);
+		}
+
+		.certificates-content {
+			padding-inline: 2rem;
+			align-items: start;
+			scrollbar-width: initial;
+		}
+
+		.certificates-content::-webkit-scrollbar {
+			display: initial;
+		}
+
+		.certificates-terminal {
+			gap: 1.6rem;
+		}
+
+		.command-line {
+			flex-wrap: wrap;
+			gap: 0.2rem 0.55rem;
+		}
+
+		.certificates-output {
+			gap: 1.2rem;
+		}
+
+		.certificate-list {
+			padding-left: 0.65rem;
+			padding-right: 0;
+			grid-auto-flow: row;
+			grid-template-rows: none;
+			grid-template-columns: 1fr;
+			gap: 1.15rem;
+		}
+
+		.certificate-list a,
+		.certificate-pending {
+			grid-template-columns: auto minmax(0, 1fr);
+			gap: 0.65rem;
+		}
+
+		.terminal-input-shell {
+			width: 100%;
+			flex-basis: 100%;
+			font-size: 1rem;
+		}
+
+		.command-form input {
+			font-size: inherit;
+			scroll-margin-block: 35dvh;
+		}
+	}
+
+	@media (hover: none), (pointer: coarse) {
+		.certificate-list a:hover {
+			color: var(--color-text);
+			transform: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.certificate-list a,
+		.certificate-provider {
+			transition: none;
+		}
+
+		.terminal-cursor {
+			animation: none;
+		}
+	}
+</style>
