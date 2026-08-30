@@ -4,35 +4,30 @@ const certificates = [
 		id: 'certificate-aws',
 		title: 'AWS Certified Cloud Practitioner',
 		provider: 'coming soon',
-		credentialId: null,
 		href: null,
 	},
 	{
 		id: 'certificate-terraform',
 		title: 'HashiCorp Terraform Associate',
 		provider: 'coming soon',
-		credentialId: null,
 		href: null,
 	},
 	{
 		id: 'certificate-1',
 		title: 'Angular: De cero a experto',
 		provider: 'Udemy',
-		credentialId: 'UC-b2abc958-5ab7-4ca7-b515-f8031e4e84f4',
 		href: 'https://www.udemy.com/certificate/UC-b2abc958-5ab7-4ca7-b515-f8031e4e84f4/',
 	},
 	{
 		id: 'certificate-2',
 		title: 'Unlocking Information Security',
 		provider: 'edX / IsraelX',
-		credentialId: 'e85f29f5874a422cab5a54a637eee525',
 		href: 'https://courses.edx.org/certificates/e85f29f5874a422cab5a54a637eee525',
 	},
 	{
 		id: 'certificate-3',
 		title: 'Curso de Patrones de Diseño Creacionales en JavaScript',
 		provider: 'Platzi',
-		credentialId: '9fc2b486-f07e-4c59-aeae-76f9539304c9',
 		href:
 			'https://platzi.com/p/darwinlatorre_/curso/6933-patrones-diseno-creacionales/diploma/detalle/',
 	},
@@ -40,7 +35,6 @@ const certificates = [
 		id: 'certificate-4',
 		title: 'Curso de API REST con Javascript: Fundamentos',
 		provider: 'Platzi',
-		credentialId: '214227fb-a61c-4f9e-841c-a2687721b5cb',
 		href: 'https://platzi.com/p/darwinlatorre_/curso/2985-api/diploma/detalle/',
 	},
 ];
@@ -89,7 +83,6 @@ const certificates = [
 										<span class="certificate-copy">
 											<span class="certificate-name">{certificate.title}</span>
 											<span class="certificate-meta">
-												<span class="credential-id">Credential ID {certificate.credentialId}</span>
 												<span class="certificate-provider">[{certificate.provider}]</span>
 											</span>
 										</span>
@@ -296,10 +289,6 @@ const certificates = [
 		font-size: 0.68em;
 		letter-spacing: 0.015em;
 		line-height: 1.35;
-	}
-
-	.credential-id {
-		overflow-wrap: anywhere;
 	}
 
 	.certificate-provider {
