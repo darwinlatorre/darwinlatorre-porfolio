@@ -1,8 +1,11 @@
 ---
 import { ChevronDown, FileText, Folder, House } from '@lucide/astro';
 
-const projectItems = ['Proyecto 1', 'Proyecto 2', 'Proyecto 3'];
-const certificateItems = ['Angular: De cero a experto', 'Unlocking Information Security'];
+const certificateItems = [
+	{ label: 'AWS Certified Cloud Practitioner', href: '#certificate-aws' },
+	{ label: 'Angular: De cero a experto', href: '#certificate-1' },
+	{ label: 'Unlocking Information Security', href: '#certificate-2' },
+];
 ---
 
 <nav class="file-tree" aria-label="Portfolio sections">
@@ -17,32 +20,15 @@ const certificateItems = ['Angular: De cero a experto', 'Unlocking Information S
 			<span>About</span>
 		</a>
 
-		<div class="tree-group" data-tree-group>
-			<button
-				class="tree-row tree-toggle"
-				type="button"
-				aria-expanded="true"
-				aria-controls="projects-tree"
-				data-tree-toggle
-			>
-				<Folder class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
-				<span>Projects</span>
-				<ChevronDown class="chevron" size={13} stroke-width={1.5} aria-hidden="true" />
-			</button>
-
-			<div id="projects-tree" class="tree-children">
-				<div class="tree-children-inner">
-					{
-						projectItems.map((item, index) => (
-							<a href={`#project-${index + 1}`}>
-								<FileText class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
-								<span>{item}</span>
-							</a>
-						))
-					}
-				</div>
-			</div>
-		</div>
+		<a
+			class="tree-row"
+			href="https://github.com/darwinlatorre"
+			target="_blank"
+			rel="noreferrer"
+		>
+			<Folder class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
+			<span>Projects</span>
+		</a>
 
 		<a class="tree-row" href="#experience">
 			<Folder class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
@@ -75,10 +61,10 @@ const certificateItems = ['Angular: De cero a experto', 'Unlocking Information S
 			<div id="certificates-tree" class="tree-children">
 				<div class="tree-children-inner">
 					{
-						certificateItems.map((item, index) => (
-							<a href={`#certificate-${index + 1}`}>
+						certificateItems.map((item) => (
+							<a href={item.href}>
 								<FileText class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
-								<span>{item}</span>
+								<span>{item.label}</span>
 							</a>
 						))
 					}
@@ -96,7 +82,7 @@ const certificateItems = ['Angular: De cero a experto', 'Unlocking Information S
 		width: min(21rem, 100%);
 		isolation: isolate;
 		align-content: center;
-		font-size: 0.86rem;
+		font-size: 0.92rem;
 	}
 
 	.root-children {
@@ -205,7 +191,7 @@ const certificateItems = ['Angular: De cero a experto', 'Unlocking Information S
 		align-items: center;
 		gap: 0.5rem;
 		color: var(--color-text-muted);
-		font-size: 0.76rem;
+		font-size: 0.82rem;
 		text-decoration: none;
 		transition: color var(--duration-fast) ease, transform var(--duration-fast) ease;
 	}
@@ -245,7 +231,7 @@ const certificateItems = ['Angular: De cero a experto', 'Unlocking Information S
 	@media (max-width: 48rem) {
 		.file-tree {
 			width: min(22rem, 100%);
-			font-size: 0.78rem;
+			font-size: 0.84rem;
 			transform: translateZ(0);
 			will-change: transform;
 		}
@@ -257,7 +243,7 @@ const certificateItems = ['Angular: De cero a experto', 'Unlocking Information S
 
 		.tree-children a {
 			min-height: 1.75rem;
-			font-size: 0.7rem;
+			font-size: 0.76rem;
 			-webkit-tap-highlight-color: transparent;
 		}
 

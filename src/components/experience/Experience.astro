@@ -1,8 +1,22 @@
 ---
 const experiences = [
 	{
+		role: 'Java Developer',
+		company: 'Freelance',
+		location: 'Remote',
+		start: '2026-06',
+		end: '2026-07',
+		startLabel: 'Jun 2026',
+		endLabel: 'Jul 2026',
+		highlights: [
+			'Performed adjustments and maintenance on the backend of an e-commerce platform developed with Java and Spring Boot.',
+			'Implemented adjustments, bug fixes, and deployments on GCP using Cloud Run, Cloud SQL, Artifact Registry, and Secret Manager.',
+		],
+	},
+	{
 		role: 'DevOps Engineer',
 		company: 'Asmet Salud EPS',
+		location: null,
 		start: '2025-01',
 		end: '2026-03',
 		startLabel: 'Jan 2025',
@@ -17,6 +31,7 @@ const experiences = [
 	{
 		role: 'IT Infrastructure Professional',
 		company: 'Asmet Salud EPS',
+		location: null,
 		start: '2024-06',
 		end: '2024-12',
 		startLabel: 'Jun 2024',
@@ -64,7 +79,9 @@ const experiences = [
 											aria-hidden="true"> - </span
 										><time datetime={experience.end}>{experience.endLabel}</time>]</span
 									>
-									<span>{experience.role} @ {experience.company}</span>
+									<span>
+										{experience.role} @ {experience.company}{experience.location && ` / ${experience.location}`}
+									</span>
 								</span>
 								<span class="entry-state" aria-hidden="true">
 									<span class="state-open">[-]</span><span class="state-closed">[+]</span>
@@ -81,7 +98,9 @@ const experiences = [
 
 			<p class="experience-summary" data-experience-summary>
 				<span aria-hidden="true">&gt;</span>
-				<strong>[SUMMARY]:</strong> {'{ AWS, Kubernetes, Terraform, Jenkins, Spring Boot, GitLab CI/CD }'}
+				<strong>[SUMMARY]:</strong> {
+					'{ AWS, GCP, Kubernetes, Terraform, Jenkins, Spring Boot, GitLab CI/CD }'
+				}
 			</p>
 
 			<section class="interactive-block" data-experience-ready>

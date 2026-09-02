@@ -36,6 +36,10 @@ const initializePageScroll = () => {
 		experience?.querySelectorAll<HTMLElement>('[data-experience-entry]') ?? [];
 	const experienceSummary = experience?.querySelector<HTMLElement>('[data-experience-summary]');
 	const experienceReady = experience?.querySelector<HTMLElement>('[data-experience-ready]');
+	const services = document.querySelector<HTMLElement>('[data-services]');
+	const servicesContent = services?.querySelector<HTMLElement>('[data-services-content]');
+	const servicesTitle = services?.querySelector<HTMLElement>('[data-services-title]');
+	const serviceCards = services?.querySelectorAll<HTMLElement>('[data-service-card]') ?? [];
 	const certificates = document.querySelector<HTMLElement>('[data-certificates]');
 	const certificatesContent = certificates?.querySelector<HTMLElement>(
 		'[data-certificates-content]',
@@ -68,7 +72,8 @@ const initializePageScroll = () => {
 	let detailsTop = scroller.clientHeight;
 	let aboutTop = scroller.clientHeight * 2;
 	let experienceTop = scroller.clientHeight * 3;
-	let certificatesTop = scroller.clientHeight * 4;
+	let servicesTop = scroller.clientHeight * 4;
+	let certificatesTop = scroller.clientHeight * 5;
 	let bypassSectionLocks = false;
 	let bypassTimer = 0;
 	let treeNavigation: TreeNavigation | null = null;
@@ -111,6 +116,7 @@ const initializePageScroll = () => {
 
 		normalizeContentPosition(aboutContent, aboutTop);
 		normalizeContentPosition(experienceContent, experienceTop);
+		normalizeContentPosition(servicesContent, servicesTop);
 		normalizeContentPosition(certificatesContent, certificatesTop);
 	}
 	const getScrollState = (content: HTMLElement | null | undefined) => {
@@ -145,9 +151,12 @@ const initializePageScroll = () => {
 		experienceTop = experience
 			? experience.getBoundingClientRect().top + scroller.scrollTop
 			: aboutTop + scroller.clientHeight;
+		servicesTop = services
+			? services.getBoundingClientRect().top + scroller.scrollTop
+			: experienceTop + scroller.clientHeight;
 		certificatesTop = certificates
 			? certificates.getBoundingClientRect().top + scroller.scrollTop
-			: experienceTop + scroller.clientHeight;
+			: servicesTop + scroller.clientHeight;
 	};
 
 	const render = () => {
@@ -175,8 +184,16 @@ const initializePageScroll = () => {
 				? 1
 				: 0
 			: rawExperienceProgress;
+		const rawServicesProgress = clamp(
+			(scroller.scrollTop - experienceTop) / Math.max(servicesTop - experienceTop, 1),
+		);
+		const servicesProgress = reducedMotion.matches
+			? rawServicesProgress >= 0.5
+				? 1
+				: 0
+			: rawServicesProgress;
 		const rawCertificatesProgress = clamp(
-			(scroller.scrollTop - experienceTop) / Math.max(certificatesTop - experienceTop, 1),
+			(scroller.scrollTop - servicesTop) / Math.max(certificatesTop - servicesTop, 1),
 		);
 		const certificatesProgress = reducedMotion.matches
 			? rawCertificatesProgress >= 0.5
@@ -184,10 +201,14 @@ const initializePageScroll = () => {
 				: 0
 			: rawCertificatesProgress;
 		const inCertificates = scroller.scrollTop >= certificatesTop - 2;
-		const inExperience = scroller.scrollTop >= experienceTop - 2 && !inCertificates;
-		const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience && !inCertificates;
+		const inServices = scroller.scrollTop >= servicesTop - 2 && !inCertificates;
+		const inExperience =
+			scroller.scrollTop >= experienceTop - 2 && !inServices && !inCertificates;
+		const inAbout =
+			scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inCertificates;
 		const aboutScrollState = getScrollState(aboutContent);
 		const experienceScrollState = getScrollState(experienceContent);
+		const servicesScrollState = getScrollState(servicesContent);
 		const certificatesScrollState = getScrollState(certificatesContent);
 
 		aboutContent?.classList.toggle(
@@ -201,6 +222,12 @@ const initializePageScroll = () => {
 			experienceScrollState.scrollable &&
 				!experienceScrollState.atStart &&
 				!experienceScrollState.atEnd,
+		);
+		servicesContent?.classList.toggle(
+			'is-scroll-contained',
+			servicesScrollState.scrollable &&
+				!servicesScrollState.atStart &&
+				!servicesScrollState.atEnd,
 		);
 		certificatesContent?.classList.toggle(
 			'is-scroll-contained',
@@ -269,10 +296,18 @@ const initializePageScroll = () => {
 					scrollCue.href = '#certificates';
 					scrollCue.setAttribute('aria-label', 'Continue through the Certificates content');
 				}
-			} else if (inExperience) {
-				if (experienceScrollState.atEnd) {
+			} else if (inServices) {
+				if (servicesScrollState.atEnd) {
 					scrollCue.href = '#certificates';
 					scrollCue.setAttribute('aria-label', 'Go to the Certificates section');
+				} else {
+					scrollCue.href = '#services';
+					scrollCue.setAttribute('aria-label', 'Continue through the Services content');
+				}
+			} else if (inExperience) {
+				if (experienceScrollState.atEnd) {
+					scrollCue.href = '#services';
+					scrollCue.setAttribute('aria-label', 'Go to the Services section');
 				} else {
 					scrollCue.href = '#experience';
 					scrollCue.setAttribute('aria-label', 'Continue through the Experience content');
@@ -324,15 +359,22 @@ const initializePageScroll = () => {
 
 		if (about) about.inert = aboutProgress < 0.65 || experienceProgress >= 0.2;
 		if (experience) {
-			experience.inert = experienceProgress < 0.65 || certificatesProgress >= 0.2;
+			experience.inert = experienceProgress < 0.65 || servicesProgress >= 0.2;
 		}
 		reveal(experienceCommand, range(experienceProgress, 0.18, 0.38), 8);
 		experienceEntries.forEach((entry, index) => {
-			const start = 0.32 + index * 0.18;
-			reveal(entry, range(experienceProgress, start, start + 0.28), 20);
+			const start = 0.3 + index * 0.13;
+			reveal(entry, range(experienceProgress, start, start + 0.24), 20);
 		});
 		reveal(experienceSummary, range(experienceProgress, 0.68, 0.86), 12);
 		reveal(experienceReady, range(experienceProgress, 0.82, 0.98), 8);
+
+		if (services) services.inert = servicesProgress < 0.65 || certificatesProgress >= 0.2;
+		reveal(servicesTitle, range(servicesProgress, 0.16, 0.34), 10);
+		serviceCards.forEach((card, index) => {
+			const start = 0.28 + index * 0.1;
+			reveal(card, range(servicesProgress, start, start + 0.3), 22);
+		});
 
 		if (certificates) certificates.inert = certificatesProgress < 0.65;
 		reveal(certificatesCommand, range(certificatesProgress, 0.18, 0.36), 8);
@@ -367,6 +409,7 @@ const initializePageScroll = () => {
 	const handlePageScroll = () => {
 		enforceSectionBoundary(aboutContent, aboutTop);
 		enforceSectionBoundary(experienceContent, experienceTop);
+		enforceSectionBoundary(servicesContent, servicesTop);
 		enforceSectionBoundary(certificatesContent, certificatesTop);
 		requestRender();
 	};
@@ -398,6 +441,12 @@ const initializePageScroll = () => {
 			contentResizeObserver?.observe(experienceContent.firstElementChild);
 		}
 	}
+	if (servicesContent) {
+		contentResizeObserver?.observe(servicesContent);
+		if (servicesContent.firstElementChild) {
+			contentResizeObserver?.observe(servicesContent.firstElementChild);
+		}
+	}
 	if (certificatesContent) {
 		contentResizeObserver?.observe(certificatesContent);
 		if (certificatesContent.firstElementChild) {
@@ -420,6 +469,10 @@ const initializePageScroll = () => {
 		passive: true,
 		signal: abortController.signal,
 	});
+	servicesContent?.addEventListener('scroll', requestRender, {
+		passive: true,
+		signal: abortController.signal,
+	});
 	certificatesContent?.addEventListener('scroll', requestRender, {
 		passive: true,
 		signal: abortController.signal,
@@ -432,15 +485,20 @@ const initializePageScroll = () => {
 		(event) => {
 			if (technologyDialog?.open) return;
 			const inCertificates = scroller.scrollTop >= certificatesTop - 2;
-			const inExperience = scroller.scrollTop >= experienceTop - 2 && !inCertificates;
-			const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience && !inCertificates;
+			const inServices = scroller.scrollTop >= servicesTop - 2 && !inCertificates;
+			const inExperience =
+				scroller.scrollTop >= experienceTop - 2 && !inServices && !inCertificates;
+			const inAbout =
+				scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inCertificates;
 			const activeContent = inCertificates
 				? certificatesContent
-				: inExperience
-					? experienceContent
-					: inAbout
-						? aboutContent
-						: null;
+				: inServices
+					? servicesContent
+					: inExperience
+						? experienceContent
+						: inAbout
+							? aboutContent
+							: null;
 			if (!activeContent || event.target !== activeContent) return;
 			const { atStart, atEnd } = getScrollState(activeContent);
 			let amount = 0;
@@ -505,8 +563,11 @@ const initializePageScroll = () => {
 		(event) => {
 			const inDetails = scroller.scrollTop / Math.max(detailsTop, 1) >= 0.5;
 			const inCertificates = scroller.scrollTop >= certificatesTop - 2;
-			const inExperience = scroller.scrollTop >= experienceTop - 2 && !inCertificates;
-			const inAbout = scroller.scrollTop >= aboutTop - 2 && !inExperience && !inCertificates;
+			const inServices = scroller.scrollTop >= servicesTop - 2 && !inCertificates;
+			const inExperience =
+				scroller.scrollTop >= experienceTop - 2 && !inServices && !inCertificates;
+			const inAbout =
+				scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inCertificates;
 			const certificatesScrollState = getScrollState(certificatesContent);
 			if (inCertificates) {
 				if (certificatesScrollState.atEnd) return;
@@ -517,11 +578,28 @@ const initializePageScroll = () => {
 				});
 				return;
 			}
+			const servicesScrollState = getScrollState(servicesContent);
+			if (inServices) {
+				if (servicesScrollState.atEnd) {
+					event.preventDefault();
+					document.querySelector('#certificates')?.scrollIntoView({
+						behavior: reducedMotion.matches ? 'auto' : 'smooth',
+						block: 'start',
+					});
+					return;
+				}
+				event.preventDefault();
+				servicesContent?.scrollBy({
+					top: servicesContent.clientHeight * 0.8,
+					behavior: reducedMotion.matches ? 'auto' : 'smooth',
+				});
+				return;
+			}
 			const experienceScrollState = getScrollState(experienceContent);
 			if (inExperience) {
 				if (experienceScrollState.atEnd) {
 					event.preventDefault();
-					document.querySelector('#certificates')?.scrollIntoView({
+					document.querySelector('#services')?.scrollIntoView({
 						behavior: reducedMotion.matches ? 'auto' : 'smooth',
 						block: 'start',
 					});
@@ -577,6 +655,7 @@ const initializePageScroll = () => {
 	measure();
 	enforceSectionBoundary(aboutContent, aboutTop);
 	enforceSectionBoundary(experienceContent, experienceTop);
+	enforceSectionBoundary(servicesContent, servicesTop);
 	enforceSectionBoundary(certificatesContent, certificatesTop);
 	render();
 };
