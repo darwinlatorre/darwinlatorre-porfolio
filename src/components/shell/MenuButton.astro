@@ -2,11 +2,11 @@
 import { Folder, House } from '@lucide/astro';
 
 const menuItems = [
-	{ label: 'About', href: '#about' },
-	{ label: 'Projects', href: '#projects' },
-	{ label: 'Experience', href: '#experience' },
-	{ label: 'Services', href: '#services' },
-	{ label: 'Certificates', href: '#certificates' },
+	{ label: 'About', href: '#about', external: false },
+	{ label: 'Projects', href: 'https://github.com/darwinlatorre', external: true },
+	{ label: 'Experience', href: '#experience', external: false },
+	{ label: 'Services', href: '#services', external: false },
+	{ label: 'Certificates', href: '#certificates', external: false },
 ];
 
 interface Props {
@@ -39,7 +39,7 @@ const { id = 'site-menu' } = Astro.props;
 		inert
 	>
 		<div class="menu-tree">
-			<a class="menu-root" href="#home" aria-label="Go to Home">
+			<a class="menu-root" href="#home-details" aria-label="Go to Home details">
 				<House class="menu-icon" size={22} stroke-width={1.5} aria-hidden="true" />
 				<span>Home</span>
 			</a>
@@ -49,7 +49,11 @@ const { id = 'site-menu' } = Astro.props;
 					{
 						menuItems.map((item) => (
 							<li>
-								<a href={item.href}>
+								<a
+									href={item.href}
+									target={item.external ? '_blank' : undefined}
+									rel={item.external ? 'noreferrer' : undefined}
+								>
 									<Folder class="menu-icon" size={22} stroke-width={1.5} aria-hidden="true" />
 									<span>{item.label}</span>
 								</a>

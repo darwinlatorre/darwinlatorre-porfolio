@@ -1,0 +1,317 @@
+---
+const services = [
+	{
+		title: 'Backend Development',
+		description:
+			'Desarrollo, mantenimiento y evolución de aplicaciones backend con Java y Spring Boot.',
+	},
+	{
+		title: 'Cloud & DevOps',
+		description: 'Implementación y mejora de infraestructura y procesos de despliegue en la nube.',
+	},
+	{
+		title: 'CRM & Email Configuration',
+		description:
+			'Configuration and customization of Zoho CRM, customer management, automations, email setup, notifications, and integrations with external services.',
+	},
+	{
+		title: 'Monitoring & Observability',
+		description: 'Configuración de monitoreo para aplicaciones e infraestructura.',
+	},
+];
+---
+
+<section id="services" class="screen services" aria-label="Services" data-services>
+	<div
+		class="services-content"
+		tabindex="0"
+		aria-label="Services content"
+		data-services-content
+	>
+		<div class="services-layout">
+			<header class="services-heading" data-services-title>
+				<span class="heading-rule" aria-hidden="true"></span>
+				<h2><span aria-hidden="true">[&gt;</span> Services<span aria-hidden="true">]</span></h2>
+				<span class="heading-rule" aria-hidden="true"></span>
+			</header>
+
+			<div class="services-grid">
+				{
+					services.map((service) => (
+						<a
+							class="service-card"
+							href={`mailto:contact@darwinlatorre.com?subject=${encodeURIComponent(`Service inquiry: ${service.title}`)}`}
+							aria-label={`Contact Darwin about ${service.title}`}
+							data-service-card
+						>
+							<span class="card-mark" aria-hidden="true">×</span>
+							<span class="card-terminal" aria-hidden="true">
+								<span>&gt;</span><span class="card-cursor">_</span>
+							</span>
+							<h2><span aria-hidden="true">&gt;</span> {service.title}</h2>
+							<p>{service.description}</p>
+						</a>
+					))
+				}
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	.services {
+		--services-header-space: calc(var(--page-inset) + var(--control-offset) + 4.75rem);
+		--services-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.75rem);
+		--service-border: color-mix(in srgb, var(--color-accent) 78%, var(--color-text));
+		--service-border-active: color-mix(in srgb, var(--color-accent) 66%, var(--color-text));
+
+		display: grid;
+		overflow: hidden;
+		grid-template-rows: var(--services-header-space) minmax(0, 1fr) var(--services-footer-space);
+	}
+
+	.services-content {
+		display: grid;
+		width: min(70rem, 100%);
+		height: 100%;
+		min-height: 0;
+		margin: 0 auto;
+		padding: 0.75rem clamp(2rem, 5vw, 4.5rem);
+		overflow-y: auto;
+		grid-row: 2;
+		align-items: safe center;
+		scrollbar-width: none;
+	}
+
+	.services-content::-webkit-scrollbar {
+		display: none;
+	}
+
+	.services-content.is-scroll-contained {
+		overscroll-behavior-y: contain;
+	}
+
+	.services-layout {
+		display: grid;
+		width: 100%;
+		padding-block: 0.5rem;
+		gap: clamp(1rem, 2.2vh, 1.6rem);
+		justify-items: center;
+	}
+
+	.services-heading {
+		display: grid;
+		width: 100%;
+		grid-template-columns: minmax(2rem, 1fr) auto minmax(2rem, 1fr);
+		align-items: center;
+		gap: clamp(0.65rem, 1.8vw, 1.25rem);
+	}
+
+	.services-heading h2 {
+		margin: 0;
+		color: var(--color-text);
+		font-size: clamp(1rem, 1.45vw, 1.25rem);
+		font-weight: 400;
+		letter-spacing: 0.01em;
+		line-height: 1.4;
+		text-align: center;
+		white-space: nowrap;
+	}
+
+	.services-heading h2 span {
+		color: var(--color-accent);
+	}
+
+	.services-heading h2 span:first-child {
+		margin-right: 0.45rem;
+	}
+
+	.heading-rule {
+		display: block;
+		width: 100%;
+		border-top: 1px dashed var(--color-accent-muted);
+	}
+
+	.services-grid {
+		display: grid;
+		width: 100%;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: clamp(0.8rem, 1.5vw, 1.15rem);
+	}
+
+	.service-card {
+		position: relative;
+		display: grid;
+		min-height: clamp(12.5rem, 27vh, 15.5rem);
+		margin: 0;
+		padding: clamp(2.7rem, 5vh, 4rem) clamp(1.8rem, 3.2vw, 3rem) clamp(1.8rem, 4vh, 3rem);
+		align-content: center;
+		gap: clamp(1.25rem, 2.8vh, 2.1rem);
+		border: 1px solid var(--service-border);
+		background: color-mix(in srgb, var(--color-surface-raised) 28%, transparent);
+		color: var(--color-text);
+		text-decoration: none;
+		cursor: pointer;
+		transition: border-color 220ms ease, background-color 220ms ease,
+			box-shadow 280ms ease, transform 280ms var(--ease-out);
+	}
+
+	.card-mark {
+		position: absolute;
+		top: 0.8rem;
+		left: 0.9rem;
+		color: var(--color-accent);
+		font-size: 1.5rem;
+		line-height: 1;
+		transition: color 220ms ease, transform 280ms var(--ease-out);
+	}
+
+	.card-terminal {
+		position: absolute;
+		bottom: 0.85rem;
+		right: 0.95rem;
+		display: inline-flex;
+		color: var(--color-accent);
+		font-size: 0.9rem;
+		line-height: 1;
+	}
+
+	.card-cursor {
+		animation: card-cursor-blink 1.1s step-end infinite;
+	}
+
+	.service-card h2 {
+		margin: 0;
+		color: var(--color-text);
+		font-size: clamp(1rem, 1.6vw, 1.35rem);
+		font-weight: 400;
+		letter-spacing: -0.02em;
+		line-height: 1.35;
+		text-align: center;
+		transition: color 220ms ease, transform 280ms var(--ease-out);
+	}
+
+	.service-card h2 span {
+		color: var(--color-accent);
+	}
+
+	.service-card p {
+		margin: 0;
+		color: color-mix(in srgb, var(--color-text) 92%, var(--color-text-muted));
+		font-size: var(--terminal-font-size);
+		line-height: 1.55;
+	}
+
+	.service-card:hover,
+	.service-card:focus-visible {
+		border-color: var(--service-border-active);
+		background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface));
+		box-shadow: 0 0 1.5rem var(--color-accent-glow-faint);
+		transform: translateY(-4px);
+	}
+
+	.service-card:hover .card-mark,
+	.service-card:focus-visible .card-mark {
+		color: color-mix(in srgb, var(--color-accent) 78%, var(--color-text));
+		transform: rotate(90deg);
+	}
+
+	.service-card:hover h2,
+	.service-card:focus-visible h2 {
+		color: color-mix(in srgb, var(--color-accent) 35%, var(--color-text));
+		transform: translateX(3px);
+	}
+
+	.service-card:active {
+		transform: translateY(-1px) scale(0.99);
+	}
+
+	.service-card:focus-visible {
+		outline: 1px solid var(--color-accent);
+		outline-offset: 4px;
+	}
+
+	@keyframes card-cursor-blink {
+		0%,
+		48% {
+			opacity: 1;
+		}
+
+		49%,
+		100% {
+			opacity: 0.12;
+		}
+	}
+
+	@media (max-width: 48rem) {
+		.services {
+			--services-header-space: calc(var(--page-inset) + var(--control-offset) + 3rem);
+			--services-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.5rem);
+		}
+
+		.services-content {
+			padding-inline: 2rem;
+			align-items: start;
+			scrollbar-width: initial;
+		}
+
+		.services-content::-webkit-scrollbar {
+			display: initial;
+		}
+
+		.services-layout {
+			gap: 1rem;
+		}
+
+		.services-heading h2 {
+			font-size: var(--terminal-font-size);
+		}
+
+		.services-grid {
+			grid-template-columns: 1fr;
+			gap: 0.8rem;
+		}
+
+		.service-card {
+			min-height: 10.5rem;
+			padding: 2.5rem 1.35rem 1.5rem;
+			gap: 1rem;
+		}
+
+		.service-card h2 {
+			font-size: clamp(0.95rem, 4.5vw, 1.15rem);
+		}
+
+	}
+
+	@media (hover: none), (pointer: coarse) {
+		.service-card:hover {
+			border-color: var(--service-border);
+			background: color-mix(in srgb, var(--color-surface-raised) 28%, transparent);
+			box-shadow: none;
+			transform: none;
+		}
+
+		.service-card:hover .card-mark {
+			color: var(--color-accent);
+			transform: none;
+		}
+
+		.service-card:hover h2 {
+			color: var(--color-text);
+			transform: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.service-card,
+		.card-mark,
+		.service-card h2 {
+			transition: none;
+		}
+
+		.card-cursor {
+			animation: none;
+		}
+	}
+</style>
