@@ -328,8 +328,8 @@ const initializePageScroll = () => {
 		}
 		reveal(experienceCommand, range(experienceProgress, 0.18, 0.38), 8);
 		experienceEntries.forEach((entry, index) => {
-			const start = 0.32 + index * 0.18;
-			reveal(entry, range(experienceProgress, start, start + 0.28), 20);
+			const start = 0.3 + index * 0.13;
+			reveal(entry, range(experienceProgress, start, start + 0.24), 20);
 		});
 		reveal(experienceSummary, range(experienceProgress, 0.68, 0.86), 12);
 		reveal(experienceReady, range(experienceProgress, 0.82, 0.98), 8);
