@@ -4,6 +4,7 @@ import Certificates from '../components/certificates/Certificates.astro';
 import Experience from '../components/experience/Experience.astro';
 import Home from '../components/home/Home.astro';
 import Services from '../components/services/Services.astro';
+import TechnologyDialog from '../components/about/TechnologyDialog.astro';
 import MenuButton from '../components/shell/MenuButton.astro';
 import SharedName from '../components/shell/SharedName.astro';
 import SharedScrollCue from '../components/shell/SharedScrollCue.astro';
@@ -14,6 +15,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 	<MenuButton id="site-menu" />
 	<SharedName />
 	<SharedScrollCue />
+	<TechnologyDialog />
 
 	<main class="page-scroll" data-page-scroll>
 		<Home />
@@ -25,7 +27,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 
 <script>
-	import '../scripts/about-interactions';
+	import '../scripts/terminal-interactions';
 	import '../scripts/page-scroll';
 </script>
 

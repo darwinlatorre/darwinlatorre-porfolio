@@ -28,7 +28,7 @@ const initializePageScroll = () => {
 	const aboutTerminalCommand = about?.querySelector<HTMLElement>('[data-about-terminal-command]');
 	const aboutStatValues = about?.querySelectorAll<HTMLElement>('[data-about-stat-value]') ?? [];
 	const aboutSocials = about?.querySelectorAll<HTMLElement>('[data-about-social]') ?? [];
-	const technologyDialog = about?.querySelector<HTMLDialogElement>('[data-technologies-dialog]');
+	const technologyDialog = document.querySelector<HTMLDialogElement>('[data-technologies-dialog]');
 	const experience = document.querySelector<HTMLElement>('[data-experience]');
 	const experienceContent = experience?.querySelector<HTMLElement>('[data-experience-content]');
 	const experienceCommand = experience?.querySelector<HTMLElement>('[data-experience-command]');
@@ -40,6 +40,7 @@ const initializePageScroll = () => {
 	const servicesContent = services?.querySelector<HTMLElement>('[data-services-content]');
 	const servicesTitle = services?.querySelector<HTMLElement>('[data-services-title]');
 	const serviceCards = services?.querySelectorAll<HTMLElement>('[data-service-card]') ?? [];
+	const servicesTerminal = services?.querySelector<HTMLElement>('[data-services-terminal]');
 	const certificates = document.querySelector<HTMLElement>('[data-certificates]');
 	const certificatesContent = certificates?.querySelector<HTMLElement>(
 		'[data-certificates-content]',
@@ -375,6 +376,7 @@ const initializePageScroll = () => {
 			const start = 0.28 + index * 0.1;
 			reveal(card, range(servicesProgress, start, start + 0.3), 22);
 		});
+		reveal(servicesTerminal, range(servicesProgress, 0.76, 0.96), 8);
 
 		if (certificates) certificates.inert = certificatesProgress < 0.65;
 		reveal(certificatesCommand, range(certificatesProgress, 0.18, 0.36), 8);
@@ -533,6 +535,22 @@ const initializePageScroll = () => {
 
 			beginProgrammaticNavigation();
 			document.querySelector('#home')?.scrollIntoView({
+				behavior: reducedMotion.matches ? 'auto' : 'smooth',
+				block: 'start',
+			});
+		},
+		{ signal: abortController.signal },
+	);
+	document.addEventListener(
+		'portfolio:navigate',
+		(event) => {
+			const targetId = event.detail.target === 'home' ? 'home-details' : event.detail.target;
+			const target = document.getElementById(targetId);
+			if (!target) return;
+
+			beginProgrammaticNavigation();
+			window.history.pushState(null, '', `#${targetId}`);
+			target.scrollIntoView({
 				behavior: reducedMotion.matches ? 'auto' : 'smooth',
 				block: 'start',
 			});
