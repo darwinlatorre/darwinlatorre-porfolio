@@ -11,6 +11,7 @@
 	--color-border: #4d3659;
 	--color-accent-glow: rgb(169 110 211 / 18%);
 	--color-accent-glow-faint: rgb(169 110 211 / 16%);
+	--service-border: color-mix(in srgb, var(--color-accent) 78%, var(--color-text));
 
 	--font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 		'Liberation Mono', monospace;
