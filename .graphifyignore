@@ -1,0 +1,5 @@
+# Keep the graph focused on application code, not agent skills or lockfiles.
+.agents/
+.opencode/
+package-lock.json
+requirements-graphify.txt
