@@ -15,7 +15,7 @@
 
 ## App wiring and change hazards
 - This is a static Astro site with a single page, `src/pages/index.astro`, and no server adapter. `BaseLayout.astro` imports global styles/design tokens and includes Vercel Analytics and Speed Insights.
-- The page orders Home → About → Experience → Services → Certificates. Home contains two screens (`Hero` and `HomeDetails`), so section count is not screen count.
+- The page orders Home → About → Experience → Services → Certificates, then the site footer (`components/shell/SiteFooter.astro`). The footer uses `scroll-snap-align: end` so the mandatory snap can rest past Certificates; `page-scroll.ts` points the scroll cue at `#site-footer` and hides it at the page end. Home contains two screens (`Hero` and `HomeDetails`), so section count is not screen count.
 - The body has `overflow: hidden`; scrolling happens in `[data-page-scroll]`, not the window. `src/scripts/page-scroll.ts` coordinates scroll-driven reveals, nested content scrolling, fragment navigation, keyboard navigation, and shared shell elements. Review it when changing section order, heights, or scroll behavior.
 - Component `data-*` attributes and section/fragment IDs are behavior hooks consumed by the scripts. Update markup and selectors together; navigation links are maintained separately in `components/home/FileTree.astro` and `components/shell/MenuButton.astro`. Certificate fragment links in FileTree must match IDs in `components/certificates/Certificates.astro`.
 - Despite its name, `src/scripts/about-interactions.ts` initializes every `[data-terminal-root]` (About, Experience, Certificates), sharing command responses and technology-dialog behavior. Changes there affect all three terminals.

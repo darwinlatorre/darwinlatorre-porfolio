@@ -25,7 +25,12 @@ import { ChevronDown } from '@lucide/astro';
 		letter-spacing: 0.08em;
 		text-decoration: none;
 		cursor: pointer;
-		transition: color var(--duration-fast) ease;
+		transition: color var(--duration-fast) ease, opacity var(--duration-fast) ease;
+	}
+
+	.scroll-cue.is-hidden {
+		opacity: 0;
+		pointer-events: none;
 	}
 
 	.scroll-cue:hover,

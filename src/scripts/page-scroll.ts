@@ -284,14 +284,19 @@ const initializePageScroll = () => {
 			initialLabel.style.transform = `translateY(${-3 * labelTransition}px)`;
 			discoverLabel.style.opacity = `${labelTransition * aboutLabelOpacity}`;
 			discoverLabel.style.transform = `translateY(${3 * (1 - labelTransition)}px)`;
-			scrollCue.classList.toggle(
-				'is-terminal',
-				inCertificates && certificatesScrollState.atEnd,
-			);
+			const atPageEnd =
+				scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2;
+
+			scrollCue.classList.toggle('is-terminal', atPageEnd);
+			scrollCue.classList.toggle('is-hidden', atPageEnd);
+			scrollCue.inert = atPageEnd;
 			if (inCertificates) {
-				if (certificatesScrollState.atEnd) {
+				if (atPageEnd) {
 					scrollCue.removeAttribute('href');
 					scrollCue.setAttribute('aria-label', 'End of current portfolio content');
+				} else if (certificatesScrollState.atEnd) {
+					scrollCue.href = '#site-footer';
+					scrollCue.setAttribute('aria-label', 'Go to the site footer');
 				} else {
 					scrollCue.href = '#certificates';
 					scrollCue.setAttribute('aria-label', 'Continue through the Certificates content');
@@ -570,7 +575,14 @@ const initializePageScroll = () => {
 				scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inCertificates;
 			const certificatesScrollState = getScrollState(certificatesContent);
 			if (inCertificates) {
-				if (certificatesScrollState.atEnd) return;
+				if (certificatesScrollState.atEnd) {
+					event.preventDefault();
+					document.querySelector('#site-footer')?.scrollIntoView({
+						behavior: reducedMotion.matches ? 'auto' : 'smooth',
+						block: 'end',
+					});
+					return;
+				}
 				event.preventDefault();
 				certificatesContent?.scrollBy({
 					top: certificatesContent.clientHeight * 0.8,
