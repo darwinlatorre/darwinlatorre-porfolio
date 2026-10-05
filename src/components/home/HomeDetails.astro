@@ -1,5 +1,6 @@
 ---
 import CommandButton from './CommandButton.astro';
+import CvDialog from './CvDialog.astro';
 import FileTree from './FileTree.astro';
 ---
 
@@ -23,7 +24,7 @@ import FileTree from './FileTree.astro';
 
 			<div class="actions reveal">
 				<CommandButton label="Pull Contact" href="mailto:contact@darwinlatorre.com" />
-				<CommandButton label="Pull CV" href="/Darwin_Latorre_CV_English.pdf" />
+				<CommandButton label="Pull CV" href="/Darwin_Latorre_CV_English.pdf" cvDialog />
 			</div>
 		</div>
 
@@ -34,6 +35,7 @@ import FileTree from './FileTree.astro';
 		</div>
 	</div>
 
+	<CvDialog />
 </section>
 
 <script>

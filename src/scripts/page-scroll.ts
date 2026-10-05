@@ -29,6 +29,7 @@ const initializePageScroll = () => {
 	const aboutStatValues = about?.querySelectorAll<HTMLElement>('[data-about-stat-value]') ?? [];
 	const aboutSocials = about?.querySelectorAll<HTMLElement>('[data-about-social]') ?? [];
 	const technologyDialog = about?.querySelector<HTMLDialogElement>('[data-technologies-dialog]');
+	const cvDialog = document.querySelector<HTMLDialogElement>('[data-cv-dialog]');
 	const experience = document.querySelector<HTMLElement>('[data-experience]');
 	const experienceContent = experience?.querySelector<HTMLElement>('[data-experience-content]');
 	const experienceCommand = experience?.querySelector<HTMLElement>('[data-experience-command]');
@@ -488,7 +489,7 @@ const initializePageScroll = () => {
 	document.addEventListener(
 		'keydown',
 		(event) => {
-			if (technologyDialog?.open) return;
+			if (technologyDialog?.open || cvDialog?.open) return;
 			const inCertificates = scroller.scrollTop >= certificatesTop - 2;
 			const inServices = scroller.scrollTop >= servicesTop - 2 && !inCertificates;
 			const inExperience =

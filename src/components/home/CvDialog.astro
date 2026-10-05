@@ -1,0 +1,220 @@
+---
+import { X } from '@lucide/astro';
+
+const cvHref = '/Darwin_Latorre_CV_English.pdf';
+---
+
+<dialog class="cv-dialog" aria-labelledby="cv-title" data-cv-dialog>
+	<div class="cv-window">
+		<header class="cv-header">
+			<h2 id="cv-title"><span aria-hidden="true">&gt;</span> Curriculum Vitae</h2>
+			<div class="cv-tools">
+				<a class="cv-tool" href={cvHref} download data-cv-download>Download</a>
+				<a class="cv-tool" href={cvHref} target="_blank" rel="noreferrer" data-cv-external>
+					Open in tab
+				</a>
+				<button type="button" aria-label="Close curriculum vitae" data-cv-close>
+					<X size={24} stroke-width={1.35} aria-hidden="true" />
+				</button>
+			</div>
+		</header>
+
+		<div class="cv-frame">
+			<iframe
+				title="Curriculum Vitae PDF"
+				data-cv-frame
+				data-src={`${cvHref}#toolbar=0&view=Fit`}
+			>
+			</iframe>
+		</div>
+	</div>
+</dialog>
+
+<style>
+	.cv-dialog {
+		--cv-pad: clamp(1.35rem, 3vw, 2.25rem);
+		--cv-header: 2.75rem;
+		--cv-gap: clamp(1rem, 2vh, 1.5rem);
+		--cv-page-ratio: 0.70708;
+		--cv-screen-pad: 0.5rem;
+		--cv-max-w: min(76rem, calc(100vw - 4rem));
+		--cv-max-h: calc(100dvh - 2 * var(--cv-screen-pad));
+		--cv-chrome: calc(var(--cv-pad) * 2 + var(--cv-header) + var(--cv-gap) + 2px);
+		width: min(
+			var(--cv-max-w),
+			calc((var(--cv-max-h) - var(--cv-chrome)) * var(--cv-page-ratio) + var(--cv-pad) * 2 + 2px)
+		);
+		height: min(
+			var(--cv-max-h),
+			calc(var(--cv-chrome) + (var(--cv-max-w) - var(--cv-pad) * 2 - 2px) / var(--cv-page-ratio))
+		);
+		max-width: none;
+		max-height: none;
+		margin: auto;
+		padding: 0;
+		overflow: hidden;
+		border: 1px solid var(--color-accent-muted);
+		border-radius: var(--radius-frame);
+		background: color-mix(in srgb, var(--color-surface-raised) 96%, transparent);
+		box-shadow: 0 1.5rem 5rem rgb(0 0 0 / 48%);
+		color: var(--color-text);
+		overscroll-behavior: contain;
+	}
+
+	.cv-dialog::backdrop {
+		background: rgb(6 5 9 / 78%);
+		backdrop-filter: blur(3px);
+	}
+
+	.cv-dialog[open] {
+		animation: dialog-enter 220ms var(--ease-out) both;
+	}
+
+	.cv-window {
+		display: grid;
+		padding: var(--cv-pad);
+		gap: var(--cv-gap);
+		grid-template-rows: auto auto;
+	}
+
+	.cv-header {
+		display: flex;
+		height: var(--cv-header);
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.cv-header h2 {
+		min-width: 0;
+		margin: 0;
+		overflow: hidden;
+		font-size: clamp(1rem, 1.8vw, 1.3rem);
+		font-weight: 400;
+		letter-spacing: 0.015em;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.cv-header h2 span {
+		color: var(--color-accent);
+	}
+
+	.cv-tools {
+		display: flex;
+		flex-shrink: 0;
+		align-items: center;
+		gap: 0.6rem;
+	}
+
+	.cv-tool {
+		--corner-cut: 0.75rem;
+
+		position: relative;
+		display: inline-flex;
+		height: 2.4rem;
+		padding: 0 1.15rem;
+		isolation: isolate;
+		align-items: center;
+		clip-path: polygon(
+			0 0,
+			calc(100% - var(--corner-cut)) 0,
+			100% var(--corner-cut),
+			100% 100%,
+			0 100%
+		);
+		background: var(--color-border);
+		color: var(--color-text);
+		font-size: 0.72rem;
+		letter-spacing: 0.025em;
+		text-decoration: none;
+		transition: background-color var(--duration-fast) ease;
+	}
+
+	.cv-tool::before {
+		content: '';
+		position: absolute;
+		z-index: -1;
+		inset: var(--border-width);
+		clip-path: inherit;
+		background: var(--color-surface);
+		transition: background-color var(--duration-fast) ease;
+	}
+
+	.cv-tool:hover,
+	.cv-tool:focus-visible {
+		background: var(--color-accent-muted);
+	}
+
+	.cv-tool:hover::before,
+	.cv-tool:focus-visible::before {
+		background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface));
+	}
+
+	.cv-tool:focus-visible {
+		outline: 1px solid var(--color-accent);
+		outline-offset: 4px;
+	}
+
+	.cv-header button {
+		display: grid;
+		width: 2.75rem;
+		height: 2.75rem;
+		padding: 0;
+		place-items: center;
+		border: 0;
+		background: transparent;
+		color: var(--color-text-muted);
+		cursor: pointer;
+		transition: color var(--duration-fast) ease, transform var(--duration-fast) ease;
+	}
+
+	.cv-header button:hover,
+	.cv-header button:focus-visible {
+		color: var(--color-accent);
+		transform: rotate(90deg);
+	}
+
+	.cv-header button:focus-visible {
+		outline: 1px solid var(--color-accent-muted);
+		outline-offset: 2px;
+	}
+
+	.cv-frame {
+		position: relative;
+		aspect-ratio: var(--cv-page-ratio);
+		overflow: hidden;
+		border: 1px solid var(--color-border);
+		background: color-mix(in srgb, var(--color-surface) 88%, black);
+	}
+
+	.cv-frame iframe {
+		display: block;
+		width: 100%;
+		height: 100%;
+		border: 0;
+		background: transparent;
+	}
+
+	@keyframes dialog-enter {
+		from {
+			opacity: 0;
+			transform: translateY(8px) scale(0.985);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.cv-dialog[open] {
+			animation: none;
+		}
+
+		.cv-tool,
+		.cv-header button {
+			transition: none;
+		}
+	}
+</style>
