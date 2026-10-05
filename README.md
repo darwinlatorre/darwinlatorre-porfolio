@@ -76,6 +76,25 @@ src/
 public/         Static assets and downloadable CV
 ```
 
+## Agent tooling
+
+The project-local Graphify skill is installed in `.agents/skills/` and loaded by OpenCode through `opencode.json`. Restart OpenCode after installing or updating skills.
+
+### Graphify
+
+Requires Python 3.10+ and [uv](https://docs.astral.sh/uv/getting-started/installation/). Install the pinned official `graphifyy` package in an isolated project environment:
+
+```sh
+uv venv .venv
+uv pip install --python .venv/bin/python -r requirements-graphify.txt
+npm run graphify:build
+npm run graphify -- query "initializePageScroll"
+```
+
+`graphify:build` indexes code locally without an API key, then generates `graphify-out/graph.json`, `GRAPH_REPORT.md`, and `graph.html`. Re-run it after code changes. `.graphifyignore` excludes agent tooling and lockfiles; `.gitignore` is also respected. Documentation/media semantic extraction through the Graphify skill is a separate workflow.
+
+For skill examples using bare `graphify` or Python commands, activate the environment with `source .venv/bin/activate` first, or use `.venv/bin/graphify` and `.venv/bin/python` explicitly.
+
 ## Branches and Deployment
 
 - `dev` is the active development branch.

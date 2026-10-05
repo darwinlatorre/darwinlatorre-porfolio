@@ -1,28 +1,17 @@
 ---
 import { siGithub, siX } from 'simple-icons';
-import TechnologyDialog from './TechnologyDialog.astro';
+import { profile, socialLinks as portfolioSocialLinks } from '../../data/portfolio';
+import TerminalPrompt from '../terminal/TerminalPrompt.astro';
 
-const socialLinks = [
-	{
-		label: 'LinkedIn',
-		href: 'https://www.linkedin.com/in/darwinlatorre/',
-		mark: 'in',
-	},
-	{
-		label: 'GitHub',
-		href: 'https://github.com/darwinlatorre',
-		icon: siGithub,
-	},
-	{
-		label: 'X',
-		href: 'https://x.com/latorre_darwin',
-		icon: siX,
-	},
-];
+const socialLinks = portfolioSocialLinks.map((link) => ({
+	...link,
+	icon: link.label === 'GitHub' ? siGithub : link.label === 'X' ? siX : undefined,
+	mark: link.label === 'LinkedIn' ? 'in' : undefined,
+}));
 
 ---
 
-<section id="about" class="screen about" aria-label="About" data-about data-terminal-root>
+<section id="about" class="screen about" aria-label="About" data-about>
 	<div
 		class="about-content"
 		tabindex="0"
@@ -41,11 +30,7 @@ const socialLinks = [
 
 				<div class="command-output description-output" data-about-description>
 					<span class="output-rule" aria-hidden="true" data-about-line></span>
-					<p>
-						I'm a DevOps and Backend Engineer focused on building reliable cloud infrastructure and
-						scalable applications. My experience spans AWS, GCP, Kubernetes, Terraform, CI/CD, and Spring
-						Boot, bridging development and operations to deliver efficient production systems.
-					</p>
+					<p>{profile.description}</p>
 				</div>
 			</section>
 
@@ -60,7 +45,7 @@ const socialLinks = [
 				<div class="command-output stats-output">
 					<div class="stat-row" data-about-stat-value>
 						<span>experience_years:</span>
-						<strong>3+</strong>
+						<strong>{profile.experienceYears}</strong>
 					</div>
 					<button
 						class="stat-row stat-trigger"
@@ -70,7 +55,7 @@ const socialLinks = [
 						data-about-stat-value
 					>
 						<span>technologies_used:</span>
-						<strong>16+</strong>
+						<strong>{profile.technologiesUsed}</strong>
 					</button>
 				</div>
 			</section>
@@ -110,43 +95,10 @@ const socialLinks = [
 			</section>
 
 			<section class="terminal-block interactive-block" data-about-terminal-command>
-				<form class="command-form" data-terminal-form>
-					<label class="command-line" for="about-command">
-						<span class="prompt">
-							<span>user@</span><span class="prompt-host">darwinlatorre:</span><span>~$</span>
-						</span>
-						<span class="terminal-input-shell">
-							<input
-								id="about-command"
-								name="command"
-								type="text"
-								placeholder="show"
-								autocomplete="off"
-								spellcheck="false"
-								enterkeyhint="send"
-								aria-describedby="terminal-response"
-								data-terminal-input
-							/>
-							<span class="cursor-track" aria-hidden="true">
-								<span class="input-mirror" data-terminal-mirror></span>
-								<span class="input-cursor">_</span>
-							</span>
-						</span>
-					</label>
-				</form>
-				<p
-					id="terminal-response"
-					class="terminal-response"
-					role="status"
-					aria-live="polite"
-					data-terminal-response
-					hidden
-				></p>
+				<TerminalPrompt context="about" responseId="about-terminal-response" />
 			</section>
 		</div>
 	</div>
-
-	<TechnologyDialog />
 </section>
 
 <style>
@@ -368,89 +320,6 @@ const socialLinks = [
 		outline-offset: 4px;
 	}
 
-	.command-form {
-		margin: 0;
-	}
-
-	.command-form .command-line {
-		width: 100%;
-	}
-
-	.terminal-input-shell {
-		position: relative;
-		display: block;
-		width: min(32rem, 100%);
-		min-width: 4rem;
-		flex: 1 1 auto;
-		overflow: hidden;
-	}
-
-	.command-form input {
-		position: relative;
-		z-index: 1;
-		display: block;
-		width: 100%;
-		min-width: 0;
-		padding: 0;
-		border: 0;
-		outline: 0;
-		background: transparent;
-		caret-color: transparent;
-		color: var(--color-text);
-		font: inherit;
-		letter-spacing: inherit;
-		line-height: inherit;
-	}
-
-	.command-form input::placeholder {
-		color: color-mix(in srgb, var(--color-text-muted) 68%, transparent);
-		opacity: 1;
-	}
-
-	.cursor-track {
-		position: absolute;
-		z-index: 2;
-		inset: 0;
-		display: flex;
-		align-items: baseline;
-		overflow: hidden;
-		font: inherit;
-		line-height: inherit;
-		pointer-events: none;
-	}
-
-	.input-mirror {
-		visibility: hidden;
-		flex: 0 0 auto;
-		white-space: pre;
-	}
-
-	.input-cursor {
-		flex: 0 0 auto;
-		color: var(--color-accent);
-		animation: input-cursor-blink 1.1s step-end infinite;
-	}
-
-	@keyframes input-cursor-blink {
-		0%,
-		48% {
-			opacity: 1;
-		}
-		49%,
-		100% {
-			opacity: 0.12;
-		}
-	}
-
-	.terminal-response {
-		margin: 0 0 0 clamp(3.5rem, 7vw, 5.5rem);
-		padding: 0.35rem 0 0.35rem clamp(1.5rem, 3vw, 2.9rem);
-		border-left: 1px solid var(--color-accent-muted);
-		color: var(--color-text-muted);
-		font-size: var(--about-font-size);
-		line-height: 1.45;
-	}
-
 	@media (max-width: 48rem) {
 		.about {
 			--about-header-space: calc(var(--page-inset) + var(--control-offset) + 3rem);
@@ -511,27 +380,6 @@ const socialLinks = [
 			width: 1.8rem;
 		}
 
-		.command-form .command-line {
-			flex-wrap: wrap;
-		}
-
-		.terminal-input-shell {
-			width: 100%;
-			flex-basis: 100%;
-			font-size: 1rem;
-		}
-
-		.command-form input {
-			font-size: inherit;
-			scroll-margin-block: 35dvh;
-		}
-
-		.terminal-response {
-			margin-left: 0.6rem;
-			padding-left: 1.15rem;
-			font-size: var(--about-font-size);
-		}
-
 	}
 
 	@media (max-height: 50rem) {
@@ -584,10 +432,5 @@ const socialLinks = [
 		.social-mark {
 			transition: none;
 		}
-
-		.input-cursor {
-			animation: none;
-		}
-
 	}
 </style>

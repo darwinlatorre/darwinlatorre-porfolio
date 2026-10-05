@@ -2,12 +2,18 @@
 interface Props {
 	label: string;
 	href: string;
+	cvDialog?: boolean;
 }
 
-const { label, href } = Astro.props;
+const { label, href, cvDialog = false } = Astro.props;
 ---
 
-<a class="command-link" href={href}>
+<a
+	class="command-link"
+	href={href}
+	aria-haspopup={cvDialog ? 'dialog' : undefined}
+	data-cv-open={cvDialog ? '' : undefined}
+>
 	<span class="command-label"><span aria-hidden="true">&gt;</span> {label}</span>
 	<span class="arrow" aria-hidden="true">&rarr;</span>
 </a>

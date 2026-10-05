@@ -28,7 +28,8 @@ const initializePageScroll = () => {
 	const aboutTerminalCommand = about?.querySelector<HTMLElement>('[data-about-terminal-command]');
 	const aboutStatValues = about?.querySelectorAll<HTMLElement>('[data-about-stat-value]') ?? [];
 	const aboutSocials = about?.querySelectorAll<HTMLElement>('[data-about-social]') ?? [];
-	const technologyDialog = about?.querySelector<HTMLDialogElement>('[data-technologies-dialog]');
+	const technologyDialog = document.querySelector<HTMLDialogElement>('[data-technologies-dialog]');
+	const cvDialog = document.querySelector<HTMLDialogElement>('[data-cv-dialog]');
 	const experience = document.querySelector<HTMLElement>('[data-experience]');
 	const experienceContent = experience?.querySelector<HTMLElement>('[data-experience-content]');
 	const experienceCommand = experience?.querySelector<HTMLElement>('[data-experience-command]');
@@ -40,6 +41,7 @@ const initializePageScroll = () => {
 	const servicesContent = services?.querySelector<HTMLElement>('[data-services-content]');
 	const servicesTitle = services?.querySelector<HTMLElement>('[data-services-title]');
 	const serviceCards = services?.querySelectorAll<HTMLElement>('[data-service-card]') ?? [];
+	const servicesTerminal = services?.querySelector<HTMLElement>('[data-services-terminal]');
 	const certificates = document.querySelector<HTMLElement>('[data-certificates]');
 	const certificatesContent = certificates?.querySelector<HTMLElement>(
 		'[data-certificates-content]',
@@ -284,14 +286,19 @@ const initializePageScroll = () => {
 			initialLabel.style.transform = `translateY(${-3 * labelTransition}px)`;
 			discoverLabel.style.opacity = `${labelTransition * aboutLabelOpacity}`;
 			discoverLabel.style.transform = `translateY(${3 * (1 - labelTransition)}px)`;
-			scrollCue.classList.toggle(
-				'is-terminal',
-				inCertificates && certificatesScrollState.atEnd,
-			);
+			const atPageEnd =
+				scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2;
+
+			scrollCue.classList.toggle('is-terminal', atPageEnd);
+			scrollCue.classList.toggle('is-hidden', atPageEnd);
+			scrollCue.inert = atPageEnd;
 			if (inCertificates) {
-				if (certificatesScrollState.atEnd) {
+				if (atPageEnd) {
 					scrollCue.removeAttribute('href');
 					scrollCue.setAttribute('aria-label', 'End of current portfolio content');
+				} else if (certificatesScrollState.atEnd) {
+					scrollCue.href = '#site-footer';
+					scrollCue.setAttribute('aria-label', 'Go to the site footer');
 				} else {
 					scrollCue.href = '#certificates';
 					scrollCue.setAttribute('aria-label', 'Continue through the Certificates content');
@@ -375,6 +382,7 @@ const initializePageScroll = () => {
 			const start = 0.28 + index * 0.1;
 			reveal(card, range(servicesProgress, start, start + 0.3), 22);
 		});
+		reveal(servicesTerminal, range(servicesProgress, 0.76, 0.96), 8);
 
 		if (certificates) certificates.inert = certificatesProgress < 0.65;
 		reveal(certificatesCommand, range(certificatesProgress, 0.18, 0.36), 8);
@@ -483,7 +491,7 @@ const initializePageScroll = () => {
 	document.addEventListener(
 		'keydown',
 		(event) => {
-			if (technologyDialog?.open) return;
+			if (technologyDialog?.open || cvDialog?.open) return;
 			const inCertificates = scroller.scrollTop >= certificatesTop - 2;
 			const inServices = scroller.scrollTop >= servicesTop - 2 && !inCertificates;
 			const inExperience =
@@ -540,6 +548,22 @@ const initializePageScroll = () => {
 		{ signal: abortController.signal },
 	);
 	document.addEventListener(
+		'portfolio:navigate',
+		(event) => {
+			const targetId = event.detail.target === 'home' ? 'home-details' : event.detail.target;
+			const target = document.getElementById(targetId);
+			if (!target) return;
+
+			beginProgrammaticNavigation();
+			window.history.pushState(null, '', `#${targetId}`);
+			target.scrollIntoView({
+				behavior: reducedMotion.matches ? 'auto' : 'smooth',
+				block: 'start',
+			});
+		},
+		{ signal: abortController.signal },
+	);
+	document.addEventListener(
 		'click',
 		(event) => {
 			if (!(event.target instanceof Element)) return;
@@ -570,7 +594,14 @@ const initializePageScroll = () => {
 				scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inCertificates;
 			const certificatesScrollState = getScrollState(certificatesContent);
 			if (inCertificates) {
-				if (certificatesScrollState.atEnd) return;
+				if (certificatesScrollState.atEnd) {
+					event.preventDefault();
+					document.querySelector('#site-footer')?.scrollIntoView({
+						behavior: reducedMotion.matches ? 'auto' : 'smooth',
+						block: 'end',
+					});
+					return;
+				}
 				event.preventDefault();
 				certificatesContent?.scrollBy({
 					top: certificatesContent.clientHeight * 0.8,

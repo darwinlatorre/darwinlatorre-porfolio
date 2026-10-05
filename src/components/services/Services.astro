@@ -1,24 +1,6 @@
 ---
-const services = [
-	{
-		title: 'Backend Development',
-		description:
-			'Desarrollo, mantenimiento y evolución de aplicaciones backend con Java y Spring Boot.',
-	},
-	{
-		title: 'Cloud & DevOps',
-		description: 'Implementación y mejora de infraestructura y procesos de despliegue en la nube.',
-	},
-	{
-		title: 'CRM & Email Configuration',
-		description:
-			'Configuration and customization of Zoho CRM, customer management, automations, email setup, notifications, and integrations with external services.',
-	},
-	{
-		title: 'Monitoring & Observability',
-		description: 'Configuración de monitoreo para aplicaciones e infraestructura.',
-	},
-];
+import { services } from '../../data/portfolio';
+import TerminalPrompt from '../terminal/TerminalPrompt.astro';
 ---
 
 <section id="services" class="screen services" aria-label="Services" data-services>
@@ -54,6 +36,10 @@ const services = [
 					))
 				}
 			</div>
+
+			<div class="services-terminal" data-services-terminal>
+				<TerminalPrompt context="services" responseId="services-terminal-response" />
+			</div>
 		</div>
 	</div>
 </section>
@@ -62,7 +48,6 @@ const services = [
 	.services {
 		--services-header-space: calc(var(--page-inset) + var(--control-offset) + 4.75rem);
 		--services-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.75rem);
-		--service-border: color-mix(in srgb, var(--color-accent) 78%, var(--color-text));
 		--service-border-active: color-mix(in srgb, var(--color-accent) 66%, var(--color-text));
 
 		display: grid;
@@ -137,6 +122,12 @@ const services = [
 		width: 100%;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: clamp(0.8rem, 1.5vw, 1.15rem);
+	}
+
+	.services-terminal {
+		width: 100%;
+		margin-top: clamp(0.45rem, 1vh, 0.8rem);
+		text-align: left;
 	}
 
 	.service-card {
