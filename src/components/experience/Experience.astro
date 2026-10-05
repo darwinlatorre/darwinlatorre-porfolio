@@ -94,7 +94,6 @@ const experiences = [
 					))
 				}
 				<p class="experience-summary" data-experience-summary>
-					<span class="entry-marker summary-marker" aria-hidden="true">✦</span>
 					<strong class="summary-label">SUMMARY</strong>
 					<span class="summary-stack">
 						<span class="summary-brace">{'{ '}</span>
@@ -120,7 +119,7 @@ const experiences = [
 		--experience-content-font: clamp(0.95rem, 1.35vw, 1.18rem);
 		--experience-line-height: 1.55;
 		--experience-log-padding: clamp(1.5rem, 3vw, 2.9rem);
-		--experience-date-width: 17ch;
+		--experience-date-width: 9rem;
 		--experience-column-gap: 1.25rem;
 		--experience-marker-size: 0.55rem;
 		--experience-marker-offset: calc(
@@ -238,7 +237,7 @@ const experiences = [
 	.entry-period {
 		margin: 0;
 		color: var(--service-border);
-		font-size: var(--terminal-font-size);
+		font-size: 0.80rem;
 		white-space: nowrap;
 	}
 
@@ -308,16 +307,6 @@ const experiences = [
 	.summary-brace {
 		color: var(--experience-magenta);
 		font-size: 1.2em;
-	}
-
-	.summary-marker {
-		display: grid;
-		place-items: center;
-		background: var(--service-border);
-		box-shadow: 0 0 0.45rem var(--service-border);
-		color: var(--color-text);
-		font-size: 0.55rem;
-		line-height: 1;
 	}
 
 	.interactive-block {
