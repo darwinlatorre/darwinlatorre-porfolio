@@ -21,11 +21,11 @@ export const experiences = [
 	{
 		role: 'Java Developer',
 		company: 'Freelance',
-		location: 'Remote',
+		location: 'darwinlatorre',
 		start: '2026-06',
 		end: '2026-07',
 		startLabel: 'Jun 2026',
-		endLabel: 'Jul 2026',
+		endLabel: 'Currently',
 		highlights: [
 			'Performed adjustments and maintenance on the backend of an e-commerce platform developed with Java and Spring Boot.',
 			'Implemented adjustments, bug fixes, and deployments on GCP using Cloud Run, Cloud SQL, Artifact Registry, and Secret Manager.',
