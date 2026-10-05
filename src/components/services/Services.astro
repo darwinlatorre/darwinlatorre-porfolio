@@ -10,31 +10,33 @@ import TerminalPrompt from '../terminal/TerminalPrompt.astro';
 		aria-label="Services content"
 		data-services-content
 	>
-		<div class="services-layout">
-			<header class="services-heading" data-services-title>
-				<span class="heading-rule" aria-hidden="true"></span>
-				<h2><span aria-hidden="true">[&gt;</span> Services<span aria-hidden="true">]</span></h2>
-				<span class="heading-rule" aria-hidden="true"></span>
-			</header>
+		<div class="services-stack">
+			<div class="services-layout">
+				<header class="services-heading" data-services-title>
+					<span class="heading-rule" aria-hidden="true"></span>
+					<h2><span aria-hidden="true">[&gt;</span> Services<span aria-hidden="true">]</span></h2>
+					<span class="heading-rule" aria-hidden="true"></span>
+				</header>
 
-			<div class="services-grid">
-				{
-					services.map((service) => (
-						<a
-							class="service-card"
-							href={`mailto:contact@darwinlatorre.com?subject=${encodeURIComponent(`Service inquiry: ${service.title}`)}`}
-							aria-label={`Contact Darwin about ${service.title}`}
-							data-service-card
-						>
-							<span class="card-mark" aria-hidden="true">×</span>
-							<span class="card-terminal" aria-hidden="true">
-								<span>&gt;</span><span class="card-cursor">_</span>
-							</span>
-							<h2><span aria-hidden="true">&gt;</span> {service.title}</h2>
-							<p>{service.description}</p>
-						</a>
-					))
-				}
+				<div class="services-grid">
+					{
+						services.map((service) => (
+							<a
+								class="service-card"
+								href={`mailto:contact@darwinlatorre.com?subject=${encodeURIComponent(`Service inquiry: ${service.title}`)}`}
+								aria-label={`Contact Darwin about ${service.title}`}
+								data-service-card
+							>
+								<span class="card-mark" aria-hidden="true">×</span>
+								<span class="card-terminal" aria-hidden="true">
+									<span>&gt;</span><span class="card-cursor">_</span>
+								</span>
+								<h2><span aria-hidden="true">&gt;</span> {service.title}</h2>
+								<p>{service.description}</p>
+							</a>
+						))
+					}
+				</div>
 			</div>
 
 			<div class="services-terminal" data-services-terminal>
@@ -57,7 +59,7 @@ import TerminalPrompt from '../terminal/TerminalPrompt.astro';
 
 	.services-content {
 		display: grid;
-		width: min(70rem, 100%);
+		width: min(80rem, 100%);
 		height: 100%;
 		min-height: 0;
 		margin: 0 auto;
@@ -76,9 +78,16 @@ import TerminalPrompt from '../terminal/TerminalPrompt.astro';
 		overscroll-behavior-y: contain;
 	}
 
-	.services-layout {
+	.services-stack {
 		display: grid;
 		width: 100%;
+		row-gap: clamp(1rem, 2.2vh, 1.6rem);
+	}
+
+	.services-layout {
+		display: grid;
+		width: min(70rem, 100%);
+		margin-inline: auto;
 		padding-block: 0.5rem;
 		gap: clamp(1rem, 2.2vh, 1.6rem);
 		justify-items: center;
@@ -252,6 +261,10 @@ import TerminalPrompt from '../terminal/TerminalPrompt.astro';
 
 		.services-layout {
 			gap: 1rem;
+		}
+
+		.services-stack {
+			row-gap: 1rem;
 		}
 
 		.services-heading h2 {
