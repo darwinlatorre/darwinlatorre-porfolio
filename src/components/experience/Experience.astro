@@ -5,11 +5,11 @@ const experiences = [
 	{
 		role: 'Java Developer',
 		company: 'Freelance',
-		location: 'Remote',
+		location: 'darwinlatorre',
 		start: '2026-06',
 		end: '2026-07',
 		startLabel: 'Jun 2026',
-		endLabel: 'Jul 2026',
+		endLabel: 'Currently',
 		highlights: [
 			'Performed adjustments and maintenance on the backend of an e-commerce platform developed with Java and Spring Boot.',
 			'Implemented adjustments, bug fixes, and deployments on GCP using Cloud Run, Cloud SQL, Artifact Registry, and Secret Manager.',
@@ -79,21 +79,24 @@ const experiences = [
 								<span> - </span>
 								<time datetime={experience.end}>{experience.endLabel}</time>
 							</p>
-							<div class="entry-details">
-								<h2 class="entry-title">
-									<span class="entry-role">{experience.role}</span>
-									<span class="entry-company">
-										@ {experience.company}{experience.location && ` / ${experience.location}`}
-									</span>
-								</h2>
+							<details class="entry-details" open>
+								<summary class="entry-summary">
+									<h2 class="entry-title">
+										<span class="entry-role">{experience.role}</span>
+										<span class="entry-company">
+											@ {experience.company}{experience.location && ` / ${experience.location}`}
+										</span>
+									</h2>
+								</summary>
 								<ul>
 									{experience.highlights.map((highlight) => <li>{highlight}</li>)}
 								</ul>
-							</div>
+							</details>
 						</article>
 					))
 				}
 				<p class="experience-summary" data-experience-summary>
+					<span class="entry-marker" aria-hidden="true"></span>
 					<strong class="summary-label">SUMMARY</strong>
 					<span class="summary-stack">
 						<span class="summary-brace">{'{ '}</span>
@@ -119,7 +122,7 @@ const experiences = [
 		--experience-content-font: clamp(0.95rem, 1.35vw, 1.18rem);
 		--experience-line-height: 1.55;
 		--experience-log-padding: clamp(1.5rem, 3vw, 2.9rem);
-		--experience-date-width: 9rem;
+		--experience-date-width: 9.4rem;
 		--experience-column-gap: 1.25rem;
 		--experience-marker-size: 0.55rem;
 		--experience-marker-offset: calc(
@@ -243,6 +246,21 @@ const experiences = [
 
 	.entry-details {
 		min-width: 0;
+	}
+
+	.entry-summary {
+		cursor: pointer;
+		list-style: none;
+		list-style-type: none;
+	}
+
+	.entry-summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.entry-summary:focus-visible {
+		outline: 1px solid var(--color-accent-muted);
+		outline-offset: 3px;
 	}
 
 	.entry-title {
