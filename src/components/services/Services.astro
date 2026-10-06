@@ -105,7 +105,7 @@ import TerminalPrompt from '../terminal/TerminalPrompt.astro';
 	.services-heading h2 {
 		margin: 0;
 		color: var(--color-text);
-		font-size: clamp(1rem, 1.45vw, 1.25rem);
+		font-size: var(--section-heading-font-size);
 		font-weight: 400;
 		letter-spacing: 0.01em;
 		line-height: 1.4;
@@ -266,10 +266,6 @@ import TerminalPrompt from '../terminal/TerminalPrompt.astro';
 
 		.services-stack {
 			row-gap: 1rem;
-		}
-
-		.services-heading h2 {
-			font-size: var(--terminal-font-size);
 		}
 
 		.services-grid {

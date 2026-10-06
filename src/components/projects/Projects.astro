@@ -3,8 +3,9 @@ import AuthPreview from './AuthPreview.astro';
 import { projects } from '../../data/portfolio';
 ---
 
-<section id="projects" class="screen projects" aria-label="Projects" data-projects>
+<section id="projects" class="screen projects" aria-labelledby="projects-title" data-projects>
 	<div class="projects-content" tabindex="0" aria-label="Projects content" data-projects-content>
+		<h2 id="projects-title" class="projects-title"><span aria-hidden="true">&gt;</span> projects</h2>
 		<div class="projects-grid">
 			{
 				projects.map((project) => (
@@ -71,6 +72,20 @@ import { projects } from '../../data/portfolio';
 
 	.projects-content::-webkit-scrollbar {
 		display: none;
+	}
+
+	.projects-title {
+		width: min(var(--projects-max-width), 100%);
+		margin: 0 auto;
+		color: var(--color-text);
+		font-size: var(--section-heading-font-size);
+		font-weight: 400;
+		letter-spacing: 0.01em;
+		line-height: 1.4;
+	}
+
+	.projects-title span {
+		color: var(--color-accent);
 	}
 
 	.projects-content.is-scroll-contained {
@@ -280,6 +295,10 @@ import { projects } from '../../data/portfolio';
 		}
 
 		.projects-github-bar {
+			width: min(34rem, 100%);
+		}
+
+		.projects-title {
 			width: min(34rem, 100%);
 		}
 

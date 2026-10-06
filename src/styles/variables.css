@@ -16,6 +16,7 @@
 	--font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 		'Liberation Mono', monospace;
 	--terminal-font-size: clamp(0.86rem, 1.15vw, 1.04rem);
+	--section-heading-font-size: clamp(1.15rem, 1.8vw, 1.55rem);
 	--page-inset: clamp(0.5rem, 1vw, 1rem);
 	--control-offset: clamp(1.25rem, 2.5vw, 2.35rem);
 	--border-width: 1px;
