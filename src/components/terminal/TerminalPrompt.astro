@@ -112,6 +112,11 @@ const inputId = `${context}-terminal-command`;
 		opacity: 1;
 	}
 
+	input:focus-visible {
+		outline: 1px solid var(--color-accent-muted);
+		outline-offset: -1px;
+	}
+
 	.cursor-track {
 		position: absolute;
 		z-index: 2;

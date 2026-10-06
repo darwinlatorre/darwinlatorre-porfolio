@@ -17,6 +17,33 @@ export const socialLinks = [
 	{ label: 'X', href: 'https://x.com/latorre_darwin' },
 ] as const;
 
+export const projects = [
+	{
+		id: 'project-z3ntry',
+		name: 'z3ntry',
+		description: 'Sitio de Z3nTry sobre ciberseguridad, desarrollo y diseño.',
+		href: 'https://www.z3ntry.com/',
+		repository: 'https://github.com/Z3nTry-0/z3ntry',
+		preview: 'https://www.z3ntry.com/',
+	},
+	{
+		id: 'project-auth-service',
+		name: 'auth-service-custom',
+		description: 'Servicio de autenticación con Spring Boot y JWT: gestión de usuarios, roles, sesiones, verificación de correo y recuperación de contraseñas.',
+		href: 'https://github.com/darwinlatorre/auth-service-custom-implementation',
+		repository: null,
+		preview: null,
+	},
+	{
+		id: 'project-portfolio',
+		name: 'darwinlatorre_',
+		description: 'Portafolio personal de DevOps y desarrollo backend, con experiencia profesional, proyectos y certificaciones en una interfaz de terminal interactiva.',
+		href: 'https://www.darwinlatorre.com/',
+		repository: 'https://github.com/darwinlatorre/darwinlatorre-porfolio',
+		preview: 'https://www.darwinlatorre.com/',
+	},
+] as const;
+
 export const experiences = [
 	{
 		role: 'Java Developer',
