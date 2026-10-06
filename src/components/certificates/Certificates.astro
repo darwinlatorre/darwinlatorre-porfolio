@@ -19,15 +19,12 @@ import TerminalPrompt from '../terminal/TerminalPrompt.astro';
 		<div class="certificates-terminal">
 			<p class="command-line" data-certificates-command>
 				<span class="prompt">
-					<span>user@</span><span class="prompt-host">darwinlatorre:</span><span>~$</span>
+					<span>darwinlatorre ~/certificates</span><span>$</span>
 				</span>
 				<code>cat certificates.log</code>
 			</p>
 
 			<div class="certificates-output">
-				<p class="output-title" data-certificates-title>
-					<span aria-hidden="true">&gt;</span> [CERTIFICATIONS]
-				</p>
 				<span class="output-rule" aria-hidden="true" data-certificates-rule></span>
 
 				<ul class="certificate-list" aria-label="Certificate links">
@@ -133,11 +130,8 @@ import TerminalPrompt from '../terminal/TerminalPrompt.astro';
 	.prompt {
 		display: inline-flex;
 		flex: 0 0 auto;
+		gap: 0.5em;
 		color: var(--color-accent);
-	}
-
-	.prompt-host {
-		color: color-mix(in srgb, var(--color-text-muted) 65%, var(--color-text));
 	}
 
 	.certificates-output {
@@ -145,17 +139,6 @@ import TerminalPrompt from '../terminal/TerminalPrompt.astro';
 		width: 100%;
 		min-width: 0;
 		gap: clamp(1.4rem, 3vh, 2.2rem);
-	}
-
-	.output-title {
-		margin: 0;
-		color: color-mix(in srgb, var(--color-accent) 88%, var(--color-text));
-		font-size: var(--terminal-font-size);
-		line-height: 1.5;
-	}
-
-	.output-title span {
-		margin-right: 0.65rem;
 	}
 
 	.output-rule {

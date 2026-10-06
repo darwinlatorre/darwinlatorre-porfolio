@@ -53,7 +53,6 @@ const initializePageScroll = () => {
 	const certificatesCommand = certificates?.querySelector<HTMLElement>(
 		'[data-certificates-command]',
 	);
-	const certificatesTitle = certificates?.querySelector<HTMLElement>('[data-certificates-title]');
 	const certificateRules =
 		certificates?.querySelectorAll<HTMLElement>('[data-certificates-rule]') ?? [];
 	const certificateItems =
@@ -420,7 +419,6 @@ const initializePageScroll = () => {
 		});
 		if (certificates) certificates.inert = certificatesProgress < 0.65;
 		reveal(certificatesCommand, range(certificatesProgress, 0.18, 0.36), 8);
-		reveal(certificatesTitle, range(certificatesProgress, 0.3, 0.48), 12);
 		certificateRules.forEach((rule, index) => {
 			reveal(rule, range(certificatesProgress, 0.38 + index * 0.32, 0.56 + index * 0.3), 0);
 		});
@@ -492,7 +490,7 @@ const initializePageScroll = () => {
 	}
 	if (projectsContent) {
 		contentResizeObserver?.observe(projectsContent);
-		if (projectsContent.firstElementChild) contentResizeObserver?.observe(projectsContent.firstElementChild);
+		for (const child of projectsContent.children) contentResizeObserver?.observe(child);
 	}
 	if (certificatesContent) {
 		contentResizeObserver?.observe(certificatesContent);

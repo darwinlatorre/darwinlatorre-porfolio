@@ -14,7 +14,7 @@ const inputId = `${context}-terminal-command`;
 	<form class="command-form" data-terminal-form>
 		<label class="command-line" for={inputId}>
 			<span class="prompt">
-				<span>user@</span><span class="prompt-host">darwinlatorre:</span><span>~$</span>
+				$
 			</span>
 			<span class="terminal-input-shell">
 				<input
@@ -75,10 +75,6 @@ const inputId = `${context}-terminal-command`;
 		display: inline-flex;
 		flex: 0 0 auto;
 		color: var(--color-accent);
-	}
-
-	.prompt-host {
-		color: color-mix(in srgb, var(--color-text-muted) 65%, var(--color-text));
 	}
 
 	.terminal-input-shell {
@@ -197,8 +193,8 @@ const inputId = `${context}-terminal-command`;
 		}
 
 		.terminal-input-shell {
-			width: 100%;
-			flex-basis: 100%;
+			width: auto;
+			flex-basis: 0;
 			font-size: 1rem;
 		}
 
