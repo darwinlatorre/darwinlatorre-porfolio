@@ -9,6 +9,9 @@ const socialLinks = portfolioSocialLinks.map((link) => ({
 	mark: link.label === 'LinkedIn' ? 'in' : undefined,
 }));
 
+const descriptionParts = profile.description.split(
+	/(DevOps and Backend Engineer|AWS, GCP, Kubernetes, Terraform, CI\/CD, and Spring Boot)/,
+);
 ---
 
 <section id="about" class="screen about" aria-label="About" data-about>
@@ -23,21 +26,23 @@ const socialLinks = portfolioSocialLinks.map((link) => ({
 			<section class="terminal-block">
 				<p class="command-line" data-about-marker>
 					<span class="prompt">
-						<span>user@</span><span class="prompt-host">darwinlatorre:</span><span>~$</span>
+						<span class="prompt-host">darwinlatorre ~/about</span><span class="prompt-symbol">$</span>
 					</span>
-					<code>cd about &amp;&amp; cat resume.md</code>
+					<code>cat resume.md</code>
 				</p>
 
 				<div class="command-output description-output" data-about-description>
 					<span class="output-rule" aria-hidden="true" data-about-line></span>
-					<p tabindex="0" aria-label="Professional profile description">{profile.description}</p>
+					<p tabindex="0" aria-label="Professional profile description">
+						{descriptionParts.map((part, index) => index % 2 === 1 ? <strong>{part}</strong> : part)}
+					</p>
 				</div>
 			</section>
 
 			<section class="terminal-block">
 				<p class="command-line" data-about-stat-command>
 					<span class="prompt">
-						<span>user@</span><span class="prompt-host">darwinlatorre:</span><span>~$</span>
+						<span class="prompt-host">~/about</span><span class="prompt-symbol">$</span>
 					</span>
 					<code>tail -n 2 resume.md</code>
 				</p>
@@ -63,7 +68,7 @@ const socialLinks = portfolioSocialLinks.map((link) => ({
 			<section class="terminal-block links-block">
 				<p class="command-line" data-about-social-command>
 					<span class="prompt">
-						<span>user@</span><span class="prompt-host">darwinlatorre:</span><span>~$</span>
+						<span class="prompt-host">~/about</span><span class="prompt-symbol">$</span>
 					</span>
 					<code>grep "links" resume.md</code>
 				</p>
@@ -163,11 +168,16 @@ const socialLinks = portfolioSocialLinks.map((link) => ({
 	.prompt {
 		display: inline-flex;
 		flex: 0 0 auto;
+		gap: 0.5em;
 		color: var(--color-accent);
 	}
 
 	.prompt .prompt-host {
-		color: color-mix(in srgb, var(--color-text-muted) 65%, var(--color-text));
+		color: var(--color-accent);
+	}
+
+	.prompt-symbol {
+		color: var(--color-accent);
 	}
 
 	.command-output {
@@ -194,10 +204,14 @@ const socialLinks = portfolioSocialLinks.map((link) => ({
 	.description-output p {
 		width: min(64rem, 100%);
 		margin: 0;
-		color: color-mix(in srgb, var(--color-text) 92%, var(--color-text-muted));
-		font-size: clamp(0.95rem, 1.35vw, 1.18rem);
-		letter-spacing: -0.018em;
-		line-height: 1.55;
+		color: var(--color-text);
+		font-size: 1.15rem;
+		letter-spacing: 0;
+		line-height: 1.6;
+	}
+
+	.description-output strong {
+		font-weight: 600;
 	}
 
 	.stats-output {
@@ -220,7 +234,8 @@ const socialLinks = portfolioSocialLinks.map((link) => ({
 
 	.stat-row strong {
 		font: inherit;
-		font-weight: 400;
+		font-weight: 600;
+		color: color-mix(in srgb, var(--color-text) 85%, var(--color-accent));
 	}
 
 	button.stat-row {
@@ -346,18 +361,14 @@ const socialLinks = portfolioSocialLinks.map((link) => ({
 		}
 
 		.command-line {
-			flex-direction: column;
-			gap: 0.2rem;
+			flex-wrap: wrap;
+			gap: 0.2rem 0.5rem;
 			font-size: 0.85rem;
 			line-height: 1.55;
 		}
 
 		.command-line code {
 			overflow-wrap: anywhere;
-		}
-
-		.terminal-block:not(:first-child) > .command-line .prompt {
-			display: none;
 		}
 
 		.command-output {
@@ -368,8 +379,8 @@ const socialLinks = portfolioSocialLinks.map((link) => ({
 		.description-output p {
 			max-height: clamp(6rem, calc(100dvh - 30rem), 24rem);
 			overflow-y: auto;
-			font-size: 0.85rem;
-			line-height: 1.55;
+			font-size: 1.15rem;
+			line-height: 1.6;
 			letter-spacing: 0;
 			scrollbar-width: thin;
 		}
@@ -394,7 +405,6 @@ const socialLinks = portfolioSocialLinks.map((link) => ({
 		}
 
 		.stat-row strong {
-			color: var(--color-text);
 			font-size: inherit;
 		}
 
