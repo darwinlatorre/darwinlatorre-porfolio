@@ -1,5 +1,5 @@
 ---
-import { services } from '../../data/portfolio';
+import { profile, services } from '../../data/portfolio';
 import TerminalPrompt from '../terminal/TerminalPrompt.astro';
 ---
 
@@ -23,7 +23,7 @@ import TerminalPrompt from '../terminal/TerminalPrompt.astro';
 						services.map((service) => (
 							<a
 								class="service-card"
-								href={`mailto:contact@darwinlatorre.com?subject=${encodeURIComponent(`Service inquiry: ${service.title}`)}`}
+								href={`mailto:${profile.email}?subject=${encodeURIComponent(`Service inquiry: ${service.title}`)}`}
 								aria-label={`Contact Darwin about ${service.title}`}
 								data-service-card
 							>

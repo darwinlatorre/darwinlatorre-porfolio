@@ -2,7 +2,7 @@ export const profile = {
 	name: 'Darwin Latorre',
 	handle: 'Dark',
 	role: 'DevOps & Backend Developer',
-	email: 'contact@darwinlatorre.com',
+	email: 'darwilestib12@gmail.com',
 	description:
 		"I'm a DevOps and Backend Engineer focused on building reliable cloud infrastructure and scalable applications. My experience spans AWS, GCP, Kubernetes, Terraform, CI/CD, and Spring Boot, bridging development and operations to deliver efficient production systems.",
 	experienceYears: '3+',

@@ -2,6 +2,7 @@
 import CommandButton from './CommandButton.astro';
 import CvDialog from './CvDialog.astro';
 import FileTree from './FileTree.astro';
+import { profile } from '../../data/portfolio';
 ---
 
 <section
@@ -23,7 +24,7 @@ import FileTree from './FileTree.astro';
 			</div>
 
 			<div class="actions reveal">
-				<CommandButton label="Pull Contact" href="mailto:contact@darwinlatorre.com" />
+				<CommandButton label="Pull Contact" href={`mailto:${profile.email}`} />
 				<CommandButton label="Pull CV" href="/Darwin_Latorre_CV_English.pdf" cvDialog />
 			</div>
 		</div>

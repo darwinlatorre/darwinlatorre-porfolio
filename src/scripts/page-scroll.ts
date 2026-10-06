@@ -1,4 +1,5 @@
 import { createClipboardFeedback } from './clipboard';
+import { profile } from '../data/portfolio';
 import { initializeTreeNavigation, type TreeNavigation } from './tree-navigation';
 
 const initializePageScroll = () => {
@@ -62,7 +63,7 @@ const initializePageScroll = () => {
 		? createClipboardFeedback({
 				trigger: nameAction,
 				status: copyStatus ?? null,
-				value: 'contact@darwinlatorre.com',
+				value: profile.email,
 			})
 		: null;
 
