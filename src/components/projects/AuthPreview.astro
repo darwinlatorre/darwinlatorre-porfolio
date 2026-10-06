@@ -1,0 +1,147 @@
+---
+import { ShieldCheck } from '@lucide/astro';
+---
+
+<div class="auth-preview">
+	<div class="preview-heading">
+		<span class="eyebrow">IDENTITY GATEWAY</span>
+		<p>One identity.</p>
+		<div class="stack-highlight"><strong>Java</strong><span>+</span><strong>Spring Boot</strong></div>
+	</div>
+	<div class="security-core">
+		<div class="orbit orbit-outer"></div>
+		<div class="orbit orbit-inner"></div>
+		<span class="orbit-node node-top"></span>
+		<span class="orbit-node node-bottom"></span>
+		<div class="shield-core"><ShieldCheck size={58} stroke-width={1.1} /></div>
+		<span class="core-caption">JWT · ROLE-BASED ACCESS</span>
+	</div>
+	<div class="token-panel">
+		<div class="token-header"><span>ACCESS TOKEN</span><span class="token-badge">BEARER</span></div>
+		<div class="token-string"><span>eyJhbGciOiJIUzI1NiJ9</span><span>.eyJzdWIiOiJ1c2VyIn0</span><span>.signature</span></div>
+	</div>
+</div>
+
+<style>
+	.auth-preview {
+		position: relative;
+		display: flex;
+		height: 100%;
+		padding: 0.85rem clamp(1rem, 1.8vw, 1.5rem) 14rem;
+		overflow: hidden;
+		flex-direction: column;
+		background: #101417;
+		color: #edf6f3;
+		font-family: inherit;
+	}
+
+	.token-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+		color: #a5bfb5;
+		font-size: 0.5rem;
+		letter-spacing: 0.08em;
+	}
+	.preview-heading { position: relative; margin-top: 0; margin-left: -0.35rem; }
+	.eyebrow { color: #8edec4; font-size: 0.55rem; letter-spacing: 0.18em; }
+	.preview-heading p { margin: 0.65rem 0 0; font-size: clamp(1.25rem, 2vw, 1.8rem); line-height: 1.25; letter-spacing: -0.055em; }
+	.stack-highlight { display: flex; margin-top: 1rem; align-items: center; flex-wrap: wrap; gap: 0.6rem; font-size: clamp(1rem, 1.5vw, 1.3rem); }
+	.stack-highlight strong { color: #a4f3d6; font-weight: 600; }
+	.stack-highlight strong:first-child { color: #ef6569; }
+	.stack-highlight span { color: #59766c; font-size: 0.75rem; }
+	.security-core { position: relative; width: 100%; min-height: 13rem; margin-block: auto; }
+	.orbit { position: absolute; top: 50%; left: 50%; border: 1px solid #78d9be26; border-radius: 50%; transform: translate(-50%, -50%); }
+	.orbit-outer { width: 12rem; height: 12rem; }
+	.orbit-inner { width: 9rem; height: 9rem; border-style: dashed; border-color: #78d9be38; }
+	.shield-core {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		display: grid;
+		width: 6.4rem;
+		height: 6.4rem;
+		place-items: center;
+		border: 1px solid #91e9cb50;
+		border-radius: 1.7rem;
+		background: linear-gradient(140deg, #264f46, #112721);
+		color: #a4f3d6;
+		box-shadow: 0 0 25px #91e9cb26, 0 0 60px #63dab11f,
+			inset 0 0 24px #91e9cb18;
+		transform: translate(-50%, -50%) rotate(-8deg);
+	}
+	.shield-core :global(svg) { transform: rotate(8deg); }
+	.orbit-node { position: absolute; left: 50%; width: 0.4rem; height: 0.4rem; border-radius: 50%; background: #9beccd; }
+	.node-top { top: calc(50% - 6.2rem); }
+	.node-bottom { top: calc(50% + 5.8rem); }
+	.core-caption { position: absolute; bottom: -1.5rem; width: 100%; color: #799b90; font-size: 0.5rem; letter-spacing: 0.08em; text-align: center; }
+	.token-panel { position: relative; margin-top: 3rem; padding: 0.9rem; border: 1px solid #6ca78e35; border-radius: 0.55rem; background: #101c20e6; }
+	.token-badge { padding: 0.25rem 0.35rem; border-radius: 0.2rem; background: #29473b; color: #9beccd; font-size: 0.45rem; }
+	.token-string { display: grid; margin-block: 0.85rem; overflow: hidden; gap: 0.2rem; font-size: 0.65rem; white-space: nowrap; }
+	.token-string span:nth-child(1) { color: #df9fb6; }
+	.token-string span:nth-child(2) { color: #b4abd9; }
+	.token-string span:nth-child(3) { color: #8fdbbc; }
+
+	.security-core,
+	.token-panel {
+		transition: transform 360ms var(--ease-out);
+	}
+
+	/* Keep the shield centered while bringing the token closer to the title. */
+	.security-core {
+		transform: translateY(4rem);
+	}
+
+	.token-panel {
+		transform: translateY(7.5rem);
+	}
+
+	.shield-core::after {
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		background: linear-gradient(135deg, #c8ffe41a, transparent 48%);
+		pointer-events: none;
+		content: '';
+	}
+
+	:global(.project-card:has(:focus-visible)) .security-core,
+	:global(.project-card:has(:focus-visible)) .token-panel {
+		transform: translateY(0);
+	}
+
+	@media (any-hover: hover) {
+		:global(.project-card:hover) .security-core,
+		:global(.project-card:hover) .token-panel {
+			transform: translateY(0);
+		}
+	}
+
+	@media (any-hover: none) {
+		.security-core,
+		.token-panel {
+			transform: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.security-core,
+		.token-panel {
+			transition: none;
+		}
+	}
+
+	@media (max-width: 48rem) {
+		.auth-preview { padding-bottom: 12rem; }
+		.preview-heading { margin-top: 0; }
+		.security-core { min-height: 8rem; }
+		.orbit-outer { width: 7rem; height: 7rem; }
+		.orbit-inner { width: 6rem; height: 6rem; }
+		.shield-core { width: 4.8rem; height: 4.8rem; border-radius: 1.2rem; }
+		.shield-core :global(svg) { width: 44px; height: 44px; }
+		.node-top { top: calc(50% - 3.7rem); }
+		.node-bottom { top: calc(50% + 3.3rem); }
+		.token-panel { margin-top: 2.4rem; }
+	}
+</style>

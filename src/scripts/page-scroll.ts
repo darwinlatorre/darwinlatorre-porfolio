@@ -1,4 +1,5 @@
 import { createClipboardFeedback } from './clipboard';
+import { profile } from '../data/portfolio';
 import { initializeTreeNavigation, type TreeNavigation } from './tree-navigation';
 
 const initializePageScroll = () => {
@@ -42,6 +43,9 @@ const initializePageScroll = () => {
 	const servicesTitle = services?.querySelector<HTMLElement>('[data-services-title]');
 	const serviceCards = services?.querySelectorAll<HTMLElement>('[data-service-card]') ?? [];
 	const servicesTerminal = services?.querySelector<HTMLElement>('[data-services-terminal]');
+	const projects = document.querySelector<HTMLElement>('[data-projects]');
+	const projectsContent = projects?.querySelector<HTMLElement>('[data-projects-content]');
+	const projectCards = projects?.querySelectorAll<HTMLElement>('[data-project-card]') ?? [];
 	const certificates = document.querySelector<HTMLElement>('[data-certificates]');
 	const certificatesContent = certificates?.querySelector<HTMLElement>(
 		'[data-certificates-content]',
@@ -62,7 +66,7 @@ const initializePageScroll = () => {
 		? createClipboardFeedback({
 				trigger: nameAction,
 				status: copyStatus ?? null,
-				value: 'contact@darwinlatorre.com',
+				value: profile.email,
 			})
 		: null;
 
@@ -73,9 +77,10 @@ const initializePageScroll = () => {
 	let endTop = 0;
 	let detailsTop = scroller.clientHeight;
 	let aboutTop = scroller.clientHeight * 2;
-	let experienceTop = scroller.clientHeight * 3;
-	let servicesTop = scroller.clientHeight * 4;
-	let certificatesTop = scroller.clientHeight * 5;
+	let projectsTop = scroller.clientHeight * 3;
+	let experienceTop = scroller.clientHeight * 4;
+	let servicesTop = scroller.clientHeight * 5;
+	let certificatesTop = scroller.clientHeight * 6;
 	let bypassSectionLocks = false;
 	let bypassTimer = 0;
 	let treeNavigation: TreeNavigation | null = null;
@@ -119,6 +124,7 @@ const initializePageScroll = () => {
 		normalizeContentPosition(aboutContent, aboutTop);
 		normalizeContentPosition(experienceContent, experienceTop);
 		normalizeContentPosition(servicesContent, servicesTop);
+		normalizeContentPosition(projectsContent, projectsTop);
 		normalizeContentPosition(certificatesContent, certificatesTop);
 	}
 	const getScrollState = (content: HTMLElement | null | undefined) => {
@@ -150,9 +156,12 @@ const initializePageScroll = () => {
 		aboutTop = about
 			? about.getBoundingClientRect().top + scroller.scrollTop
 			: detailsTop + scroller.clientHeight;
+		projectsTop = projects
+			? projects.getBoundingClientRect().top + scroller.scrollTop
+			: aboutTop + scroller.clientHeight;
 		experienceTop = experience
 			? experience.getBoundingClientRect().top + scroller.scrollTop
-			: aboutTop + scroller.clientHeight;
+			: projectsTop + scroller.clientHeight;
 		servicesTop = services
 			? services.getBoundingClientRect().top + scroller.scrollTop
 			: experienceTop + scroller.clientHeight;
@@ -179,7 +188,7 @@ const initializePageScroll = () => {
 				: 0
 			: rawAboutProgress;
 		const rawExperienceProgress = clamp(
-			(scroller.scrollTop - aboutTop) / Math.max(experienceTop - aboutTop, 1),
+			(scroller.scrollTop - projectsTop) / Math.max(experienceTop - projectsTop, 1),
 		);
 		const experienceProgress = reducedMotion.matches
 			? rawExperienceProgress >= 0.5
@@ -194,6 +203,12 @@ const initializePageScroll = () => {
 				? 1
 				: 0
 			: rawServicesProgress;
+		const rawProjectsProgress = clamp(
+			(scroller.scrollTop - aboutTop) / Math.max(projectsTop - aboutTop, 1),
+		);
+		const projectsProgress = reducedMotion.matches
+			? rawProjectsProgress >= 0.5 ? 1 : 0
+			: rawProjectsProgress;
 		const rawCertificatesProgress = clamp(
 			(scroller.scrollTop - servicesTop) / Math.max(certificatesTop - servicesTop, 1),
 		);
@@ -203,14 +218,16 @@ const initializePageScroll = () => {
 				: 0
 			: rawCertificatesProgress;
 		const inCertificates = scroller.scrollTop >= certificatesTop - 2;
+		const inProjects = scroller.scrollTop >= projectsTop - 2 && scroller.scrollTop < experienceTop - 2;
 		const inServices = scroller.scrollTop >= servicesTop - 2 && !inCertificates;
 		const inExperience =
-			scroller.scrollTop >= experienceTop - 2 && !inServices && !inCertificates;
+			scroller.scrollTop >= experienceTop - 2 && !inServices && !inProjects && !inCertificates;
 		const inAbout =
-			scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inCertificates;
+			scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inProjects && !inCertificates;
 		const aboutScrollState = getScrollState(aboutContent);
 		const experienceScrollState = getScrollState(experienceContent);
 		const servicesScrollState = getScrollState(servicesContent);
+		const projectsScrollState = getScrollState(projectsContent);
 		const certificatesScrollState = getScrollState(certificatesContent);
 
 		aboutContent?.classList.toggle(
@@ -230,6 +247,10 @@ const initializePageScroll = () => {
 			servicesScrollState.scrollable &&
 				!servicesScrollState.atStart &&
 				!servicesScrollState.atEnd,
+		);
+		projectsContent?.classList.toggle(
+			'is-scroll-contained',
+			projectsScrollState.scrollable && !projectsScrollState.atStart && !projectsScrollState.atEnd,
 		);
 		certificatesContent?.classList.toggle(
 			'is-scroll-contained',
@@ -303,6 +324,14 @@ const initializePageScroll = () => {
 					scrollCue.href = '#certificates';
 					scrollCue.setAttribute('aria-label', 'Continue through the Certificates content');
 				}
+			} else if (inProjects) {
+				if (projectsScrollState.atEnd) {
+					scrollCue.href = '#experience';
+					scrollCue.setAttribute('aria-label', 'Go to the Experience section');
+				} else {
+					scrollCue.href = '#projects';
+					scrollCue.setAttribute('aria-label', 'Continue through the Projects content');
+				}
 			} else if (inServices) {
 				if (servicesScrollState.atEnd) {
 					scrollCue.href = '#certificates';
@@ -321,8 +350,8 @@ const initializePageScroll = () => {
 				}
 			} else if (inAbout) {
 				if (aboutScrollState.atEnd) {
-					scrollCue.href = '#experience';
-					scrollCue.setAttribute('aria-label', 'Go to the Experience section');
+					scrollCue.href = '#projects';
+					scrollCue.setAttribute('aria-label', 'Go to the Projects section');
 				} else {
 					scrollCue.href = '#about';
 					scrollCue.setAttribute('aria-label', 'Continue through the About content');
@@ -364,7 +393,7 @@ const initializePageScroll = () => {
 		});
 		reveal(aboutTerminalCommand, range(aboutProgress, 0.82, 0.98), 10);
 
-		if (about) about.inert = aboutProgress < 0.65 || experienceProgress >= 0.2;
+		if (about) about.inert = aboutProgress < 0.65 || projectsProgress >= 0.2;
 		if (experience) {
 			experience.inert = experienceProgress < 0.65 || servicesProgress >= 0.2;
 		}
@@ -384,6 +413,11 @@ const initializePageScroll = () => {
 		});
 		reveal(servicesTerminal, range(servicesProgress, 0.76, 0.96), 8);
 
+		if (projects) projects.inert = projectsProgress < 0.65 || experienceProgress >= 0.2;
+		projectCards.forEach((card, index) => {
+			const start = 0.3 + index * 0.12;
+			reveal(card, range(projectsProgress, start, start + 0.3), 18);
+		});
 		if (certificates) certificates.inert = certificatesProgress < 0.65;
 		reveal(certificatesCommand, range(certificatesProgress, 0.18, 0.36), 8);
 		reveal(certificatesTitle, range(certificatesProgress, 0.3, 0.48), 12);
@@ -418,6 +452,7 @@ const initializePageScroll = () => {
 		enforceSectionBoundary(aboutContent, aboutTop);
 		enforceSectionBoundary(experienceContent, experienceTop);
 		enforceSectionBoundary(servicesContent, servicesTop);
+		enforceSectionBoundary(projectsContent, projectsTop);
 		enforceSectionBoundary(certificatesContent, certificatesTop);
 		requestRender();
 	};
@@ -455,6 +490,10 @@ const initializePageScroll = () => {
 			contentResizeObserver?.observe(servicesContent.firstElementChild);
 		}
 	}
+	if (projectsContent) {
+		contentResizeObserver?.observe(projectsContent);
+		if (projectsContent.firstElementChild) contentResizeObserver?.observe(projectsContent.firstElementChild);
+	}
 	if (certificatesContent) {
 		contentResizeObserver?.observe(certificatesContent);
 		if (certificatesContent.firstElementChild) {
@@ -466,7 +505,9 @@ const initializePageScroll = () => {
 		passive: true,
 		signal: abortController.signal,
 	});
-	scroller.addEventListener('scrollend', endProgrammaticNavigation, {
+	scroller.addEventListener('scrollend', (event) => {
+		if (event.target === scroller) endProgrammaticNavigation();
+	}, {
 		signal: abortController.signal,
 	});
 	aboutContent?.addEventListener('scroll', requestRender, {
@@ -481,6 +522,7 @@ const initializePageScroll = () => {
 		passive: true,
 		signal: abortController.signal,
 	});
+	projectsContent?.addEventListener('scroll', requestRender, { passive: true, signal: abortController.signal });
 	certificatesContent?.addEventListener('scroll', requestRender, {
 		passive: true,
 		signal: abortController.signal,
@@ -493,13 +535,16 @@ const initializePageScroll = () => {
 		(event) => {
 			if (technologyDialog?.open || cvDialog?.open) return;
 			const inCertificates = scroller.scrollTop >= certificatesTop - 2;
+			const inProjects = scroller.scrollTop >= projectsTop - 2 && scroller.scrollTop < experienceTop - 2;
 			const inServices = scroller.scrollTop >= servicesTop - 2 && !inCertificates;
 			const inExperience =
-				scroller.scrollTop >= experienceTop - 2 && !inServices && !inCertificates;
+				scroller.scrollTop >= experienceTop - 2 && !inServices && !inProjects && !inCertificates;
 			const inAbout =
-				scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inCertificates;
+				scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inProjects && !inCertificates;
 			const activeContent = inCertificates
 				? certificatesContent
+				: inProjects
+					? projectsContent
 				: inServices
 					? servicesContent
 					: inExperience
@@ -587,12 +632,14 @@ const initializePageScroll = () => {
 		(event) => {
 			const inDetails = scroller.scrollTop / Math.max(detailsTop, 1) >= 0.5;
 			const inCertificates = scroller.scrollTop >= certificatesTop - 2;
+			const inProjects = scroller.scrollTop >= projectsTop - 2 && scroller.scrollTop < experienceTop - 2;
 			const inServices = scroller.scrollTop >= servicesTop - 2 && !inCertificates;
 			const inExperience =
-				scroller.scrollTop >= experienceTop - 2 && !inServices && !inCertificates;
+				scroller.scrollTop >= experienceTop - 2 && !inServices && !inProjects && !inCertificates;
 			const inAbout =
-				scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inCertificates;
+				scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inProjects && !inCertificates;
 			const certificatesScrollState = getScrollState(certificatesContent);
+			const projectsScrollState = getScrollState(projectsContent);
 			if (inCertificates) {
 				if (certificatesScrollState.atEnd) {
 					event.preventDefault();
@@ -610,6 +657,18 @@ const initializePageScroll = () => {
 				return;
 			}
 			const servicesScrollState = getScrollState(servicesContent);
+			if (inProjects) {
+				if (projectsScrollState.atEnd) {
+					event.preventDefault();
+					document.querySelector('#experience')?.scrollIntoView({
+						behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start',
+					});
+					return;
+				}
+				event.preventDefault();
+				projectsContent?.scrollBy({ top: projectsContent.clientHeight * 0.8, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+				return;
+			}
 			if (inServices) {
 				if (servicesScrollState.atEnd) {
 					event.preventDefault();
@@ -655,7 +714,7 @@ const initializePageScroll = () => {
 			}
 
 			const target = document.querySelector(
-				inAbout ? '#experience' : inDetails ? '#about' : '#home-details',
+				inAbout ? '#projects' : inDetails ? '#about' : '#home-details',
 			);
 			if (!target) return;
 
@@ -687,6 +746,7 @@ const initializePageScroll = () => {
 	enforceSectionBoundary(aboutContent, aboutTop);
 	enforceSectionBoundary(experienceContent, experienceTop);
 	enforceSectionBoundary(servicesContent, servicesTop);
+	enforceSectionBoundary(projectsContent, projectsTop);
 	enforceSectionBoundary(certificatesContent, certificatesTop);
 	render();
 };

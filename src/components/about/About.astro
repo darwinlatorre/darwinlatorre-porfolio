@@ -30,7 +30,7 @@ const socialLinks = portfolioSocialLinks.map((link) => ({
 
 				<div class="command-output description-output" data-about-description>
 					<span class="output-rule" aria-hidden="true" data-about-line></span>
-					<p>{profile.description}</p>
+					<p tabindex="0" aria-label="Professional profile description">{profile.description}</p>
 				</div>
 			</section>
 
@@ -326,63 +326,109 @@ const socialLinks = portfolioSocialLinks.map((link) => ({
 			--about-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.5rem);
 		}
 
-	.about-content {
-		padding-inline: 2rem;
-		align-items: start;
-		overflow: hidden;
-		scrollbar-width: initial;
-	}
-
-	.about-content::-webkit-scrollbar {
-		display: initial;
-	}
+		.about-content {
+			padding: 0.25rem clamp(1.35rem, 5vw, 2rem) 0.5rem;
+			align-items: start;
+			overflow-y: auto;
+			scrollbar-width: thin;
+		}
 
 		.terminal-layout {
-			padding-top: 0.5rem;
-			gap: clamp(0.55rem, 3.5vh, 1.3rem);
+			width: min(34rem, 100%);
+			min-width: 0;
+			margin-inline: auto;
+			gap: clamp(0.65rem, 1.8dvh, 1rem);
 		}
 
 		.terminal-block {
-			gap: 0.1rem;
+			min-width: 0;
+			gap: 0.4rem;
 		}
 
 		.command-line {
-			flex-wrap: wrap;
-			gap: 0.25rem 0.65rem;
-			font-size: var(--about-font-size);
+			flex-direction: column;
+			gap: 0.2rem;
+			font-size: 0.85rem;
+			line-height: 1.55;
+		}
+
+		.command-line code {
+			overflow-wrap: anywhere;
+		}
+
+		.terminal-block:not(:first-child) > .command-line .prompt {
+			display: none;
 		}
 
 		.command-output {
-			margin-left: 0.6rem;
-			padding-left: 1.15rem;
+			margin-left: 0;
+			padding-left: 1rem;
 		}
 
 		.description-output p {
-			font-size: clamp(0.95rem, 1.35vw, 1.18rem);
-			line-height: 1.5;
+			max-height: clamp(6rem, calc(100dvh - 30rem), 24rem);
+			overflow-y: auto;
+			font-size: 0.85rem;
+			line-height: 1.55;
+			letter-spacing: 0;
+			scrollbar-width: thin;
+		}
+
+		.description-output p:focus-visible {
+			outline: 1px solid var(--color-accent-muted);
+			outline-offset: 3px;
+		}
+
+		.stats-output {
+			width: 100%;
+			padding-block: 0;
+			gap: 0.25rem;
 		}
 
 		.stat-row {
+			min-height: 1.4rem;
+			grid-template-columns: auto auto;
+			align-items: center;
 			gap: 0.7rem;
-			font-size: var(--about-font-size);
+			font-size: 0.85rem;
+		}
+
+		.stat-row strong {
+			color: var(--color-text);
+			font-size: inherit;
 		}
 
 		.social-links {
-			gap: 1.55rem;
+			width: fit-content;
+			padding: 0.5rem 0.4rem 0.25rem;
+			grid-template-columns: repeat(3, auto);
+			gap: 1.35rem;
+			border-left: 0;
 		}
 
 		.social-links a {
-			grid-template-columns: 2.25rem auto;
-			gap: 0.75rem;
+			min-height: 3.1rem;
+			grid-template-columns: 1fr;
+			justify-items: center;
+			gap: 0.5rem;
 		}
 
 		.social-diamond {
 			width: 1.8rem;
 		}
 
+		.social-name {
+			font-size: 0.65rem;
+		}
+
+		.interactive-block {
+			padding-top: 0.6rem;
+			border-top: 1px dashed var(--color-accent-muted);
+		}
+
 	}
 
-	@media (max-height: 50rem) {
+	@media (min-width: 48.01rem) and (max-height: 50rem) {
 		.social-links {
 			display: flex;
 			gap: 2rem;
@@ -396,26 +442,6 @@ const socialLinks = portfolioSocialLinks.map((link) => ({
 
 		.social-name {
 			display: none;
-		}
-	}
-
-	@media (max-width: 48rem) and (max-height: 42rem) {
-		.about {
-			--about-header-space: calc(var(--page-inset) + var(--control-offset) + 2.25rem);
-			--about-footer-space: calc(var(--page-inset) + var(--control-offset) + 2rem);
-		}
-
-			.terminal-layout {
-			gap: 1.1rem;
-		}
-
-		.terminal-block {
-			gap: 0.55rem;
-		}
-
-		.description-output p {
-			font-size: clamp(0.95rem, 1.35vw, 1.18rem);
-			line-height: 1.4;
 		}
 	}
 

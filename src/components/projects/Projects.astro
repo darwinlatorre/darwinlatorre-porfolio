@@ -1,0 +1,352 @@
+---
+import AuthPreview from './AuthPreview.astro';
+import { projects } from '../../data/portfolio';
+---
+
+<section id="projects" class="screen projects" aria-label="Projects" data-projects>
+	<div class="projects-content" tabindex="0" aria-label="Projects content" data-projects-content>
+		<div class="projects-grid">
+			{
+				projects.map((project) => (
+					<article id={project.id} class="project-card" data-project-card>
+						<div class="project-preview" aria-hidden="true">
+							{project.preview ? (
+								<iframe src={project.preview} title={`${project.name} website preview`} loading="lazy" tabindex="-1" />
+							) : (
+								<AuthPreview />
+							)}
+						</div>
+						<a class="project-main-link" href={project.href} target="_blank" rel="noreferrer" aria-label={`Open ${project.name}`}>
+							<div class="project-meta">
+								<h2>{project.name}</h2>
+								<span class="project-description">{project.description}</span>
+							</div>
+						</a>
+						{project.repository && (
+							<a class="project-repository" href={project.repository} target="_blank" rel="noreferrer" aria-label={`View ${project.name} repository on GitHub`}>
+								<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+								<path fill="currentColor" d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.23c-3.34.73-4.04-1.42-4.04-1.42-.55-1.39-1.33-1.76-1.33-1.76-1.09-.75.08-.74.08-.74 1.2.09 1.83 1.23 1.83 1.23 1.07 1.83 2.8 1.3 3.49.99.11-.77.42-1.3.76-1.6-2.67-.3-5.48-1.34-5.48-5.95 0-1.31.47-2.38 1.23-3.22-.12-.3-.53-1.52.12-3.17 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.29-1.23 3.29-1.23.66 1.65.25 2.87.13 3.17.77.84 1.23 1.91 1.23 3.22 0 4.62-2.81 5.64-5.49 5.94.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.57A12 12 0 0 0 12 .5Z" />
+								</svg>
+							</a>
+						)}
+					</article>
+				))
+			}
+		</div>
+		<a href="https://github.com/darwinlatorre" target="_blank" rel="noreferrer" class="projects-github-bar github-profile-button">
+				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+					<path fill="currentColor" d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.23c-3.34.73-4.04-1.42-4.04-1.42-.55-1.39-1.33-1.76-1.33-1.76-1.09-.75.08-.74.08-.74 1.2.09 1.83 1.23 1.83 1.23 1.07 1.83 2.8 1.3 3.49.99.11-.77.42-1.3.76-1.6-2.67-.3-5.48-1.34-5.48-5.95 0-1.31.47-2.38 1.23-3.22-.12-.3-.53-1.52.12-3.17 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.29-1.23 3.29-1.23.66 1.65.25 2.87.13 3.17.77.84 1.23 1.91 1.23 3.22 0 4.62-2.81 5.64-5.49 5.94.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.57A12 12 0 0 0 12 .5Z" />
+				</svg>
+				<span>GitHub / darwinlatorre</span>
+		</a>
+	</div>
+</section>
+
+<style>
+	.projects {
+		--projects-max-width: 82rem;
+		--projects-gap: 1.5rem;
+		--projects-header-space: calc(var(--page-inset) + var(--control-offset) + 4.75rem);
+		--projects-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.75rem);
+
+		display: grid;
+		overflow: hidden;
+		grid-template-rows: var(--projects-header-space) minmax(0, 1fr) var(--projects-footer-space);
+	}
+
+	.projects-content {
+		display: grid;
+		width: min(88rem, 100%);
+		height: 100%;
+		min-height: 0;
+		min-width: 0;
+		margin-inline: auto;
+		padding: 0.75rem clamp(2rem, 5vw, 4.5rem);
+		overflow-y: auto;
+		grid-row: 2;
+		align-content: safe center;
+		gap: var(--projects-gap);
+		scrollbar-width: none;
+	}
+
+	.projects-content::-webkit-scrollbar {
+		display: none;
+	}
+
+	.projects-content.is-scroll-contained {
+		overscroll-behavior-y: contain;
+	}
+
+	.projects-content:focus-visible {
+		outline: 1px solid var(--color-accent-muted);
+		outline-offset: -4px;
+	}
+
+	.projects-github-bar {
+		display: flex;
+		width: min(var(--projects-max-width), 100%);
+		margin-inline: auto;
+		padding: 0.65rem;
+		justify-content: center;
+		border: var(--border-width) solid var(--color-border);
+		background: color-mix(in srgb, var(--color-surface-raised) 35%, transparent);
+	}
+
+	.github-profile-button {
+		display: inline-flex;
+		min-height: 2.75rem;
+		padding: 0.5rem 1rem;
+		align-items: center;
+		gap: 0.6rem;
+		cursor: pointer;
+		color: var(--color-text);
+		font-size: 0.85rem;
+		text-decoration: none;
+		transition: color 180ms ease;
+	}
+
+	.github-profile-button:hover {
+		color: var(--color-accent);
+	}
+
+	.github-profile-button:focus-visible {
+		outline: 1px solid var(--color-accent);
+		outline-offset: 2px;
+	}
+
+	.projects-grid {
+		display: grid;
+		width: min(var(--projects-max-width), 100%);
+		margin-inline: auto;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--projects-gap);
+	}
+
+	.project-card {
+		position: relative;
+		display: grid;
+		min-width: 0;
+		min-height: clamp(40rem, calc(68vh + 14rem), 50rem);
+		overflow: hidden;
+		border: var(--border-width) solid var(--color-border);
+		background: color-mix(in srgb, var(--color-surface-raised) 24%, transparent);
+		color: var(--color-text);
+		text-decoration: none;
+		transition: border-color 220ms ease, background-color 220ms ease;
+	}
+
+	.project-preview {
+		position: absolute;
+		inset: 0;
+		overflow: hidden;
+		background: var(--color-surface-raised);
+	}
+
+	.project-preview iframe {
+		width: calc(192.4% + 48px);
+		height: calc(192.4% + 48px);
+		overflow: hidden;
+		border: 0;
+		transform: scale(0.52);
+		transform-origin: top left;
+		pointer-events: none;
+	}
+
+	.project-main-link {
+		position: absolute;
+		z-index: 1;
+		inset: 0;
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.project-meta {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		display: grid;
+		padding: 0.8rem 2.5rem 0.8rem 1rem;
+		grid-template-rows: auto 0fr;
+		gap: 0;
+		border-top: 1px solid var(--color-border);
+		background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+		backdrop-filter: blur(3px);
+		transition: grid-template-rows 280ms var(--ease-out), background-color 280ms ease;
+	}
+
+	.project-card h2 {
+		margin: 0;
+		font-size: clamp(1.3rem, 1.95vw, 1.75rem);
+		font-weight: 400;
+		letter-spacing: -0.025em;
+		line-height: 1.4;
+		text-align: left;
+		overflow-wrap: anywhere;
+	}
+
+	.project-description {
+		display: block;
+		min-height: 0;
+		overflow: hidden;
+		padding-right: 0.3rem;
+		color: color-mix(in srgb, var(--color-text) 92%, var(--color-text-muted));
+		font-size: var(--terminal-font-size);
+		line-height: 1.5;
+		opacity: 0;
+		transform: translateY(0.6rem);
+		transition: opacity 220ms ease 40ms, transform 280ms var(--ease-out), margin-top 280ms var(--ease-out);
+	}
+
+	.project-card:hover .project-meta,
+	.project-card:has(:focus-visible) .project-meta {
+		grid-template-rows: auto 1fr;
+		background: color-mix(in srgb, var(--color-surface-raised) 72%, transparent);
+		backdrop-filter: blur(12px);
+	}
+
+	.project-card:hover .project-description,
+	.project-card:has(:focus-visible) .project-description {
+		margin-top: 0.5rem;
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	.project-repository {
+		position: absolute;
+		z-index: 2;
+		right: 0.75rem;
+		bottom: 0.75rem;
+		display: inline-flex;
+		width: 2.75rem;
+		min-height: 2.75rem;
+		padding: 0.35rem;
+		align-items: center;
+		justify-content: center;
+		border: 0;
+		background: transparent;
+		color: var(--color-accent);
+		text-decoration: none;
+		opacity: 0;
+		pointer-events: none;
+		transform: translateY(-4px);
+		transition: opacity 180ms ease, transform 180ms ease;
+	}
+
+	.project-card:hover .project-repository,
+	.project-card:has(:focus-visible) .project-repository,
+	.project-repository:focus-visible {
+		opacity: 1;
+		pointer-events: auto;
+		transform: translateY(0);
+	}
+
+	.project-repository:hover,
+	.project-repository:focus-visible {
+		color: var(--color-accent);
+		transform: scale(1.12);
+	}
+
+	.project-card:hover,
+	.project-card:has(:focus-visible) {
+		border-color: color-mix(in srgb, var(--color-accent) 66%, var(--color-text));
+		background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface));
+	}
+
+	.project-main-link:focus-visible,
+	.project-repository:focus-visible {
+		outline: 1px solid var(--color-accent);
+		outline-offset: -3px;
+	}
+
+	@media (max-width: 48rem) {
+		.projects {
+			--projects-header-space: calc(var(--page-inset) + var(--control-offset) + 3rem);
+			--projects-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.5rem);
+		}
+
+		.projects-content {
+			padding-inline: clamp(1rem, 5vw, 2rem);
+			overflow-y: auto;
+			align-items: start;
+			align-content: start;
+		}
+
+		.projects-grid {
+			width: min(34rem, 100%);
+			padding-block: 0.5rem;
+			grid-template-columns: 1fr;
+			gap: var(--projects-gap);
+		}
+
+		.projects-github-bar {
+			width: min(34rem, 100%);
+		}
+
+		.project-card {
+			min-height: 32rem;
+		}
+
+		.project-card:has(.auth-preview) {
+			min-height: 40rem;
+		}
+
+		.project-card h2 {
+			font-size: 1.35rem;
+		}
+
+		.project-description {
+			margin-top: 0.5rem;
+			font-size: 0.85rem;
+			opacity: 1;
+			transform: none;
+		}
+
+		.project-meta {
+			grid-template-rows: auto 1fr;
+			padding-right: 1rem;
+		}
+
+		.project-card:has(.project-repository) .project-meta {
+			padding-right: 4rem;
+		}
+
+		.project-repository {
+			opacity: 1;
+			pointer-events: auto;
+			transform: none;
+		}
+	}
+
+	@media (hover: none), (pointer: coarse) {
+		.project-meta {
+			grid-template-rows: auto 1fr;
+			padding-right: 1rem;
+		}
+
+		.project-card:has(.project-repository) .project-meta {
+			padding-right: 4rem;
+		}
+		.project-repository {
+			opacity: 1;
+			pointer-events: auto;
+			transform: none;
+		}
+
+		.project-card .project-description {
+			margin-top: 0.5rem;
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.project-card,
+		.project-repository,
+		.project-meta,
+		.project-description,
+		.github-profile-button {
+			transition: none;
+		}
+	}
+</style>

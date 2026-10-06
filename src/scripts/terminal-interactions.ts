@@ -8,7 +8,7 @@ import {
 } from '../data/portfolio';
 import type { PortfolioSection, TerminalContext } from '../types/terminal';
 
-type ShowTarget = PortfolioSection | 'projects';
+type ShowTarget = PortfolioSection;
 
 type TerminalResult =
 	| { type: 'text'; text: string }
@@ -47,11 +47,12 @@ declare global {
 const internalSections: PortfolioSection[] = [
 	'home',
 	'about',
+	'projects',
 	'experience',
 	'services',
 	'certificates',
 ];
-const showTargets: ShowTarget[] = [...internalSections, 'projects'];
+const showTargets: ShowTarget[] = internalSections;
 const commandHistory: string[] = [];
 
 const text = (value: string): TerminalResult => ({ type: 'text', text: value });
@@ -104,8 +105,8 @@ const getShowResult = (target: ShowTarget): TerminalResult => {
 		case 'projects':
 			return {
 				type: 'links',
-				title: 'Projects are currently available through the public GitHub profile.',
-				links: [{ label: 'GitHub / darwinlatorre', href: profile.githubHref, external: true }],
+				title: 'Featured projects',
+				links: [{ label: 'Explore projects', href: '#projects' }],
 			};
 	}
 };
@@ -132,7 +133,7 @@ const commands: Record<string, TerminalCommand> = {
 		execute: () => ({
 			result: {
 				type: 'list',
-				items: ['home/', 'about/', 'experience/', 'services/', 'certificates/', 'projects -> GitHub'],
+				items: internalSections.map((section) => `${section}/`),
 			},
 		}),
 	},
@@ -149,7 +150,7 @@ const commands: Record<string, TerminalCommand> = {
 		execute: ([target, ...extra]) => {
 			if (!target || extra.length > 0 || !internalSections.includes(target as PortfolioSection)) {
 				return {
-					result: text('usage: go <home|about|experience|services|certificates>'),
+					result: text(`usage: go <${internalSections.join('|')}>`),
 				};
 			}
 
@@ -167,7 +168,7 @@ const commands: Record<string, TerminalCommand> = {
 			if (extra.length > 0 || !showTargets.includes(resolvedTarget as ShowTarget)) {
 				return {
 					result: text(
-						'usage: show [home|about|experience|services|certificates|projects]',
+						`usage: show [${internalSections.join('|')}]`,
 					),
 				};
 			}
@@ -223,10 +224,9 @@ const commands: Record<string, TerminalCommand> = {
 	projects: {
 		name: 'projects',
 		usage: 'projects',
-		description: 'Open the GitHub profile.',
+		description: 'Go to featured projects.',
 		execute: () => ({
-			result: text('Opening GitHub profile...'),
-			action: { type: 'open', href: profile.githubHref },
+			action: { type: 'navigate', target: 'projects' },
 		}),
 	},
 	history: {
@@ -356,6 +356,10 @@ const initializeTerminal = (root: HTMLElement) => {
 				: { result: text(`command not found: ${commandName}. Use "help" to list commands.`) };
 
 			renderResult(response, execution.result);
+			if (execution.action?.type === 'navigate') {
+				window.clearTimeout(focusTimer);
+				input.blur();
+			}
 			runAction(execution.action);
 		},
 		{ signal: abortController.signal },
