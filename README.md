@@ -1,44 +1,43 @@
 # Darwin Latorre Portfolio
 
-Personal portfolio for a DevOps and Backend Developer, built with Astro and presented as an interactive terminal experience.
+Personal portfolio for Darwin Latorre, a DevOps and Backend Engineer. Built with Astro, it presents professional experience, selected projects, services, and certifications through a terminal-inspired interface.
 
-**Live site:** [darwinlatorre.vercel.app](https://darwinlatorre.vercel.app)
-
-## Features
-
-- Full-screen navigation with scroll snapping across Home, About, Experience, and Certificates.
-- Interactive terminal prompts with command responses and synchronized cursors.
-- Professional experience covering DevOps, cloud infrastructure, Java, and Spring Boot.
-- External certificate verification links and upcoming certification status.
-- Responsive layouts with mobile accordions and sequential internal scrolling.
-- Keyboard navigation, reduced-motion support, accessible focus states, and semantic markup.
-- Vercel Analytics and Speed Insights integration.
+**Live site:** [darwinlatorre.com](https://darwinlatorre.com)
 
 ## Tech Stack
 
-- [Astro](https://astro.build/)
-- TypeScript
-- CSS
-- [Lucide](https://lucide.dev/) and [Simple Icons](https://simpleicons.org/)
-- ESLint and Astro Check
-- Docker and Docker Compose
-- Vercel
+- **Site:** [Astro](https://astro.build/), TypeScript, and CSS.
+- **Icons:** [Lucide](https://lucide.dev/) and [Simple Icons](https://simpleicons.org/).
+- **Quality checks:** ESLint and Astro Check.
+- **Deployment:** Vercel, with Docker and Docker Compose for local production previews.
 
 ## Requirements
 
 - Node.js 22.12 or later
-- npm
+- npm (use the committed `package-lock.json`).
 
 ## Local Development
 
 Install dependencies and start the development server:
 
 ```sh
-npm install
+npm ci
 npm run dev
 ```
 
 The site will be available at `http://localhost:4321`.
+
+## Verification and Production Preview
+
+Run the independent checks before publishing:
+
+```sh
+npm run lint
+npm run check
+npm run build
+```
+
+Then use `npm run preview` to serve the built site locally. The build command does not run lint or type checking automatically.
 
 ## Available Commands
 
@@ -69,10 +68,12 @@ docker compose down
 ```text
 src/
   components/   UI organized by portfolio section
+  data/         Profile, projects, services, and certificate content
   layouts/      Shared Astro page layout
   pages/        Site entry points
   scripts/      Terminal, navigation, and scroll interactions
   styles/       Global styles and design tokens
+  types/        Shared TypeScript types
 public/         Static assets and downloadable CV
 ```
 
@@ -100,3 +101,4 @@ For skill examples using bare `graphify` or Python commands, activate the enviro
 - `dev` is the active development branch.
 - `main` contains production-ready changes.
 - Vercel deploys the production site from `main` and creates previews for pull requests.
+- Production is available at [darwinlatorre.com](https://darwinlatorre.com).

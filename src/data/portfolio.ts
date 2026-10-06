@@ -38,9 +38,9 @@ export const projects = [
 		id: 'project-portfolio',
 		name: 'darwinlatorre_',
 		description: 'Portafolio personal de DevOps y desarrollo backend, con experiencia profesional, proyectos y certificaciones en una interfaz de terminal interactiva.',
-		href: 'https://www.darwinlatorre.com/',
+		href: 'https://darwinlatorre.com/',
 		repository: 'https://github.com/darwinlatorre/darwinlatorre-porfolio',
-		preview: 'https://www.darwinlatorre.com/',
+		preview: 'https://darwinlatorre.com/',
 	},
 ] as const;
 
