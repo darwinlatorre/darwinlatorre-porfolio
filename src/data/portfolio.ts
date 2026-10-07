@@ -63,6 +63,7 @@ export const experiences = [
 		highlights: [
 			'Performed adjustments and maintenance on the backend of an e-commerce platform developed with Java and Spring Boot.',
 			'Implemented adjustments, bug fixes, and deployments on GCP using Cloud Run, Cloud SQL, Artifact Registry, and Secret Manager.',
+			'Maintained authentication solutions in Spring Boot, from custom implementations to Keycloak integrations.',
 		],
 	},
 	{
