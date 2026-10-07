@@ -11,6 +11,13 @@ export const profile = {
 	githubHref: 'https://github.com/darwinlatorre',
 } as const;
 
+export const seo = {
+	title: 'Darwinlatorre_',
+	description: profile.description,
+	siteName: 'Darwinlatorre_',
+	alternateNames: ['Darwinlatorre_', 'darwinlatorre', 'darwinlatorre_', profile.handle],
+} as const;
+
 export const socialLinks = [
 	{ label: 'LinkedIn', href: 'https://www.linkedin.com/in/darwinlatorre/' },
 	{ label: 'GitHub', href: profile.githubHref },
@@ -38,7 +45,7 @@ export const projects = [
 		id: 'project-portfolio',
 		name: 'darwinlatorre_',
 		description: 'Portafolio personal de DevOps y desarrollo backend, con experiencia profesional, proyectos y certificaciones en una interfaz de terminal interactiva.',
-		href: 'https://darwinlatorre.com/',
+		href: 'https://www.darwinlatorre.com/',
 		repository: 'https://github.com/darwinlatorre/darwinlatorre-porfolio',
 		preview: '/previews/portfolio.webp',
 	},
