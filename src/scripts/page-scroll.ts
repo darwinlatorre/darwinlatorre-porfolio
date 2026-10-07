@@ -61,6 +61,16 @@ const initializePageScroll = () => {
 	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 	const mobileViewport = window.matchMedia('(max-width: 48rem)');
 	const abortController = new AbortController();
+	const paneFocusTargets = Array.from(scroller.querySelectorAll<HTMLElement>(
+		'[data-about-content], [data-projects-content], [data-experience-content], ' +
+		'[data-services-content], [data-certificates-content], .description-output p[tabindex]',
+	)).map((element) => ({ element, tabindex: element.getAttribute('tabindex') }));
+	const updatePaneFocusability = () => {
+		for (const { element, tabindex } of paneFocusTargets) {
+			if (mobileViewport.matches || tabindex === null) element.removeAttribute('tabindex');
+			else element.setAttribute('tabindex', tabindex);
+		}
+	};
 	const clipboard = nameAction
 		? createClipboardFeedback({
 				trigger: nameAction,
@@ -82,6 +92,7 @@ const initializePageScroll = () => {
 	let certificatesTop = scroller.clientHeight * 6;
 	let bypassSectionLocks = false;
 	let bypassTimer = 0;
+	let focusScrollUntil = 0;
 	let treeNavigation: TreeNavigation | null = null;
 
 	const clamp = (value: number) => Math.min(1, Math.max(0, value));
@@ -437,7 +448,7 @@ const initializePageScroll = () => {
 	};
 	const enforceSectionBoundary = (content: HTMLElement | null | undefined, sectionTop: number) => {
 		// Rewriting scrollTop during touch momentum competes with the browser's snap.
-		if (!content || bypassSectionLocks || mobileViewport.matches) return;
+		if (!content || bypassSectionLocks || mobileViewport.matches || performance.now() < focusScrollUntil) return;
 
 		const { atStart, atEnd } = getScrollState(content);
 		const pageTop = scroller.scrollTop;
@@ -506,6 +517,19 @@ const initializePageScroll = () => {
 		passive: true,
 		signal: abortController.signal,
 	});
+	scroller.addEventListener('focusin', () => {
+		// Focusing links/inputs can scroll their ancestors before the next frame.
+		// Do not interpret that accessibility scroll as a user crossing a boundary.
+		focusScrollUntil = performance.now() + 600;
+	}, { signal: abortController.signal });
+	scroller.addEventListener('pointerdown', (event) => {
+		if (!(event.target instanceof Element)) return;
+		if (!event.target.closest('[data-project-card]')) return;
+		if (event.target.closest('a, button, input, select, textarea, summary')) return;
+		// A decorative card must not focus its scrollable ancestor on pointer press.
+		// Native touch panning is preserved; no touchmove handler cancels the gesture.
+		event.preventDefault();
+	}, { signal: abortController.signal });
 	scroller.addEventListener('scrollend', (event) => {
 		if (event.target === scroller) endProgrammaticNavigation();
 	}, {
@@ -530,7 +554,10 @@ const initializePageScroll = () => {
 	});
 	window.addEventListener('resize', handleResize, { signal: abortController.signal });
 	reducedMotion.addEventListener('change', requestRender, { signal: abortController.signal });
-	mobileViewport.addEventListener('change', handleResize, { signal: abortController.signal });
+	mobileViewport.addEventListener('change', () => {
+		updatePaneFocusability();
+		handleResize();
+	}, { signal: abortController.signal });
 	document.addEventListener(
 		'keydown',
 		(event) => {
@@ -738,11 +765,16 @@ const initializePageScroll = () => {
 			window.cancelAnimationFrame(frameId);
 			window.clearTimeout(bypassTimer);
 			delete scroller.dataset.interactionsReady;
+			for (const { element, tabindex } of paneFocusTargets) {
+				if (tabindex === null) element.removeAttribute('tabindex');
+				else element.setAttribute('tabindex', tabindex);
+			}
 		},
 		{ once: true },
 	);
 
 	if (getFragmentTarget(location.hash)) beginProgrammaticNavigation();
+	updatePaneFocusability();
 	measure();
 	enforceSectionBoundary(aboutContent, aboutTop);
 	enforceSectionBoundary(experienceContent, experienceTop);

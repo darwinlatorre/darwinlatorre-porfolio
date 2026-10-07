@@ -24,7 +24,7 @@ export const projects = [
 		description: 'Sitio de Z3nTry sobre ciberseguridad, desarrollo y diseño.',
 		href: 'https://www.z3ntry.com/',
 		repository: 'https://github.com/Z3nTry-0/z3ntry',
-		preview: 'https://www.z3ntry.com/',
+		preview: '/previews/z3ntry.webp',
 	},
 	{
 		id: 'project-auth-service',
@@ -40,7 +40,7 @@ export const projects = [
 		description: 'Portafolio personal de DevOps y desarrollo backend, con experiencia profesional, proyectos y certificaciones en una interfaz de terminal interactiva.',
 		href: 'https://darwinlatorre.com/',
 		repository: 'https://github.com/darwinlatorre/darwinlatorre-porfolio',
-		preview: 'https://darwinlatorre.com/',
+		preview: '/previews/portfolio.webp',
 	},
 ] as const;
 
