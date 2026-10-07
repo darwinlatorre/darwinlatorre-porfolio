@@ -109,6 +109,7 @@ const initializePageScroll = () => {
 	function endProgrammaticNavigation() {
 		bypassSectionLocks = false;
 		window.clearTimeout(bypassTimer);
+		// Native touch chaining owns pane positions; resetting them fights focus scrolling.
 		if (mobileViewport.matches) return;
 		const pageTop = scroller?.scrollTop ?? 0;
 
@@ -365,30 +366,10 @@ const initializePageScroll = () => {
 			}
 
 			const detailsIsCurrent = Math.abs(scroller.scrollTop - detailsTop) <= 2;
-			if (mobileViewport.matches && scroller.scrollTop >= aboutTop - 2 && !atPageEnd) {
-				scrollCue.href = '#site-footer';
-				scrollCue.setAttribute('aria-label', 'Continue down the portfolio');
-			}
 			scrollCue.classList.toggle(
 				'is-tree-end',
 				mobileViewport.matches && detailsIsCurrent && Boolean(treeNavigation?.isAtEnd()),
 			);
-		}
-
-		if (mobileViewport.matches) {
-			// Flowing sections must stay visible and focusable while partly in view.
-			for (const section of [homeDetails, about, projects, experience, services, certificates]) {
-				if (section) section.inert = false;
-			}
-			for (const element of [
-				homeDetailsContent, aboutMarker, aboutDescription, aboutStatCommand,
-				aboutSocialCommand, aboutTerminalCommand, ...aboutStatValues, ...aboutSocials,
-				experienceCommand, ...experienceEntries, experienceSummary, experienceReady,
-				servicesTitle, ...serviceCards, servicesTerminal, ...projectCards,
-				certificatesCommand, ...certificateRules, ...certificateItems, certificatesReady,
-			]) reveal(element, 1);
-			if (aboutLine) aboutLine.style.transform = 'scaleY(1)';
-			return;
 		}
 
 		if (homeDetailsContent) {
@@ -455,6 +436,7 @@ const initializePageScroll = () => {
 		frameId = window.requestAnimationFrame(render);
 	};
 	const enforceSectionBoundary = (content: HTMLElement | null | undefined, sectionTop: number) => {
+		// Rewriting scrollTop during touch momentum competes with the browser's snap.
 		if (!content || bypassSectionLocks || mobileViewport.matches) return;
 
 		const { atStart, atEnd } = getScrollState(content);
@@ -649,14 +631,6 @@ const initializePageScroll = () => {
 	scrollCue?.addEventListener(
 		'click',
 		(event) => {
-			if (mobileViewport.matches && scroller.scrollTop >= aboutTop - 2) {
-				event.preventDefault();
-				scroller.scrollBy({
-					top: scroller.clientHeight * 0.8,
-					behavior: reducedMotion.matches ? 'auto' : 'smooth',
-				});
-				return;
-			}
 			const inDetails = scroller.scrollTop / Math.max(detailsTop, 1) >= 0.5;
 			const inCertificates = scroller.scrollTop >= certificatesTop - 2;
 			const inProjects = scroller.scrollTop >= projectsTop - 2 && scroller.scrollTop < experienceTop - 2;

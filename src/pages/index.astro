@@ -55,40 +55,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 	}
 
 	@media (max-width: 48rem) {
-		.page-scroll {
-			scroll-snap-type: none;
-			scroll-behavior: auto;
-		}
-
-		/* One native scroll surface preserves touch momentum across sections. */
-		.page-scroll :global(section.screen:not(.home-details)) {
-			display: block;
-			flex: 0 0 auto;
-			padding-block: calc(var(--page-inset) + var(--control-offset) + 3rem)
-				calc(var(--page-inset) + var(--control-offset) + 2.5rem);
-			overflow: visible;
-			scroll-snap-align: none;
-		}
-
-		.page-scroll :global([data-about-content]),
-		.page-scroll :global([data-projects-content]),
-		.page-scroll :global([data-experience-content]),
-		.page-scroll :global([data-services-content]),
-		.page-scroll :global([data-certificates-content]) {
-			height: auto;
-			overflow: visible;
-			align-content: start;
+		/* Let touch scrolling chain to the next snap target at content edges. */
+		.page-scroll :global(.is-scroll-contained) {
 			overscroll-behavior-y: auto;
-		}
-
-		.page-scroll :global(.description-output p) {
-			max-height: none;
-			overflow: visible;
-		}
-
-		.page-scroll :global(.site-footer) {
-			margin-top: 0;
-			scroll-snap-align: none;
 		}
 	}
 

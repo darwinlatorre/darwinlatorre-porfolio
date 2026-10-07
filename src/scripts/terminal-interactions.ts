@@ -398,10 +398,7 @@ const initializeTerminal = (root: HTMLElement) => {
 		() => {
 			window.clearTimeout(focusTimer);
 			focusTimer = window.setTimeout(() => {
-				if (window.matchMedia('(max-width: 48rem)').matches) {
-					input.scrollIntoView({ block: 'nearest', behavior: 'auto' });
-					return;
-				}
+				// Scroll only the terminal pane; scrollIntoView also moves the snap parent.
 				if (!scrollContainer) return;
 				const inputTop =
 					input.getBoundingClientRect().top -
