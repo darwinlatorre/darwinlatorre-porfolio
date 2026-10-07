@@ -1,9 +1,9 @@
 ---
-import { profile } from '../../data/portfolio';
+import { profile, socialLinks } from '../../data/portfolio';
 
 const links = [
-	{ label: 'GitHub', href: 'https://github.com/darwinlatorre', external: true },
-	{ label: 'LinkedIn', href: 'https://www.linkedin.com/in/darwinlatorre/', external: true },
+	{ label: 'GitHub', href: profile.githubHref, external: true },
+	...socialLinks.filter(({ label }) => label === 'LinkedIn').map((link) => ({ ...link, external: true })),
 	{ label: 'Email', href: `mailto:${profile.email}`, external: false },
 ];
 ---

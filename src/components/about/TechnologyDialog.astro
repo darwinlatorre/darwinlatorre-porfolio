@@ -1,5 +1,6 @@
 ---
 import { X } from '@lucide/astro';
+import { profile } from '../../data/portfolio';
 import {
 	siAngular,
 	siDocker,
@@ -54,7 +55,7 @@ const technologies = [
 		</header>
 
 		<p class="technology-summary">
-			<span aria-hidden="true">&gt;</span> 16+ technologies I've worked with
+			<span aria-hidden="true">&gt;</span> {profile.technologiesUsed} technologies I've worked with
 		</p>
 
 		<ul class="technology-grid" aria-label="Technology list">

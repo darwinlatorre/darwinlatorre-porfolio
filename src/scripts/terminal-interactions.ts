@@ -7,8 +7,8 @@ import {
 	socialLinks,
 } from '../data/portfolio';
 import type { PortfolioSection, TerminalContext } from '../types/terminal';
-
-type ShowTarget = PortfolioSection;
+import { isPortfolioSection, portfolioSections } from '../data/navigation';
+import { createDialogController } from './dialog';
 
 type TerminalResult =
 	| { type: 'text'; text: string }
@@ -31,7 +31,6 @@ interface CommandExecution {
 }
 
 interface TerminalCommand {
-	name: string;
 	usage: string;
 	description: string;
 	execute: (args: string[], context: TerminalContext) => CommandExecution;
@@ -44,20 +43,12 @@ declare global {
 	}
 }
 
-const internalSections: PortfolioSection[] = [
-	'home',
-	'about',
-	'projects',
-	'experience',
-	'services',
-	'certificates',
-];
-const showTargets: ShowTarget[] = internalSections;
+const internalSections = portfolioSections.map(({ id }) => id);
 const commandHistory: string[] = [];
 
 const text = (value: string): TerminalResult => ({ type: 'text', text: value });
 
-const getShowResult = (target: ShowTarget): TerminalResult => {
+const getShowResult = (target: PortfolioSection): TerminalResult => {
 	switch (target) {
 		case 'home':
 			return {
@@ -113,7 +104,6 @@ const getShowResult = (target: ShowTarget): TerminalResult => {
 
 const commands: Record<string, TerminalCommand> = {
 	help: {
-		name: 'help',
 		usage: 'help',
 		description: 'Show available commands.',
 		execute: () => ({
@@ -127,7 +117,6 @@ const commands: Record<string, TerminalCommand> = {
 		}),
 	},
 	ls: {
-		name: 'ls',
 		usage: 'ls',
 		description: 'List portfolio sections.',
 		execute: () => ({
@@ -138,34 +127,31 @@ const commands: Record<string, TerminalCommand> = {
 		}),
 	},
 	pwd: {
-		name: 'pwd',
 		usage: 'pwd',
 		description: 'Show the current section.',
 		execute: (_args, context) => ({ result: text(`/portfolio/${context}`) }),
 	},
 	go: {
-		name: 'go',
 		usage: 'go <section>',
 		description: 'Navigate to an internal section.',
 		execute: ([target, ...extra]) => {
-			if (!target || extra.length > 0 || !internalSections.includes(target as PortfolioSection)) {
+			if (!target || extra.length > 0 || !isPortfolioSection(target)) {
 				return {
 					result: text(`usage: go <${internalSections.join('|')}>`),
 				};
 			}
 
 			return {
-				action: { type: 'navigate', target: target as PortfolioSection },
+				action: { type: 'navigate', target },
 			};
 		},
 	},
 	show: {
-		name: 'show',
 		usage: 'show [section]',
 		description: 'Show a portfolio summary.',
 		execute: ([target, ...extra], context) => {
 			const resolvedTarget = target ?? context;
-			if (extra.length > 0 || !showTargets.includes(resolvedTarget as ShowTarget)) {
+			if (extra.length > 0 || !isPortfolioSection(resolvedTarget)) {
 				return {
 					result: text(
 						`usage: show [${internalSections.join('|')}]`,
@@ -173,23 +159,20 @@ const commands: Record<string, TerminalCommand> = {
 				};
 			}
 
-			return { result: getShowResult(resolvedTarget as ShowTarget) };
+			return { result: getShowResult(resolvedTarget) };
 		},
 	},
 	whoami: {
-		name: 'whoami',
 		usage: 'whoami',
 		description: 'Show the professional profile.',
 		execute: () => ({ result: text(`${profile.name} — ${profile.role}. ${profile.description}`) }),
 	},
 	skills: {
-		name: 'skills',
 		usage: 'skills',
 		description: 'Open the technology list.',
 		execute: () => ({ action: { type: 'technologies' } }),
 	},
 	contact: {
-		name: 'contact',
 		usage: 'contact',
 		description: 'Show email and social profiles.',
 		execute: () => ({
@@ -204,7 +187,6 @@ const commands: Record<string, TerminalCommand> = {
 		}),
 	},
 	email: {
-		name: 'email',
 		usage: 'email',
 		description: 'Open a new email.',
 		execute: () => ({
@@ -213,7 +195,6 @@ const commands: Record<string, TerminalCommand> = {
 		}),
 	},
 	cv: {
-		name: 'cv',
 		usage: 'cv',
 		description: 'Open the CV.',
 		execute: () => ({
@@ -222,7 +203,6 @@ const commands: Record<string, TerminalCommand> = {
 		}),
 	},
 	projects: {
-		name: 'projects',
 		usage: 'projects',
 		description: 'Go to featured projects.',
 		execute: () => ({
@@ -230,7 +210,6 @@ const commands: Record<string, TerminalCommand> = {
 		}),
 	},
 	history: {
-		name: 'history',
 		usage: 'history',
 		description: 'Show commands used in this session.',
 		execute: () => ({
@@ -242,7 +221,6 @@ const commands: Record<string, TerminalCommand> = {
 		}),
 	},
 	clear: {
-		name: 'clear',
 		usage: 'clear',
 		description: 'Clear the current terminal output.',
 		execute: () => ({}),
@@ -315,13 +293,13 @@ const runAction = (action?: TerminalAction) => {
 const initializeTerminal = (root: HTMLElement) => {
 	if (root.dataset.interactionsReady === 'true') return;
 
-	const context = root.dataset.terminalContext as TerminalContext | undefined;
+	const context = root.dataset.terminalContext;
 	const form = root.querySelector<HTMLFormElement>('[data-terminal-form]');
 	const input = root.querySelector<HTMLInputElement>('[data-terminal-input]');
 	const mirror = root.querySelector<HTMLElement>('[data-terminal-mirror]');
 	const response = root.querySelector<HTMLElement>('[data-terminal-response]');
 	const scrollContainer = root.closest<HTMLElement>('[data-terminal-scroll]');
-	if (!context || !form || !input || !mirror || !response) return;
+	if (!context || !isPortfolioSection(context) || context === 'home' || context === 'projects' || !form || !input || !mirror || !response) return;
 
 	root.dataset.interactionsReady = 'true';
 	const abortController = new AbortController();
@@ -349,7 +327,7 @@ const initializeTerminal = (root: HTMLElement) => {
 			historyIndex = commandHistory.length;
 			draft = '';
 			const [commandName, ...args] = rawCommand.toLowerCase().split(' ');
-			const command = commands[commandName];
+			const command = Object.hasOwn(commands, commandName) ? commands[commandName] : undefined;
 			const execution = command
 				? command.execute(args, context)
 				: { result: text(`command not found: ${commandName}. Use "help" to list commands.`) };
@@ -395,6 +373,7 @@ const initializeTerminal = (root: HTMLElement) => {
 	input.addEventListener(
 		'focus',
 		() => {
+			historyIndex = commandHistory.length;
 			window.clearTimeout(focusTimer);
 			focusTimer = window.setTimeout(() => {
 				// Scroll only the terminal pane; scrollIntoView also moves the snap parent.
@@ -433,43 +412,18 @@ const initializeTechnologyDialog = () => {
 	dialog.dataset.interactionsReady = 'true';
 	const closeButton = dialog.querySelector<HTMLButtonElement>('[data-technologies-close]');
 	const abortController = new AbortController();
-	let previousFocus: HTMLElement | null = null;
+	const controller = createDialogController({ dialog, closeButton, signal: abortController.signal });
 
-	const open = () => {
-		if (dialog.open) return;
-		previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-		dialog.showModal();
-	};
-	const close = () => dialog.close();
-
-	document.addEventListener('portfolio:open-technologies', open, {
+	document.addEventListener('portfolio:open-technologies', controller.open, {
 		signal: abortController.signal,
 	});
 	document.querySelectorAll<HTMLElement>('[data-technologies-open]').forEach((trigger) => {
-		trigger.addEventListener('click', open, { signal: abortController.signal });
+		trigger.addEventListener('click', controller.open, { signal: abortController.signal });
 	});
-	closeButton?.addEventListener('click', close, { signal: abortController.signal });
-	dialog.addEventListener(
-		'click',
-		(event) => {
-			if (event.target === dialog) close();
-		},
-		{ signal: abortController.signal },
-	);
-	dialog.addEventListener(
-		'close',
-		() => {
-			previousFocus?.focus();
-			previousFocus = null;
-		},
-		{ signal: abortController.signal },
-	);
 
 	document.addEventListener(
 		'astro:before-swap',
 		() => {
-			previousFocus = null;
-			if (dialog.open) dialog.close();
 			abortController.abort();
 			delete dialog.dataset.interactionsReady;
 		},

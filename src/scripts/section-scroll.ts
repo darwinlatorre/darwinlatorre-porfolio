@@ -20,10 +20,18 @@ interface TouchGesture {
 	canGoBack: boolean;
 }
 
+interface PaneScrollOptions {
+	keyboard?: boolean;
+	allowTransition?: boolean;
+}
+
+const sectionSelector = '.screen, #site-footer';
+const editableSelector = 'input, textarea, select, [contenteditable="true"]';
+
 export const initializeSectionScroll = ({
 	scroller, mobileViewport, signal, onNavigate,
 }: SectionScrollOptions) => {
-	const sections = Array.from(scroller.querySelectorAll<HTMLElement>('.screen, #site-footer'));
+	const sections = Array.from(scroller.querySelectorAll<HTMLElement>(sectionSelector));
 	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 	let activeSection = sections[0];
 	let gesture: TouchGesture | null = null;
@@ -57,8 +65,8 @@ export const initializeSectionScroll = ({
 	const getPanes = (section: HTMLElement, target?: Element) => {
 		const panes: HTMLElement[] = [];
 		if (target && section.contains(target)) {
-			for (let element = target.closest<HTMLElement>('*'); element && element !== section; element = element.parentElement) {
-				if (element.scrollHeight > element.clientHeight + 2 && /^(auto|scroll)$/.test(getComputedStyle(element).overflowY)) panes.push(element);
+			for (let element: Element | null = target; element && element !== section; element = element.parentElement) {
+				if (element instanceof HTMLElement && element.scrollHeight > element.clientHeight + 2 && /^(auto|scroll)$/.test(getComputedStyle(element).overflowY)) panes.push(element);
 			}
 		}
 		const pane = mainPane(section);
@@ -91,7 +99,9 @@ export const initializeSectionScroll = ({
 		activate(next, direction, keyboard);
 		return true;
 	};
-	const scrollPane = (section: HTMLElement, panes: HTMLElement[], amount: number, keyboard = false, allowTransition = true) => {
+	const scrollPane = (section: HTMLElement, panes: HTMLElement[], amount: number, {
+		keyboard = false, allowTransition = true,
+	}: PaneScrollOptions = {}) => {
 		if (navigationPending) return false;
 		const direction = Math.sign(amount);
 		if (!direction) return false;
@@ -117,7 +127,7 @@ export const initializeSectionScroll = ({
 		stopMomentum();
 		gesture = null;
 		if (navigationPending || !mobileViewport.matches || event.touches.length !== 1 || !(event.target instanceof Element)) return;
-		if (event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+		if (event.target.closest(editableSelector)) return;
 		const touch = event.touches[0];
 		const section = getActiveSection();
 		const panes = getPanes(section, event.target);
@@ -149,8 +159,9 @@ export const initializeSectionScroll = ({
 		gesture.velocity = amount / Math.max(now - gesture.lastTime, 1);
 		gesture.lastY = touch.clientY;
 		gesture.lastTime = now;
-		gesture.transitioned = scrollPane(gesture.section, gesture.panes, amount, false,
-			amount > 0 ? gesture.canAdvance : gesture.canGoBack);
+		gesture.transitioned = scrollPane(gesture.section, gesture.panes, amount, {
+			allowTransition: amount > 0 ? gesture.canAdvance : gesture.canGoBack,
+		});
 	}, { passive: false, signal });
 	scroller.addEventListener('touchend', () => {
 		const completed = gesture;
@@ -167,7 +178,7 @@ export const initializeSectionScroll = ({
 				return;
 			}
 			// Inertia may finish the pane, but changing sections needs a fresh swipe.
-			scrollPane(completed.section, completed.panes, velocity * elapsed, false, false);
+			scrollPane(completed.section, completed.panes, velocity * elapsed, { allowTransition: false });
 			momentumFrame = window.requestAnimationFrame(glide);
 		};
 		momentumFrame = window.requestAnimationFrame(glide);
@@ -179,6 +190,7 @@ export const initializeSectionScroll = ({
 
 	document.addEventListener('wheel', (event) => {
 		if (document.querySelector('dialog[open]') || event.ctrlKey || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+		if (event.target instanceof Element && event.target.closest('[data-menu-panel]')) return;
 		event.preventDefault();
 		stopMomentum();
 		const now = performance.now();
@@ -194,7 +206,7 @@ export const initializeSectionScroll = ({
 	document.addEventListener('keydown', (event) => {
 		if (document.querySelector('dialog[open]') || event.altKey || event.ctrlKey || event.metaKey) return;
 		if (event.target instanceof Element) {
-			if (event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+			if (event.target.closest(editableSelector) || event.target.closest('[data-menu-panel]')) return;
 			if (event.key === ' ' && event.target.closest('button, summary')) return;
 		}
 		const section = getActiveSection();
@@ -205,7 +217,7 @@ export const initializeSectionScroll = ({
 		if (!amount) return;
 		event.preventDefault();
 		stopMomentum();
-		scrollPane(section, getPanes(section, event.target instanceof Element ? event.target : undefined), amount, true);
+		scrollPane(section, getPanes(section, event.target instanceof Element ? event.target : undefined), amount, { keyboard: true });
 	}, { signal });
 
 	signal.addEventListener('abort', () => {
@@ -218,7 +230,7 @@ export const initializeSectionScroll = ({
 		navigateTo: (target: HTMLElement) => {
 			cancelGesture();
 			wheelLocked = false;
-			const section = target.closest<HTMLElement>('.screen, #site-footer') || target.querySelector<HTMLElement>('.screen');
+			const section = target.closest<HTMLElement>(sectionSelector) || target.querySelector<HTMLElement>('.screen');
 			if (!section) return;
 			activate(section, 1);
 			if (target !== section) target.scrollIntoView({ behavior: reducedMotion.matches ? 'instant' : 'smooth', block: 'nearest', inline: 'center' });

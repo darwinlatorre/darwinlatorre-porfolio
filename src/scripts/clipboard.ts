@@ -10,8 +10,10 @@ export const createClipboardFeedback = ({
 	value,
 }: ClipboardFeedbackOptions) => {
 	let feedbackTimer = 0;
+	let disposed = false;
 
 	const copy = async () => {
+		if (disposed) return;
 		let copied: boolean;
 
 		try {
@@ -20,6 +22,7 @@ export const createClipboardFeedback = ({
 		} catch {
 			copied = false;
 		}
+		if (disposed) return;
 
 		trigger.dataset.copied = String(copied);
 		if (status) status.textContent = copied ? 'Email copied' : 'Unable to copy email';
@@ -32,6 +35,11 @@ export const createClipboardFeedback = ({
 
 	return {
 		copy,
-		dispose: () => window.clearTimeout(feedbackTimer),
+		dispose: () => {
+			disposed = true;
+			window.clearTimeout(feedbackTimer);
+			delete trigger.dataset.copied;
+			if (status) status.textContent = '';
+		},
 	};
 };

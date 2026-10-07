@@ -2,6 +2,7 @@ import { createClipboardFeedback } from './clipboard';
 import { profile } from '../data/portfolio';
 import { initializeTreeNavigation, type TreeNavigation } from './tree-navigation';
 import { initializeSectionScroll } from './section-scroll';
+import { portfolioSections } from '../data/navigation';
 
 const initializePageScroll = () => {
 	const scroller = document.querySelector<HTMLElement>('[data-page-scroll]');
@@ -57,6 +58,19 @@ const initializePageScroll = () => {
 	const certificateItems =
 		certificates?.querySelectorAll<HTMLElement>('[data-certificate-item]') ?? [];
 	const certificatesReady = certificates?.querySelector<HTMLElement>('[data-certificates-ready]');
+	const contentBySection = {
+		about: aboutContent,
+		projects: projectsContent,
+		experience: experienceContent,
+		services: servicesContent,
+		certificates: certificatesContent,
+	};
+	const contentSections = portfolioSections.flatMap((section) => section.id === 'home' ? [] : [{
+		...section,
+		content: contentBySection[section.id],
+	}]);
+	const contentPanes = contentSections.map(({ content }) => content)
+		.filter((content): content is HTMLElement => Boolean(content));
 	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 	const mobileViewport = window.matchMedia('(max-width: 48rem)');
 	const abortController = new AbortController();
@@ -94,6 +108,10 @@ const initializePageScroll = () => {
 	const clamp = (value: number) => Math.min(1, Math.max(0, value));
 	const range = (value: number, start: number, end: number) =>
 		clamp((value - start) / (end - start));
+	const sectionProgress = (start: number, end: number) => {
+		const progress = clamp((scroller.scrollTop - start) / Math.max(end - start, 1));
+		return reducedMotion.matches ? (progress >= 0.5 ? 1 : 0) : progress;
+	};
 	const getFragmentTarget = (hash: string) => {
 		if (!hash.startsWith('#') || hash.length <= 1) return null;
 
@@ -160,85 +178,31 @@ const initializePageScroll = () => {
 		const rawProgress = clamp(scroller.scrollTop / Math.max(detailsTop, 1));
 		const progress = reducedMotion.matches ? (rawProgress >= 0.5 ? 1 : 0) : rawProgress;
 		const inDetails = rawProgress >= 0.5;
-		const rawAboutProgress = clamp(
-			(scroller.scrollTop - detailsTop) / Math.max(aboutTop - detailsTop, 1),
-		);
-		const aboutProgress = reducedMotion.matches
-			? rawAboutProgress >= 0.5
-				? 1
-				: 0
-			: rawAboutProgress;
-		const rawExperienceProgress = clamp(
-			(scroller.scrollTop - projectsTop) / Math.max(experienceTop - projectsTop, 1),
-		);
-		const experienceProgress = reducedMotion.matches
-			? rawExperienceProgress >= 0.5
-				? 1
-				: 0
-			: rawExperienceProgress;
-		const rawServicesProgress = clamp(
-			(scroller.scrollTop - experienceTop) / Math.max(servicesTop - experienceTop, 1),
-		);
-		const servicesProgress = reducedMotion.matches
-			? rawServicesProgress >= 0.5
-				? 1
-				: 0
-			: rawServicesProgress;
-		const rawProjectsProgress = clamp(
-			(scroller.scrollTop - aboutTop) / Math.max(projectsTop - aboutTop, 1),
-		);
-		const projectsProgress = reducedMotion.matches
-			? rawProjectsProgress >= 0.5 ? 1 : 0
-			: rawProjectsProgress;
-		const rawCertificatesProgress = clamp(
-			(scroller.scrollTop - servicesTop) / Math.max(certificatesTop - servicesTop, 1),
-		);
-		const certificatesProgress = reducedMotion.matches
-			? rawCertificatesProgress >= 0.5
-				? 1
-				: 0
-			: rawCertificatesProgress;
-		const inCertificates = scroller.scrollTop >= certificatesTop - 2;
-		const inProjects = scroller.scrollTop >= projectsTop - 2 && scroller.scrollTop < experienceTop - 2;
-		const inServices = scroller.scrollTop >= servicesTop - 2 && !inCertificates;
-		const inExperience =
-			scroller.scrollTop >= experienceTop - 2 && !inServices && !inProjects && !inCertificates;
-		const inAbout =
-			scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inProjects && !inCertificates;
-		const aboutScrollState = getScrollState(aboutContent);
-		const experienceScrollState = getScrollState(experienceContent);
-		const servicesScrollState = getScrollState(servicesContent);
-		const projectsScrollState = getScrollState(projectsContent);
-		const certificatesScrollState = getScrollState(certificatesContent);
+		const aboutProgress = sectionProgress(detailsTop, aboutTop);
+		const projectsProgress = sectionProgress(aboutTop, projectsTop);
+		const experienceProgress = sectionProgress(projectsTop, experienceTop);
+		const servicesProgress = sectionProgress(experienceTop, servicesTop);
+		const certificatesProgress = sectionProgress(servicesTop, certificatesTop);
+		const sectionTops = {
+			about: aboutTop,
+			projects: projectsTop,
+			experience: experienceTop,
+			services: servicesTop,
+			certificates: certificatesTop,
+		};
+		const sectionStates = contentSections.map((section) => ({
+			...section,
+			top: sectionTops[section.id],
+			scrollState: getScrollState(section.content),
+		}));
+		const currentSectionIndex = sectionStates.findLastIndex(({ top }) => scroller.scrollTop >= top - 2);
+		const currentSection = sectionStates[currentSectionIndex];
+		const nextSection = sectionStates[currentSectionIndex + 1];
 
-		aboutContent?.classList.toggle(
-			'is-scroll-contained',
-			aboutScrollState.scrollable &&
-				!aboutScrollState.atStart &&
-				!aboutScrollState.atEnd,
-		);
-		experienceContent?.classList.toggle(
-			'is-scroll-contained',
-			experienceScrollState.scrollable &&
-				!experienceScrollState.atStart &&
-				!experienceScrollState.atEnd,
-		);
-		servicesContent?.classList.toggle(
-			'is-scroll-contained',
-			servicesScrollState.scrollable &&
-				!servicesScrollState.atStart &&
-				!servicesScrollState.atEnd,
-		);
-		projectsContent?.classList.toggle(
-			'is-scroll-contained',
-			projectsScrollState.scrollable && !projectsScrollState.atStart && !projectsScrollState.atEnd,
-		);
-		certificatesContent?.classList.toggle(
-			'is-scroll-contained',
-			certificatesScrollState.scrollable &&
-				!certificatesScrollState.atStart &&
-				!certificatesScrollState.atEnd,
-		);
+		for (const { content, scrollState } of sectionStates) {
+			content?.classList.toggle('is-scroll-contained',
+				scrollState.scrollable && !scrollState.atStart && !scrollState.atEnd);
+		}
 
 		if (sharedName && nameAction) {
 			const startTop = scroller.clientHeight / 2;
@@ -294,48 +258,17 @@ const initializePageScroll = () => {
 			scrollCue.classList.toggle('is-terminal', atPageEnd);
 			scrollCue.classList.toggle('is-hidden', atPageEnd);
 			scrollCue.inert = atPageEnd;
-			if (inCertificates) {
-				if (atPageEnd) {
-					scrollCue.removeAttribute('href');
-					scrollCue.setAttribute('aria-label', 'End of current portfolio content');
-				} else if (certificatesScrollState.atEnd) {
-					scrollCue.href = '#site-footer';
-					scrollCue.setAttribute('aria-label', 'Go to the site footer');
+			if (atPageEnd) {
+				scrollCue.removeAttribute('href');
+				scrollCue.setAttribute('aria-label', 'End of current portfolio content');
+			} else if (currentSection) {
+				if (currentSection.scrollState.atEnd) {
+					scrollCue.href = `#${nextSection?.id ?? 'site-footer'}`;
+					scrollCue.setAttribute('aria-label', nextSection
+						? `Go to the ${nextSection.label} section` : 'Go to the site footer');
 				} else {
-					scrollCue.href = '#certificates';
-					scrollCue.setAttribute('aria-label', 'Continue through the Certificates content');
-				}
-			} else if (inProjects) {
-				if (projectsScrollState.atEnd) {
-					scrollCue.href = '#experience';
-					scrollCue.setAttribute('aria-label', 'Go to the Experience section');
-				} else {
-					scrollCue.href = '#projects';
-					scrollCue.setAttribute('aria-label', 'Continue through the Projects content');
-				}
-			} else if (inServices) {
-				if (servicesScrollState.atEnd) {
-					scrollCue.href = '#certificates';
-					scrollCue.setAttribute('aria-label', 'Go to the Certificates section');
-				} else {
-					scrollCue.href = '#services';
-					scrollCue.setAttribute('aria-label', 'Continue through the Services content');
-				}
-			} else if (inExperience) {
-				if (experienceScrollState.atEnd) {
-					scrollCue.href = '#services';
-					scrollCue.setAttribute('aria-label', 'Go to the Services section');
-				} else {
-					scrollCue.href = '#experience';
-					scrollCue.setAttribute('aria-label', 'Continue through the Experience content');
-				}
-			} else if (inAbout) {
-				if (aboutScrollState.atEnd) {
-					scrollCue.href = '#projects';
-					scrollCue.setAttribute('aria-label', 'Go to the Projects section');
-				} else {
-					scrollCue.href = '#about';
-					scrollCue.setAttribute('aria-label', 'Continue through the About content');
+					scrollCue.href = `#${currentSection.id}`;
+					scrollCue.setAttribute('aria-label', `Continue through the ${currentSection.label} content`);
 				}
 			} else {
 				scrollCue.href = inDetails ? '#about' : '#home-details';
@@ -424,7 +357,11 @@ const initializePageScroll = () => {
 	const sectionScroll = initializeSectionScroll({
 		scroller, mobileViewport,
 		signal: abortController.signal,
-		onNavigate: render,
+		onNavigate: () => {
+			// Update inert states before section-scroll restores keyboard focus.
+			window.cancelAnimationFrame(frameId);
+			render();
+		},
 	});
 
 	if (homeDetails && treeScroll) {
@@ -437,33 +374,9 @@ const initializePageScroll = () => {
 	}
 	const contentResizeObserver =
 		typeof ResizeObserver !== 'undefined' ? new ResizeObserver(handleResize) : null;
-	if (aboutContent) {
-		contentResizeObserver?.observe(aboutContent);
-		if (aboutContent.firstElementChild) {
-			contentResizeObserver?.observe(aboutContent.firstElementChild);
-		}
-	}
-	if (experienceContent) {
-		contentResizeObserver?.observe(experienceContent);
-		if (experienceContent.firstElementChild) {
-			contentResizeObserver?.observe(experienceContent.firstElementChild);
-		}
-	}
-	if (servicesContent) {
-		contentResizeObserver?.observe(servicesContent);
-		if (servicesContent.firstElementChild) {
-			contentResizeObserver?.observe(servicesContent.firstElementChild);
-		}
-	}
-	if (projectsContent) {
-		contentResizeObserver?.observe(projectsContent);
-		for (const child of projectsContent.children) contentResizeObserver?.observe(child);
-	}
-	if (certificatesContent) {
-		contentResizeObserver?.observe(certificatesContent);
-		if (certificatesContent.firstElementChild) {
-			contentResizeObserver?.observe(certificatesContent.firstElementChild);
-		}
+	for (const content of contentPanes) {
+		contentResizeObserver?.observe(content);
+		for (const child of content.children) contentResizeObserver?.observe(child);
 	}
 
 	scroller.addEventListener('scroll', requestRender, {
@@ -475,26 +388,12 @@ const initializePageScroll = () => {
 		if (!event.target.closest('[data-project-card]')) return;
 		if (event.target.closest('a, button, input, select, textarea, summary')) return;
 		// A decorative card must not focus its scrollable ancestor on pointer press.
-		// Native touch panning is preserved; no touchmove handler cancels the gesture.
+		// Vertical gestures are handled by section-scroll; horizontal panning stays native.
 		event.preventDefault();
 	}, { signal: abortController.signal });
-	aboutContent?.addEventListener('scroll', requestRender, {
-		passive: true,
-		signal: abortController.signal,
-	});
-	experienceContent?.addEventListener('scroll', requestRender, {
-		passive: true,
-		signal: abortController.signal,
-	});
-	servicesContent?.addEventListener('scroll', requestRender, {
-		passive: true,
-		signal: abortController.signal,
-	});
-	projectsContent?.addEventListener('scroll', requestRender, { passive: true, signal: abortController.signal });
-	certificatesContent?.addEventListener('scroll', requestRender, {
-		passive: true,
-		signal: abortController.signal,
-	});
+	for (const content of contentPanes) {
+		content.addEventListener('scroll', requestRender, { passive: true, signal: abortController.signal });
+	}
 	window.addEventListener('resize', handleResize, { signal: abortController.signal });
 	reducedMotion.addEventListener('change', requestRender, { signal: abortController.signal });
 	mobileViewport.addEventListener('change', () => {
@@ -581,7 +480,8 @@ const initializePageScroll = () => {
 	measure();
 	const initialTarget = getFragmentTarget(location.hash);
 	if (initialTarget) sectionScroll.navigateTo(initialTarget);
-	render();
+	requestRender();
 };
 
 initializePageScroll();
+document.addEventListener('astro:page-load', initializePageScroll);
