@@ -1,7 +1,7 @@
 ---
 import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
-import { profile, projects, socialLinks } from '../data/portfolio';
+import { profile, projects, seo, socialLinks } from '../data/portfolio';
 import '../styles/global.css';
 import '../styles/variables.css';
 
@@ -11,9 +11,10 @@ interface Props {
 }
 
 const {
-	title = 'Darwinlatorre_',
-	description = 'Darwin Latorre, DevOps and Backend Engineer. Explore projects and experience with AWS, GCP, Kubernetes, Terraform, CI/CD, Java and Spring Boot.',
+	title = seo.title,
+	description = seo.description,
 } = Astro.props;
+const siteUrl = new URL('/', Astro.site).href;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
 const imageUrl = new URL('/social-card.png', Astro.site).href;
 const structuredData = {
@@ -21,9 +22,10 @@ const structuredData = {
 	'@graph': [
 		{
 			'@type': 'Person',
-			'@id': `${canonicalUrl}#person`,
+			'@id': `${siteUrl}#person`,
 			name: profile.name,
-			url: canonicalUrl,
+			alternateName: seo.alternateNames,
+			url: siteUrl,
 			jobTitle: profile.role,
 			description: profile.description,
 			email: profile.email,
@@ -32,26 +34,40 @@ const structuredData = {
 		},
 		{
 			'@type': 'WebSite',
-			'@id': `${canonicalUrl}#website`,
-			url: canonicalUrl,
-			name: `${profile.name} — Portfolio`,
+			'@id': `${siteUrl}#website`,
+			url: siteUrl,
+			name: seo.siteName,
+			alternateName: [profile.name, 'darwinlatorre', 'darwinlatorre.com'],
+			description: seo.description,
 			inLanguage: 'en',
-			publisher: { '@id': `${canonicalUrl}#person` },
+			publisher: { '@id': `${siteUrl}#person` },
 		},
 		{
 			'@type': 'ProfilePage',
 			'@id': `${canonicalUrl}#webpage`,
 			url: canonicalUrl,
 			name: title,
+			alternateName: profile.name,
 			description,
-			isPartOf: { '@id': `${canonicalUrl}#website` },
-			mainEntity: { '@id': `${canonicalUrl}#person` },
+			inLanguage: 'en',
+			isPartOf: { '@id': `${siteUrl}#website` },
+			mainEntity: { '@id': `${siteUrl}#person` },
+			primaryImageOfPage: { '@id': `${siteUrl}#social-image` },
 			hasPart: projects.map((project) => ({
 				'@type': 'CreativeWork',
 				name: project.name,
 				description: project.description,
 				url: project.href,
 			})),
+		},
+		{
+			'@type': 'ImageObject',
+			'@id': `${siteUrl}#social-image`,
+			url: imageUrl,
+			contentUrl: imageUrl,
+			width: 1200,
+			height: 630,
+			caption: seo.title,
 		},
 	],
 };
@@ -66,15 +82,16 @@ const structuredData = {
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
 		<meta name="author" content={profile.name} />
-		<meta name="robots" content="index, follow, max-image-preview:large" />
+		<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
 		<link rel="canonical" href={canonicalUrl} />
 		<meta property="og:type" content="website" />
-		<meta property="og:site_name" content="Darwin Latorre" />
+		<meta property="og:site_name" content={seo.siteName} />
 		<meta property="og:locale" content="en_US" />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
 		<meta property="og:url" content={canonicalUrl} />
 		<meta property="og:image" content={imageUrl} />
+		<meta property="og:image:type" content="image/png" />
 		<meta property="og:image:width" content="1200" />
 		<meta property="og:image:height" content="630" />
 		<meta property="og:image:alt" content="Darwin Latorre — DevOps & Backend Engineer" />
