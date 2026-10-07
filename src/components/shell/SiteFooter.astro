@@ -106,6 +106,13 @@ const links = [
 		}
 	}
 
+	@media (min-width: 48.01rem) {
+		.footer-inner::before {
+			left: calc((100% - 100vw) / 2 + var(--page-inset) + clamp(1rem, 2vw, 2rem));
+			right: calc((100% - 100vw) / 2 + var(--page-inset) + clamp(1rem, 2vw, 2rem));
+		}
+	}
+
 	@media (max-width: 48rem) {
 		.footer-inner {
 			justify-content: center;

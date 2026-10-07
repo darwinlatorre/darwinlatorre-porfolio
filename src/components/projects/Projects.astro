@@ -60,6 +60,7 @@ import { projects } from '../../data/portfolio';
 <style>
 	.projects {
 		--projects-max-width: 82rem;
+		--project-card-height: clamp(40rem, 68vh + 14rem, 50rem);
 		--projects-gap: 1.5rem;
 		--projects-header-space: calc(var(--page-inset) + var(--control-offset) + 4.75rem);
 		--projects-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.75rem);
@@ -154,8 +155,10 @@ import { projects } from '../../data/portfolio';
 	.project-card {
 		position: relative;
 		display: grid;
+		height: var(--project-card-height);
 		min-width: 0;
-		min-height: clamp(40rem, calc(68vh + 14rem), 50rem);
+		min-height: var(--project-card-height);
+		grid-template-rows: minmax(0, 1fr) auto;
 		overflow: hidden;
 		border: var(--border-width) solid var(--color-border);
 		background: color-mix(in srgb, var(--color-surface-raised) 24%, transparent);
@@ -165,8 +168,9 @@ import { projects } from '../../data/portfolio';
 	}
 
 	.project-preview {
-		position: absolute;
-		inset: 0;
+		position: relative;
+		min-height: 0;
+		grid-row: 1;
 		overflow: hidden;
 		background: var(--color-surface-raised);
 		pointer-events: none;
@@ -177,7 +181,7 @@ import { projects } from '../../data/portfolio';
 		display: block;
 		width: 100%;
 		height: 100%;
-		object-fit: cover;
+		object-fit: contain;
 		object-position: top;
 	}
 
@@ -202,9 +206,9 @@ import { projects } from '../../data/portfolio';
 	}
 
 	.project-main-link {
-		position: absolute;
+		position: relative;
 		z-index: 1;
-		inset: auto 0 0;
+		grid-row: 2;
 		color: inherit;
 		text-decoration: none;
 	}
@@ -305,6 +309,13 @@ import { projects } from '../../data/portfolio';
 		outline-offset: -3px;
 	}
 
+	@media (min-width: 48.01rem) {
+		.projects-content {
+			width: min(96rem, 100%);
+			padding-inline: clamp(2rem, 4vw, 4rem);
+		}
+	}
+
 	@media (max-width: 48rem) {
 		.projects {
 			--projects-header-space: calc(var(--page-inset) + var(--control-offset) + 2.5rem);
@@ -313,14 +324,15 @@ import { projects } from '../../data/portfolio';
 
 		.projects-content {
 			padding-inline: var(--content-gutter);
-			overflow: hidden;
-			grid-template-rows: auto minmax(0, 1fr);
+			overflow-y: auto;
+			grid-template-rows: auto auto;
+			align-content: start;
 			gap: 0.75rem;
 		}
 
 		.projects-grid {
 			width: 100%;
-			height: 100%;
+			height: calc(var(--project-card-height) + 0.5rem);
 			min-height: 0;
 			padding-block: 0.25rem;
 			padding-inline: max(0px, calc((100% - 30rem) / 2));
@@ -350,8 +362,6 @@ import { projects } from '../../data/portfolio';
 		}
 
 		.project-card {
-			height: 100%;
-			min-height: 0;
 			scroll-snap-align: center;
 			scroll-snap-stop: always;
 		}

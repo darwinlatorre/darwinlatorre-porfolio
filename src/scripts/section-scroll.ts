@@ -16,6 +16,8 @@ interface TouchGesture {
 	velocity: number;
 	axis: 'horizontal' | 'vertical' | null;
 	transitioned: boolean;
+	canAdvance: boolean;
+	canGoBack: boolean;
 }
 
 export const initializeSectionScroll = ({
@@ -28,6 +30,8 @@ export const initializeSectionScroll = ({
 	let momentumFrame = 0;
 	let wheelLocked = false;
 	let lastWheelTime = 0;
+	let navigationPending = false;
+	let pendingFocus: HTMLElement | null = null;
 
 	const stopMomentum = () => {
 		window.cancelAnimationFrame(momentumFrame);
@@ -38,6 +42,7 @@ export const initializeSectionScroll = ({
 		section.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop,
 	));
 	const getActiveSection = () => {
+		if (navigationPending) return activeSection;
 		if (Math.abs(sectionTop(activeSection) - scroller.scrollTop) > 2) {
 			activeSection = sections.reduce((closest, section) =>
 				Math.abs(sectionTop(section) - scroller.scrollTop) < Math.abs(sectionTop(closest) - scroller.scrollTop)
@@ -64,13 +69,21 @@ export const initializeSectionScroll = ({
 		? Math.max(0, pane.scrollHeight - pane.clientHeight - pane.scrollTop)
 		: Math.max(0, pane.scrollTop);
 	const activate = (section: HTMLElement, direction: number, keyboard = false) => {
+		const focused = document.activeElement;
+		if (section !== activeSection && focused instanceof HTMLElement && activeSection.contains(focused)) focused.blur();
 		activeSection = section;
 		const pane = mainPane(section);
 		if (pane) pane.scrollTop = direction > 0 ? 0 : pane.scrollHeight;
-		scroller.scrollTo({ top: sectionTop(section), behavior: 'instant' });
+		const top = sectionTop(section);
+		navigationPending = !reducedMotion.matches && Math.abs(top - scroller.scrollTop) > 2;
+		pendingFocus = keyboard && pane?.hasAttribute('tabindex') ? pane : null;
+		scroller.scrollTo({ top, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
 		scroller.dataset.activeSection = section.id || 'home';
 		onNavigate();
-		if (keyboard && pane?.hasAttribute('tabindex')) pane.focus({ preventScroll: true });
+		if (!navigationPending) {
+			pendingFocus?.focus({ preventScroll: true });
+			pendingFocus = null;
+		}
 	};
 	const navigate = (section: HTMLElement, direction: number, keyboard = false) => {
 		const next = sections[sections.indexOf(section) + direction];
@@ -78,7 +91,8 @@ export const initializeSectionScroll = ({
 		activate(next, direction, keyboard);
 		return true;
 	};
-	const scrollPane = (section: HTMLElement, panes: HTMLElement[], amount: number, keyboard = false) => {
+	const scrollPane = (section: HTMLElement, panes: HTMLElement[], amount: number, keyboard = false, allowTransition = true) => {
+		if (navigationPending) return false;
 		const direction = Math.sign(amount);
 		if (!direction) return false;
 		let delta = Math.abs(amount);
@@ -88,22 +102,32 @@ export const initializeSectionScroll = ({
 			delta -= consumed;
 			if (remaining(pane, direction) > 2) return false;
 		}
-		// Reaching the edge is enough: no additional swipe, timeout or animation.
-		return navigate(section, direction, keyboard);
+		return allowTransition && navigate(section, direction, keyboard);
 	};
 
 	scroller.dataset.sectionScrollReady = 'true';
+	scroller.addEventListener('scroll', () => {
+		if (!navigationPending || Math.abs(sectionTop(activeSection) - scroller.scrollTop) > 2) return;
+		navigationPending = false;
+		onNavigate();
+		pendingFocus?.focus({ preventScroll: true });
+		pendingFocus = null;
+	}, { passive: true, signal });
 	scroller.addEventListener('touchstart', (event) => {
 		stopMomentum();
 		gesture = null;
-		if (!mobileViewport.matches || event.touches.length !== 1 || !(event.target instanceof Element)) return;
+		if (navigationPending || !mobileViewport.matches || event.touches.length !== 1 || !(event.target instanceof Element)) return;
 		if (event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
 		const touch = event.touches[0];
 		const section = getActiveSection();
+		const panes = getPanes(section, event.target);
 		gesture = {
-			identifier: touch.identifier, section, panes: getPanes(section, event.target),
+			identifier: touch.identifier, section, panes,
 			startX: touch.clientX, startY: touch.clientY, lastY: touch.clientY,
 			lastTime: performance.now(), velocity: 0, axis: null, transitioned: false,
+			// Only a gesture that starts at the edge can leave the current section.
+			canAdvance: panes.every((pane) => remaining(pane, 1) <= 2),
+			canGoBack: panes.every((pane) => remaining(pane, -1) <= 2),
 		};
 	}, { passive: true, signal });
 	scroller.addEventListener('touchmove', (event) => {
@@ -125,7 +149,8 @@ export const initializeSectionScroll = ({
 		gesture.velocity = amount / Math.max(now - gesture.lastTime, 1);
 		gesture.lastY = touch.clientY;
 		gesture.lastTime = now;
-		gesture.transitioned = scrollPane(gesture.section, gesture.panes, amount);
+		gesture.transitioned = scrollPane(gesture.section, gesture.panes, amount, false,
+			amount > 0 ? gesture.canAdvance : gesture.canGoBack);
 	}, { passive: false, signal });
 	scroller.addEventListener('touchend', () => {
 		const completed = gesture;
@@ -137,10 +162,12 @@ export const initializeSectionScroll = ({
 			const elapsed = Math.min(now - lastTime, 32);
 			lastTime = now;
 			velocity *= Math.pow(0.92, elapsed / 16);
-			if (Math.abs(velocity) < 0.08 || activeSection !== completed.section || scrollPane(completed.section, completed.panes, velocity * elapsed)) {
+			if (Math.abs(velocity) < 0.08 || activeSection !== completed.section || completed.panes.every((pane) => remaining(pane, Math.sign(velocity)) <= 2)) {
 				momentumFrame = 0;
 				return;
 			}
+			// Inertia may finish the pane, but changing sections needs a fresh swipe.
+			scrollPane(completed.section, completed.panes, velocity * elapsed, false, false);
 			momentumFrame = window.requestAnimationFrame(glide);
 		};
 		momentumFrame = window.requestAnimationFrame(glide);
@@ -194,7 +221,7 @@ export const initializeSectionScroll = ({
 			const section = target.closest<HTMLElement>('.screen, #site-footer') || target.querySelector<HTMLElement>('.screen');
 			if (!section) return;
 			activate(section, 1);
-			if (target !== section) target.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'center' });
+			if (target !== section) target.scrollIntoView({ behavior: reducedMotion.matches ? 'instant' : 'smooth', block: 'nearest', inline: 'center' });
 		},
 		scrollBy: (amount: number) => {
 			cancelGesture();
