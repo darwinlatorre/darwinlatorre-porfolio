@@ -6,6 +6,7 @@
 	--color-surface-raised: #121118;
 	--color-text: #efefef;
 	--color-text-muted: #938a99;
+	--color-text-secondary: color-mix(in srgb, var(--color-text-muted) 72%, var(--color-text));
 	--color-accent: #a96ed3;
 	--color-accent-muted: #715081;
 	--color-border: #4d3659;

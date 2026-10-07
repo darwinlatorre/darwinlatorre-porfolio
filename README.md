@@ -85,8 +85,6 @@ public/         Static assets and downloadable CV
 - `src/scripts/dialog.ts` shares dialog focus restoration and cleanup between the CV and technology dialogs.
 - TypeScript checks unused locals and parameters. For scroll or dialog changes, also verify mobile and desktop, keyboard navigation, fragment links, and reduced motion in a browser.
 
-See [CODE_AUDIT.md](CODE_AUDIT.md) for the code-usage review and verification results.
-
 ## Branches and Deployment
 
 - `dev` is the active development branch.
