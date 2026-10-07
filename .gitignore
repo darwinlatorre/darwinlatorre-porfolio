@@ -6,10 +6,6 @@ dist/
 # dependencies
 node_modules/
 
-# local agent tooling and generated output
-.venv/
-graphify-out/
-
 # logs
 npm-debug.log*
 yarn-debug.log*

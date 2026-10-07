@@ -7,6 +7,6 @@ export default [
 	...tseslint.configs.recommended,
 	...astro.configs.recommended,
 	{
-		ignores: ['dist/', '.astro/', '.venv/', 'graphify-out/'],
+		ignores: ['dist/', '.astro/'],
 	},
 ];

@@ -12,9 +12,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "graphify": ".venv/bin/graphify",
-    "graphify:build": "npm run graphify -- extract . --code-only && npm run graphify -- cluster-only ."
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@lucide/astro": "^1.34.0",

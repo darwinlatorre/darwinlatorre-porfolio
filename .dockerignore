@@ -4,9 +4,6 @@
 .astro
 dist
 node_modules
-.venv
-graphify-out
-.agents
 
 .env
 .env.*
