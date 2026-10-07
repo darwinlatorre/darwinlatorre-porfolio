@@ -59,7 +59,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 			/* The active pane owns vertical gestures; horizontal carousels stay native. */
 			touch-action: pan-x pinch-zoom;
 		}
-		/* Let touch scrolling chain to the next snap target at content edges. */
+		/* Section-scroll controls edge handoff; nested panes must not trap gestures. */
 		.page-scroll :global(.is-scroll-contained) {
 			overscroll-behavior-y: auto;
 		}

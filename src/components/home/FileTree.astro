@@ -1,12 +1,10 @@
 ---
 import { ChevronDown, FileText, Folder, House } from '@lucide/astro';
-import { projects } from '../../data/portfolio';
+import { certificates, projects } from '../../data/portfolio';
 
-const certificateItems = [
-	{ label: 'AWS Certified Cloud Practitioner', href: '#certificate-aws' },
-	{ label: 'Angular: De cero a experto', href: '#certificate-1' },
-	{ label: 'Unlocking Information Security', href: '#certificate-2' },
-];
+const certificateItems = certificates.filter(({ id }) =>
+	['certificate-aws', 'certificate-1', 'certificate-2'].includes(id),
+);
 ---
 
 <nav class="file-tree" aria-label="Portfolio sections">
@@ -77,9 +75,9 @@ const certificateItems = [
 				<div class="tree-children-inner">
 					{
 						certificateItems.map((item) => (
-							<a href={item.href}>
+							<a href={`#${item.id}`}>
 								<FileText class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
-								<span>{item.label}</span>
+								<span>{item.title}</span>
 							</a>
 						))
 					}

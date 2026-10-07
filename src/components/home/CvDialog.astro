@@ -1,7 +1,8 @@
 ---
 import { X } from '@lucide/astro';
+import { profile } from '../../data/portfolio';
 
-const cvHref = '/Darwin_Latorre_CV_English.pdf';
+const { cvHref } = profile;
 ---
 
 <dialog class="cv-dialog" aria-labelledby="cv-title" data-cv-dialog>
@@ -9,8 +10,8 @@ const cvHref = '/Darwin_Latorre_CV_English.pdf';
 		<header class="cv-header">
 			<h2 id="cv-title"><span aria-hidden="true">&gt;</span> Curriculum Vitae</h2>
 			<div class="cv-tools">
-				<a class="cv-tool" href={cvHref} download data-cv-download>Download</a>
-				<a class="cv-tool" href={cvHref} target="_blank" rel="noreferrer" data-cv-external>
+				<a class="cv-tool" href={cvHref} download>Download</a>
+				<a class="cv-tool" href={cvHref} target="_blank" rel="noreferrer">
 					Open in tab
 				</a>
 				<button type="button" aria-label="Close curriculum vitae" data-cv-close>
@@ -213,6 +214,7 @@ const cvHref = '/Darwin_Latorre_CV_English.pdf';
 		}
 
 		.cv-tool,
+		.cv-tool::before,
 		.cv-header button {
 			transition: none;
 		}

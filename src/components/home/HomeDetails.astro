@@ -16,16 +16,16 @@ import { profile } from '../../data/portfolio';
 			<div class="heading-group">
 				<p class="greeting reveal">Hi, I'm</p>
 				<h2 id="home-details-title" class="name reveal">
-					Dark<span class="cursor" aria-hidden="true">_</span>
+					{profile.handle}<span class="cursor" aria-hidden="true">_</span>
 				</h2>
 				<p class="role reveal">
-					<span aria-hidden="true">&gt;</span> DevOps &amp; Backend Developer
+					<span aria-hidden="true">&gt;</span> {profile.role}
 				</p>
 			</div>
 
 			<div class="actions reveal">
 				<CommandButton label="Pull Contact" href={`mailto:${profile.email}`} />
-				<CommandButton label="Pull CV" href="/Darwin_Latorre_CV_English.pdf" cvDialog />
+				<CommandButton label="Pull CV" href={profile.cvHref} cvDialog />
 			</div>
 		</div>
 
@@ -40,25 +40,29 @@ import { profile } from '../../data/portfolio';
 </section>
 
 <script>
-	const homeDetailsScreens = document.querySelectorAll<HTMLElement>('[data-home-details]');
+	const initializeHomeDetails = () => {
+		const homeDetailsScreens = document.querySelectorAll<HTMLElement>('[data-home-details]');
 
-	for (const section of homeDetailsScreens) {
-		section.dataset.animate = 'true';
+		for (const section of homeDetailsScreens) {
+			if (section.dataset.animate === 'true') continue;
+			section.dataset.animate = 'true';
 
-		const observer = new IntersectionObserver(
-			(entries) => {
-				for (const entry of entries) {
-					if (!entry.isIntersecting) continue;
+			const observer = new IntersectionObserver((entries) => {
+				if (!entries.some(({ isIntersecting }) => isIntersecting)) return;
+				section.classList.add('is-visible');
+				observer.disconnect();
+			}, { threshold: 0.35 });
 
-					section.classList.add('is-visible');
-					observer.unobserve(section);
-				}
-			},
-			{ threshold: 0.35 },
-		);
+			observer.observe(section);
+			document.addEventListener('astro:before-swap', () => {
+				observer.disconnect();
+				delete section.dataset.animate;
+			}, { once: true });
+		}
+	};
 
-		observer.observe(section);
-	}
+	initializeHomeDetails();
+	document.addEventListener('astro:page-load', initializeHomeDetails);
 </script>
 
 <style>
@@ -274,10 +278,6 @@ import { profile } from '../../data/portfolio';
 			width: min(23rem, 100%);
 			min-height: 0;
 			margin: 0 auto;
-			overflow: hidden;
-		}
-
-		.home-details-content {
 			overflow: hidden;
 		}
 

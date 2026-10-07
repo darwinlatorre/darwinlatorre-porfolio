@@ -77,6 +77,16 @@ src/
 public/         Static assets and downloadable CV
 ```
 
+## Maintaining the Code
+
+- `src/data/portfolio.ts` is the shared source for profile, project, experience, service, and certificate content.
+- `src/data/navigation.ts` defines the section IDs and labels used by the menu, terminal commands, and scroll cue. The page markup in `src/pages/index.astro` must follow that order; Home contains two screens.
+- `src/scripts/page-scroll.ts` controls reveals and shared UI; `section-scroll.ts` controls section navigation and nested scrolling. Scrolling happens inside `[data-page-scroll]`.
+- `src/scripts/dialog.ts` shares dialog focus restoration and cleanup between the CV and technology dialogs.
+- TypeScript checks unused locals and parameters. For scroll or dialog changes, also verify mobile and desktop, keyboard navigation, fragment links, and reduced motion in a browser.
+
+See [CODE_AUDIT.md](CODE_AUDIT.md) for the code-usage review and verification results.
+
 ## Branches and Deployment
 
 - `dev` is the active development branch.

@@ -1,3 +1,5 @@
+import { createDialogController } from './dialog';
+
 const initializeCvDialog = () => {
 	const dialog = document.querySelector<HTMLDialogElement>('[data-cv-dialog]');
 	const trigger = document.querySelector<HTMLAnchorElement>('[data-cv-open]');
@@ -11,45 +13,29 @@ const initializeCvDialog = () => {
 	const desktopViewport = window.matchMedia('(min-width: 48rem)');
 	const abortController = new AbortController();
 
-	let previousFocus: HTMLElement | null = null;
-
-	const openDialog = () => {
-		if (dialog.open) return;
-
-		const src = frame?.dataset.src;
-		if (frame && src && !frame.getAttribute('src')) frame.setAttribute('src', src);
-
-		previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-		dialog.showModal();
-	};
-	const closeDialog = () => dialog.close();
+	const controller = createDialogController({
+		dialog,
+		closeButton,
+		signal: abortController.signal,
+		onOpen: () => {
+			const src = frame?.dataset.src;
+			if (frame && src && !frame.getAttribute('src')) frame.setAttribute('src', src);
+		},
+	});
 
 	trigger.addEventListener(
 		'click',
 		(event) => {
 			if (!desktopViewport.matches) return;
 			event.preventDefault();
-			openDialog();
+			controller.open();
 		},
 		{ signal: abortController.signal },
 	);
-	closeButton?.addEventListener('click', closeDialog, { signal: abortController.signal });
-	dialog.addEventListener(
-		'click',
-		(event) => {
-			if (event.target === dialog) closeDialog();
-		},
-		{ signal: abortController.signal },
-	);
-	dialog.addEventListener('close', () => previousFocus?.focus(), {
-		signal: abortController.signal,
-	});
 
 	document.addEventListener(
 		'astro:before-swap',
 		() => {
-			previousFocus = null;
-			if (dialog.open) dialog.close();
 			abortController.abort();
 			delete dialog.dataset.cvReady;
 		},
@@ -58,3 +44,4 @@ const initializeCvDialog = () => {
 };
 
 initializeCvDialog();
+document.addEventListener('astro:page-load', initializeCvDialog);

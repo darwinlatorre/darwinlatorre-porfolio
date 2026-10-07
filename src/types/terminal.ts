@@ -1,3 +1,3 @@
-export type TerminalContext = 'about' | 'experience' | 'services' | 'certificates';
+export type { PortfolioSection } from '../data/navigation';
 
-export type PortfolioSection = 'home' | 'projects' | TerminalContext;
+export type TerminalContext = 'about' | 'experience' | 'services' | 'certificates';

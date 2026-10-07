@@ -1,50 +1,6 @@
 ---
 import TerminalPrompt from '../terminal/TerminalPrompt.astro';
-
-const experiences = [
-	{
-		role: 'Java Developer',
-		company: 'Freelance',
-		location: 'darwinlatorre',
-		start: '2026-06',
-		end: '2026-07',
-		startLabel: 'Jun 2026',
-		endLabel: 'Currently',
-		highlights: [
-			'Performed adjustments and maintenance on the backend of an e-commerce platform developed with Java and Spring Boot.',
-			'Implemented adjustments, bug fixes, and deployments on GCP using Cloud Run, Cloud SQL, Artifact Registry, and Secret Manager.',
-		],
-	},
-	{
-		role: 'DevOps Engineer',
-		company: 'Asmet Salud EPS',
-		location: null,
-		start: '2025-01',
-		end: '2026-03',
-		startLabel: 'Jan 2025',
-		endLabel: 'Mar 2026',
-		highlights: [
-			'Implemented CI/CD pipelines with Jenkins and GitLab for deploying Spring Boot microservices on AWS using EKS.',
-			'Managed on-premises Kubernetes clusters running production Spring Boot microservices, monitored with Prometheus and Grafana.',
-			'Provisioned and maintained AWS infrastructure using Terraform and Terragrunt, including EKS, IAM, Secrets Manager, VPC, and RDS.',
-			'Collaborated with development teams using GitLab, Jira, and Agile methodologies.',
-		],
-	},
-	{
-		role: 'IT Infrastructure Professional',
-		company: 'Asmet Salud EPS',
-		location: null,
-		start: '2024-06',
-		end: '2024-12',
-		startLabel: 'Jun 2024',
-		endLabel: 'Dec 2024',
-		highlights: [
-			'Developed a password management system with high availability (HA) and a disaster recovery plan (DRP).',
-			'Managed AWS and on-premises infrastructure, Active Directory, networks, backups, and database backups.',
-			'Migrated JBoss and WebLogic applications from Java 7 to Java 11, including servers and code.',
-		],
-	},
-];
+import { experiences, experienceSummary } from '../../data/portfolio';
 
 const highlightTechnology = (text: string) => text.split(
 	/(Spring Boot|Java 7|Java 11|Java|GCP|Cloud Run|Cloud SQL|Artifact Registry|Secret Manager|CI\/CD|Jenkins|GitLab|AWS|EKS|Kubernetes|Prometheus|Grafana|Terraform|Terragrunt|IAM|Secrets Manager|VPC|RDS|Active Directory|JBoss|WebLogic)/,
@@ -106,7 +62,7 @@ const highlightTechnology = (text: string) => text.split(
 					<strong class="summary-label">SUMMARY</strong>
 					<span class="summary-stack">
 						<span class="summary-brace">{'{ '}</span>
-						AWS, GCP, Kubernetes, Terraform, Jenkins, Spring Boot, GitLab CI/CD
+						{experienceSummary}
 						<span class="summary-brace">{' }'}</span>
 					</span>
 				</p>
@@ -252,7 +208,6 @@ const highlightTechnology = (text: string) => text.split(
 	.entry-summary {
 		cursor: pointer;
 		list-style: none;
-		list-style-type: none;
 	}
 
 	.entry-summary::-webkit-details-marker {

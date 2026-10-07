@@ -205,7 +205,7 @@ const descriptionParts = profile.description.split(
 		width: min(64rem, 100%);
 		margin: 0;
 		color: var(--color-text);
-		font-size: 1.15rem;
+		font-size: 1.25rem;
 		letter-spacing: 0;
 		line-height: 1.6;
 	}
@@ -352,7 +352,7 @@ const descriptionParts = profile.description.split(
 			width: min(34rem, 100%);
 			min-width: 0;
 			margin-inline: auto;
-			gap: clamp(0.65rem, 1.8dvh, 1rem);
+			gap: calc(clamp(0.65rem, 1.8dvh, 1rem) + 0.3dvh);
 		}
 
 		.terminal-block {
