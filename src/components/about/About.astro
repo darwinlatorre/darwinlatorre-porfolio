@@ -119,11 +119,11 @@ const descriptionParts = profile.description.split(
 
 	.about-content {
 		display: grid;
-		width: min(80rem, 100%);
+		width: min(var(--content-max-width), 100%);
 		height: 100%;
 		min-height: 0;
 		margin: 0 auto;
-		padding: 0 clamp(2rem, 5vw, 4.5rem) 0.75rem;
+		padding: 0 var(--content-gutter) 0.75rem;
 		overflow-y: auto;
 		grid-row: 2;
 		align-items: safe center;
@@ -342,7 +342,7 @@ const descriptionParts = profile.description.split(
 		}
 
 		.about-content {
-			padding: 0.25rem clamp(1.35rem, 5vw, 2rem) 0.5rem;
+			padding: 0.25rem var(--content-gutter) 0.5rem;
 			align-items: start;
 			overflow-y: auto;
 			scrollbar-width: thin;

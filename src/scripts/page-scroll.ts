@@ -1,6 +1,7 @@
 import { createClipboardFeedback } from './clipboard';
 import { profile } from '../data/portfolio';
 import { initializeTreeNavigation, type TreeNavigation } from './tree-navigation';
+import { initializeSectionScroll } from './section-scroll';
 
 const initializePageScroll = () => {
 	const scroller = document.querySelector<HTMLElement>('[data-page-scroll]');
@@ -473,6 +474,12 @@ const initializePageScroll = () => {
 		measurementPending = true;
 		requestRender();
 	};
+
+	initializeSectionScroll({
+		scroller, mobileViewport, reducedMotion,
+		signal: abortController.signal,
+		beforeNavigate: beginProgrammaticNavigation,
+	});
 
 	if (homeDetails && treeScroll) {
 		treeNavigation = initializeTreeNavigation({

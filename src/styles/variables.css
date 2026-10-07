@@ -19,9 +19,23 @@
 	--section-heading-font-size: clamp(1.15rem, 1.8vw, 1.55rem);
 	--page-inset: clamp(0.5rem, 1vw, 1rem);
 	--control-offset: clamp(1.25rem, 2.5vw, 2.35rem);
+	--content-max-width: 78rem;
+	--content-gutter: clamp(2rem, 7vw, 6rem);
 	--border-width: 1px;
 	--radius-small: 2px;
 	--radius-frame: 3px;
 	--duration-fast: 180ms;
 	--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 64rem) {
+	:root {
+		--content-gutter: clamp(1.5rem, 4vw, 3.5rem);
+	}
+}
+
+@media (max-width: 48rem) {
+	:root {
+		--content-gutter: 2rem;
+	}
 }
