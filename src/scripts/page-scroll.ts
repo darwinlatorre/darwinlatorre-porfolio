@@ -481,6 +481,26 @@ const initializePageScroll = () => {
 	const initialTarget = getFragmentTarget(location.hash);
 	if (initialTarget) sectionScroll.navigateTo(initialTarget);
 	requestRender();
+
+	if (!location.hash && homeDetails && scroller.scrollTop <= 2) {
+		const introTimer = window.setTimeout(() => {
+			if (location.hash || scroller.scrollTop > 2 || abortController.signal.aborted) return;
+			sectionScroll.navigateTo(homeDetails);
+		}, 800);
+		const cancelIntro = () => window.clearTimeout(introTimer);
+		for (const event of ['pointerdown', 'touchstart', 'wheel', 'keydown', 'hashchange']) {
+			window.addEventListener(event, cancelIntro, {
+				passive: true,
+				once: true,
+				signal: abortController.signal,
+			});
+		}
+		document.addEventListener('portfolio:navigate', cancelIntro, {
+			once: true,
+			signal: abortController.signal,
+		});
+		abortController.signal.addEventListener('abort', cancelIntro, { once: true });
+	}
 };
 
 initializePageScroll();
