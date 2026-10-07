@@ -108,9 +108,12 @@ const inputId = `${context}-terminal-command`;
 		opacity: 1;
 	}
 
-	input:focus-visible {
-		outline: 1px solid var(--color-accent-muted);
-		outline-offset: -1px;
+	input:focus {
+		caret-color: var(--color-accent);
+	}
+
+	.terminal-input-shell:focus-within .cursor-track {
+		visibility: hidden;
 	}
 
 	.cursor-track {
@@ -200,7 +203,8 @@ const inputId = `${context}-terminal-command`;
 
 		input {
 			font-size: inherit;
-			scroll-margin-block: 35dvh;
+			appearance: none;
+			border-radius: 0;
 		}
 	}
 

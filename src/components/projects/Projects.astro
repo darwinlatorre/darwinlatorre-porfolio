@@ -6,20 +6,20 @@ import { projects } from '../../data/portfolio';
 <section id="projects" class="screen projects" aria-labelledby="projects-title" data-projects>
 	<div class="projects-content" tabindex="0" aria-label="Projects content" data-projects-content>
 		<h2 id="projects-title" class="projects-title"><span aria-hidden="true">&gt;</span> projects</h2>
-		<div class="projects-grid">
+		<div class="projects-grid" role="region" aria-label="Featured projects carousel" data-project-carousel>
 			{
 				projects.map((project) => (
 					<article id={project.id} class="project-card" data-project-card>
-						<div class="project-preview" aria-hidden="true">
+						<div class="project-preview" aria-hidden="true" inert>
 							{project.preview ? (
-								<iframe src={project.preview} title={`${project.name} website preview`} loading="lazy" tabindex="-1" />
+								<img src={project.preview} alt="" width="850" height="1400" loading="lazy" decoding="async" draggable="false" />
 							) : (
 								<AuthPreview />
 							)}
 						</div>
 						<a class="project-main-link" href={project.href} target="_blank" rel="noreferrer" aria-label={`Open ${project.name}`}>
 							<div class="project-meta">
-								<h2>{project.name}</h2>
+								<h3>{project.name}</h3>
 								<span class="project-description">{project.description}</span>
 							</div>
 						</a>
@@ -33,6 +33,20 @@ import { projects } from '../../data/portfolio';
 					</article>
 				))
 			}
+			<article id="project-github" class="project-card github-card" data-project-card>
+				<div class="github-card-art" aria-hidden="true">
+					<svg viewBox="0 0 24 24" width="80" height="80">
+						<path fill="currentColor" d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.23c-3.34.73-4.04-1.42-4.04-1.42-.55-1.39-1.33-1.76-1.33-1.76-1.09-.75.08-.74.08-.74 1.2.09 1.83 1.23 1.83 1.23 1.07 1.83 2.8 1.3 3.49.99.11-.77.42-1.3.76-1.6-2.67-.3-5.48-1.34-5.48-5.95 0-1.31.47-2.38 1.23-3.22-.12-.3-.53-1.52.12-3.17 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.29-1.23 3.29-1.23.66 1.65.25 2.87.13 3.17.77.84 1.23 1.91 1.23 3.22 0 4.62-2.81 5.64-5.49 5.94.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.57A12 12 0 0 0 12 .5Z" />
+					</svg>
+					<span>More code. More projects.</span>
+				</div>
+				<a class="project-main-link" href="https://github.com/darwinlatorre" target="_blank" rel="noreferrer" aria-label="View Darwin Latorre's GitHub profile">
+					<div class="project-meta">
+						<h3>GitHub / darwinlatorre</h3>
+						<span class="project-description">Explore all my repositories and contributions.</span>
+					</div>
+				</a>
+			</article>
 		</div>
 		<a href="https://github.com/darwinlatorre" target="_blank" rel="noreferrer" class="projects-github-bar github-profile-button">
 				<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -46,6 +60,7 @@ import { projects } from '../../data/portfolio';
 <style>
 	.projects {
 		--projects-max-width: 82rem;
+		--project-card-height: clamp(40rem, 68vh + 14rem, 50rem);
 		--projects-gap: 1.5rem;
 		--projects-header-space: calc(var(--page-inset) + var(--control-offset) + 4.75rem);
 		--projects-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.75rem);
@@ -57,12 +72,12 @@ import { projects } from '../../data/portfolio';
 
 	.projects-content {
 		display: grid;
-		width: min(88rem, 100%);
+		width: min(var(--content-max-width), 100%);
 		height: 100%;
 		min-height: 0;
 		min-width: 0;
 		margin-inline: auto;
-		padding: 0.75rem clamp(2rem, 5vw, 4.5rem);
+		padding: 0.75rem var(--content-gutter);
 		overflow-y: auto;
 		grid-row: 2;
 		align-content: safe center;
@@ -140,8 +155,10 @@ import { projects } from '../../data/portfolio';
 	.project-card {
 		position: relative;
 		display: grid;
+		height: var(--project-card-height);
 		min-width: 0;
-		min-height: clamp(40rem, calc(68vh + 14rem), 50rem);
+		min-height: var(--project-card-height);
+		grid-template-rows: minmax(0, 1fr) auto;
 		overflow: hidden;
 		border: var(--border-width) solid var(--color-border);
 		background: color-mix(in srgb, var(--color-surface-raised) 24%, transparent);
@@ -151,35 +168,53 @@ import { projects } from '../../data/portfolio';
 	}
 
 	.project-preview {
-		position: absolute;
-		inset: 0;
+		position: relative;
+		min-height: 0;
+		grid-row: 1;
 		overflow: hidden;
 		background: var(--color-surface-raised);
+		pointer-events: none;
+		user-select: none;
 	}
 
-	.project-preview iframe {
-		width: calc(192.4% + 48px);
-		height: calc(192.4% + 48px);
-		overflow: hidden;
-		border: 0;
-		transform: scale(0.52);
-		transform-origin: top left;
-		pointer-events: none;
+	.project-preview img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+		object-position: top;
+	}
+
+	.github-card {
+		display: none;
+	}
+
+	.github-card-art {
+		display: flex;
+		padding: 2rem 1rem 10rem;
+		align-items: center;
+		justify-content: center;
+		flex-direction: column;
+		gap: 1.5rem;
+		color: var(--color-accent);
+		text-align: center;
+	}
+
+	.github-card-art span {
+		color: var(--color-text-muted);
+		font-size: 0.85rem;
 	}
 
 	.project-main-link {
-		position: absolute;
+		position: relative;
 		z-index: 1;
-		inset: 0;
+		grid-row: 2;
 		color: inherit;
 		text-decoration: none;
 	}
 
 	.project-meta {
-		position: absolute;
-		right: 0;
-		bottom: 0;
-		left: 0;
+		position: relative;
 		display: grid;
 		padding: 0.8rem 2.5rem 0.8rem 1rem;
 		grid-template-rows: auto 0fr;
@@ -190,7 +225,7 @@ import { projects } from '../../data/portfolio';
 		transition: grid-template-rows 280ms var(--ease-out), background-color 280ms ease;
 	}
 
-	.project-card h2 {
+	.project-card h3 {
 		margin: 0;
 		font-size: clamp(1.3rem, 1.95vw, 1.75rem);
 		font-weight: 400;
@@ -274,43 +309,69 @@ import { projects } from '../../data/portfolio';
 		outline-offset: -3px;
 	}
 
+	@media (min-width: 48.01rem) {
+		.projects-content {
+			width: min(96rem, 100%);
+			padding-inline: clamp(2rem, 4vw, 4rem);
+		}
+	}
+
 	@media (max-width: 48rem) {
 		.projects {
-			--projects-header-space: calc(var(--page-inset) + var(--control-offset) + 3rem);
-			--projects-footer-space: calc(var(--page-inset) + var(--control-offset) + 2.5rem);
+			--projects-header-space: calc(var(--page-inset) + var(--control-offset) + 2.5rem);
+			--projects-footer-space: calc(var(--page-inset) + var(--control-offset) + 1.5rem);
 		}
 
 		.projects-content {
-			padding-inline: clamp(1rem, 5vw, 2rem);
-			overflow-y: auto;
-			align-items: start;
-			align-content: start;
+			padding-inline: var(--content-gutter);
+			overflow: hidden;
+			grid-template-rows: auto minmax(0, 1fr);
+			gap: 0.75rem;
 		}
 
 		.projects-grid {
-			width: min(34rem, 100%);
-			padding-block: 0.5rem;
-			grid-template-columns: 1fr;
-			gap: var(--projects-gap);
+			width: 100%;
+			height: 100%;
+			min-height: 0;
+			padding-block: 0.25rem;
+			padding-inline: max(0px, calc((100% - 30rem) / 2));
+			overflow-x: auto;
+			overflow-y: hidden;
+			grid-template-columns: none;
+			grid-template-rows: minmax(0, 1fr);
+			grid-auto-flow: column;
+			grid-auto-columns: min(100%, 30rem);
+			gap: 1rem;
+			scroll-snap-type: x mandatory;
+			overscroll-behavior-x: contain;
+			overscroll-behavior-y: auto;
+			scrollbar-width: none;
+		}
+
+		.projects-grid::-webkit-scrollbar {
+			display: none;
 		}
 
 		.projects-github-bar {
-			width: min(34rem, 100%);
+			display: none;
 		}
 
 		.projects-title {
-			width: min(34rem, 100%);
+			width: 100%;
 		}
 
 		.project-card {
-			min-height: 32rem;
+			height: 100%;
+			min-height: 0;
+			scroll-snap-align: center;
+			scroll-snap-stop: always;
 		}
 
-		.project-card:has(.auth-preview) {
-			min-height: 40rem;
+		.github-card {
+			display: grid;
 		}
 
-		.project-card h2 {
+		.project-card h3 {
 			font-size: 1.35rem;
 		}
 

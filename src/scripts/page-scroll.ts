@@ -1,6 +1,7 @@
 import { createClipboardFeedback } from './clipboard';
 import { profile } from '../data/portfolio';
 import { initializeTreeNavigation, type TreeNavigation } from './tree-navigation';
+import { initializeSectionScroll } from './section-scroll';
 
 const initializePageScroll = () => {
 	const scroller = document.querySelector<HTMLElement>('[data-page-scroll]');
@@ -29,8 +30,6 @@ const initializePageScroll = () => {
 	const aboutTerminalCommand = about?.querySelector<HTMLElement>('[data-about-terminal-command]');
 	const aboutStatValues = about?.querySelectorAll<HTMLElement>('[data-about-stat-value]') ?? [];
 	const aboutSocials = about?.querySelectorAll<HTMLElement>('[data-about-social]') ?? [];
-	const technologyDialog = document.querySelector<HTMLDialogElement>('[data-technologies-dialog]');
-	const cvDialog = document.querySelector<HTMLDialogElement>('[data-cv-dialog]');
 	const experience = document.querySelector<HTMLElement>('[data-experience]');
 	const experienceContent = experience?.querySelector<HTMLElement>('[data-experience-content]');
 	const experienceCommand = experience?.querySelector<HTMLElement>('[data-experience-command]');
@@ -61,6 +60,16 @@ const initializePageScroll = () => {
 	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 	const mobileViewport = window.matchMedia('(max-width: 48rem)');
 	const abortController = new AbortController();
+	const paneFocusTargets = Array.from(scroller.querySelectorAll<HTMLElement>(
+		'[data-about-content], [data-projects-content], [data-experience-content], ' +
+		'[data-services-content], [data-certificates-content], .description-output p[tabindex]',
+	)).map((element) => ({ element, tabindex: element.getAttribute('tabindex') }));
+	const updatePaneFocusability = () => {
+		for (const { element, tabindex } of paneFocusTargets) {
+			if (mobileViewport.matches || tabindex === null) element.removeAttribute('tabindex');
+			else element.setAttribute('tabindex', tabindex);
+		}
+	};
 	const clipboard = nameAction
 		? createClipboardFeedback({
 				trigger: nameAction,
@@ -80,8 +89,6 @@ const initializePageScroll = () => {
 	let experienceTop = scroller.clientHeight * 4;
 	let servicesTop = scroller.clientHeight * 5;
 	let certificatesTop = scroller.clientHeight * 6;
-	let bypassSectionLocks = false;
-	let bypassTimer = 0;
 	let treeNavigation: TreeNavigation | null = null;
 
 	const clamp = (value: number) => Math.min(1, Math.max(0, value));
@@ -101,31 +108,6 @@ const initializePageScroll = () => {
 		element.style.opacity = `${progress}`;
 		element.style.transform = `translateY(${offset * (1 - progress)}px)`;
 	};
-	const beginProgrammaticNavigation = () => {
-		bypassSectionLocks = true;
-		window.clearTimeout(bypassTimer);
-		bypassTimer = window.setTimeout(endProgrammaticNavigation, 1500);
-	};
-	function endProgrammaticNavigation() {
-		bypassSectionLocks = false;
-		window.clearTimeout(bypassTimer);
-		const pageTop = scroller?.scrollTop ?? 0;
-
-		const normalizeContentPosition = (
-			content: HTMLElement | null | undefined,
-			sectionTop: number,
-		) => {
-			if (!content) return;
-			if (pageTop < sectionTop - 2) content.scrollTop = 0;
-			if (pageTop > sectionTop + 2) content.scrollTop = content.scrollHeight;
-		};
-
-		normalizeContentPosition(aboutContent, aboutTop);
-		normalizeContentPosition(experienceContent, experienceTop);
-		normalizeContentPosition(servicesContent, servicesTop);
-		normalizeContentPosition(projectsContent, projectsTop);
-		normalizeContentPosition(certificatesContent, certificatesTop);
-	}
 	const getScrollState = (content: HTMLElement | null | undefined) => {
 		if (!content) return { scrollable: false, atStart: true, atEnd: true };
 
@@ -433,32 +415,17 @@ const initializePageScroll = () => {
 		if (frameId) return;
 		frameId = window.requestAnimationFrame(render);
 	};
-	const enforceSectionBoundary = (content: HTMLElement | null | undefined, sectionTop: number) => {
-		if (!content || bypassSectionLocks) return;
-
-		const { atStart, atEnd } = getScrollState(content);
-		const pageTop = scroller.scrollTop;
-		const movingBelowSection = pageTop > sectionTop + 2;
-		const movingAboveSection = pageTop < sectionTop - 2;
-
-		if ((movingBelowSection && !atEnd) || (movingAboveSection && !atStart)) {
-			content.scrollTop += pageTop - sectionTop;
-			scroller.scrollTop = sectionTop;
-		}
-	};
-	const handlePageScroll = () => {
-		enforceSectionBoundary(aboutContent, aboutTop);
-		enforceSectionBoundary(experienceContent, experienceTop);
-		enforceSectionBoundary(servicesContent, servicesTop);
-		enforceSectionBoundary(projectsContent, projectsTop);
-		enforceSectionBoundary(certificatesContent, certificatesTop);
-		requestRender();
-	};
 
 	const handleResize = () => {
 		measurementPending = true;
 		requestRender();
 	};
+
+	const sectionScroll = initializeSectionScroll({
+		scroller, mobileViewport,
+		signal: abortController.signal,
+		onNavigate: render,
+	});
 
 	if (homeDetails && treeScroll) {
 		treeNavigation = initializeTreeNavigation({
@@ -469,7 +436,7 @@ const initializePageScroll = () => {
 		});
 	}
 	const contentResizeObserver =
-		typeof ResizeObserver !== 'undefined' ? new ResizeObserver(requestRender) : null;
+		typeof ResizeObserver !== 'undefined' ? new ResizeObserver(handleResize) : null;
 	if (aboutContent) {
 		contentResizeObserver?.observe(aboutContent);
 		if (aboutContent.firstElementChild) {
@@ -499,15 +466,18 @@ const initializePageScroll = () => {
 		}
 	}
 
-	scroller.addEventListener('scroll', handlePageScroll, {
+	scroller.addEventListener('scroll', requestRender, {
 		passive: true,
 		signal: abortController.signal,
 	});
-	scroller.addEventListener('scrollend', (event) => {
-		if (event.target === scroller) endProgrammaticNavigation();
-	}, {
-		signal: abortController.signal,
-	});
+	scroller.addEventListener('pointerdown', (event) => {
+		if (!(event.target instanceof Element)) return;
+		if (!event.target.closest('[data-project-card]')) return;
+		if (event.target.closest('a, button, input, select, textarea, summary')) return;
+		// A decorative card must not focus its scrollable ancestor on pointer press.
+		// Native touch panning is preserved; no touchmove handler cancels the gesture.
+		event.preventDefault();
+	}, { signal: abortController.signal });
 	aboutContent?.addEventListener('scroll', requestRender, {
 		passive: true,
 		signal: abortController.signal,
@@ -527,51 +497,10 @@ const initializePageScroll = () => {
 	});
 	window.addEventListener('resize', handleResize, { signal: abortController.signal });
 	reducedMotion.addEventListener('change', requestRender, { signal: abortController.signal });
-	mobileViewport.addEventListener('change', requestRender, { signal: abortController.signal });
-	document.addEventListener(
-		'keydown',
-		(event) => {
-			if (technologyDialog?.open || cvDialog?.open) return;
-			const inCertificates = scroller.scrollTop >= certificatesTop - 2;
-			const inProjects = scroller.scrollTop >= projectsTop - 2 && scroller.scrollTop < experienceTop - 2;
-			const inServices = scroller.scrollTop >= servicesTop - 2 && !inCertificates;
-			const inExperience =
-				scroller.scrollTop >= experienceTop - 2 && !inServices && !inProjects && !inCertificates;
-			const inAbout =
-				scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inProjects && !inCertificates;
-			const activeContent = inCertificates
-				? certificatesContent
-				: inProjects
-					? projectsContent
-				: inServices
-					? servicesContent
-					: inExperience
-						? experienceContent
-						: inAbout
-							? aboutContent
-							: null;
-			if (!activeContent || event.target !== activeContent) return;
-			const { atStart, atEnd } = getScrollState(activeContent);
-			let amount = 0;
-			if (event.key === 'ArrowDown') amount = 48;
-			if (event.key === 'ArrowUp') amount = -48;
-			if (event.key === 'PageDown' || (event.key === ' ' && !event.shiftKey)) {
-				amount = activeContent.clientHeight * 0.8;
-			}
-			if (event.key === 'PageUp' || (event.key === ' ' && event.shiftKey)) {
-				amount = activeContent.clientHeight * -0.8;
-			}
-
-			if ((amount > 0 && !atEnd) || (amount < 0 && !atStart)) {
-				event.preventDefault();
-				activeContent.scrollBy({
-					top: amount,
-					behavior: reducedMotion.matches ? 'auto' : 'smooth',
-				});
-			}
-		},
-		{ signal: abortController.signal },
-	);
+	mobileViewport.addEventListener('change', () => {
+		updatePaneFocusability();
+		handleResize();
+	}, { signal: abortController.signal });
 
 	nameAction?.addEventListener(
 		'click',
@@ -582,11 +511,8 @@ const initializePageScroll = () => {
 				return;
 			}
 
-			beginProgrammaticNavigation();
-			document.querySelector('#home')?.scrollIntoView({
-				behavior: reducedMotion.matches ? 'auto' : 'smooth',
-				block: 'start',
-			});
+			const home = document.getElementById('home');
+			if (home) sectionScroll.navigateTo(home);
 		},
 		{ signal: abortController.signal },
 	);
@@ -597,12 +523,8 @@ const initializePageScroll = () => {
 			const target = document.getElementById(targetId);
 			if (!target) return;
 
-			beginProgrammaticNavigation();
 			window.history.pushState(null, '', `#${targetId}`);
-			target.scrollIntoView({
-				behavior: reducedMotion.matches ? 'auto' : 'smooth',
-				block: 'start',
-			});
+			sectionScroll.navigateTo(target);
 		},
 		{ signal: abortController.signal },
 	);
@@ -612,15 +534,19 @@ const initializePageScroll = () => {
 			if (!(event.target instanceof Element)) return;
 			const link = event.target.closest<HTMLAnchorElement>('a[href^="#"]');
 			if (!link || link === scrollCue) return;
-			if (!getFragmentTarget(link.hash)) return;
-			beginProgrammaticNavigation();
+			const target = getFragmentTarget(link.hash);
+			if (!target) return;
+			event.preventDefault();
+			window.history.pushState(null, '', link.hash);
+			sectionScroll.navigateTo(target);
 		},
 		{ capture: true, signal: abortController.signal },
 	);
 	window.addEventListener(
 		'hashchange',
 		() => {
-			if (getFragmentTarget(location.hash)) beginProgrammaticNavigation();
+			const target = getFragmentTarget(location.hash);
+			if (target) sectionScroll.navigateTo(target);
 		},
 		{ signal: abortController.signal },
 	);
@@ -628,99 +554,8 @@ const initializePageScroll = () => {
 	scrollCue?.addEventListener(
 		'click',
 		(event) => {
-			const inDetails = scroller.scrollTop / Math.max(detailsTop, 1) >= 0.5;
-			const inCertificates = scroller.scrollTop >= certificatesTop - 2;
-			const inProjects = scroller.scrollTop >= projectsTop - 2 && scroller.scrollTop < experienceTop - 2;
-			const inServices = scroller.scrollTop >= servicesTop - 2 && !inCertificates;
-			const inExperience =
-				scroller.scrollTop >= experienceTop - 2 && !inServices && !inProjects && !inCertificates;
-			const inAbout =
-				scroller.scrollTop >= aboutTop - 2 && !inExperience && !inServices && !inProjects && !inCertificates;
-			const certificatesScrollState = getScrollState(certificatesContent);
-			const projectsScrollState = getScrollState(projectsContent);
-			if (inCertificates) {
-				if (certificatesScrollState.atEnd) {
-					event.preventDefault();
-					document.querySelector('#site-footer')?.scrollIntoView({
-						behavior: reducedMotion.matches ? 'auto' : 'smooth',
-						block: 'end',
-					});
-					return;
-				}
-				event.preventDefault();
-				certificatesContent?.scrollBy({
-					top: certificatesContent.clientHeight * 0.8,
-					behavior: reducedMotion.matches ? 'auto' : 'smooth',
-				});
-				return;
-			}
-			const servicesScrollState = getScrollState(servicesContent);
-			if (inProjects) {
-				if (projectsScrollState.atEnd) {
-					event.preventDefault();
-					document.querySelector('#experience')?.scrollIntoView({
-						behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start',
-					});
-					return;
-				}
-				event.preventDefault();
-				projectsContent?.scrollBy({ top: projectsContent.clientHeight * 0.8, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
-				return;
-			}
-			if (inServices) {
-				if (servicesScrollState.atEnd) {
-					event.preventDefault();
-					document.querySelector('#certificates')?.scrollIntoView({
-						behavior: reducedMotion.matches ? 'auto' : 'smooth',
-						block: 'start',
-					});
-					return;
-				}
-				event.preventDefault();
-				servicesContent?.scrollBy({
-					top: servicesContent.clientHeight * 0.8,
-					behavior: reducedMotion.matches ? 'auto' : 'smooth',
-				});
-				return;
-			}
-			const experienceScrollState = getScrollState(experienceContent);
-			if (inExperience) {
-				if (experienceScrollState.atEnd) {
-					event.preventDefault();
-					document.querySelector('#services')?.scrollIntoView({
-						behavior: reducedMotion.matches ? 'auto' : 'smooth',
-						block: 'start',
-					});
-					return;
-				}
-				event.preventDefault();
-				experienceContent?.scrollBy({
-					top: experienceContent.clientHeight * 0.8,
-					behavior: reducedMotion.matches ? 'auto' : 'smooth',
-				});
-				return;
-			}
-
-			const aboutScrollState = getScrollState(aboutContent);
-			if (inAbout && !aboutScrollState.atEnd) {
-				event.preventDefault();
-				aboutContent?.scrollBy({
-					top: aboutContent.clientHeight * 0.8,
-					behavior: reducedMotion.matches ? 'auto' : 'smooth',
-				});
-				return;
-			}
-
-			const target = document.querySelector(
-				inAbout ? '#projects' : inDetails ? '#about' : '#home-details',
-			);
-			if (!target) return;
-
 			event.preventDefault();
-			target.scrollIntoView({
-				behavior: reducedMotion.matches ? 'auto' : 'smooth',
-				block: 'start',
-			});
+			sectionScroll.scrollBy(scroller.clientHeight * 0.8);
 		},
 		{ signal: abortController.signal },
 	);
@@ -733,19 +568,19 @@ const initializePageScroll = () => {
 			contentResizeObserver?.disconnect();
 			clipboard?.dispose();
 			window.cancelAnimationFrame(frameId);
-			window.clearTimeout(bypassTimer);
 			delete scroller.dataset.interactionsReady;
+			for (const { element, tabindex } of paneFocusTargets) {
+				if (tabindex === null) element.removeAttribute('tabindex');
+				else element.setAttribute('tabindex', tabindex);
+			}
 		},
 		{ once: true },
 	);
 
-	if (getFragmentTarget(location.hash)) beginProgrammaticNavigation();
+	updatePaneFocusability();
 	measure();
-	enforceSectionBoundary(aboutContent, aboutTop);
-	enforceSectionBoundary(experienceContent, experienceTop);
-	enforceSectionBoundary(servicesContent, servicesTop);
-	enforceSectionBoundary(projectsContent, projectsTop);
-	enforceSectionBoundary(certificatesContent, certificatesTop);
+	const initialTarget = getFragmentTarget(location.hash);
+	if (initialTarget) sectionScroll.navigateTo(initialTarget);
 	render();
 };
 

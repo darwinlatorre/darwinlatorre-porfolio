@@ -33,7 +33,7 @@ const links = [
 
 <style>
 	.site-footer {
-		--footer-gutter: clamp(2rem, 5vw, 4.5rem);
+		--footer-gutter: var(--content-gutter);
 		--footer-tuck: calc(var(--page-inset) + 3.25rem);
 		flex: none;
 		scroll-snap-align: end;
@@ -43,6 +43,7 @@ const links = [
 	.footer-inner {
 		position: relative;
 		display: flex;
+		width: min(var(--content-max-width), 100%);
 		margin: 0 auto;
 		padding: 1.1rem var(--footer-gutter) calc(var(--page-inset) + 1.1rem);
 		align-items: center;
@@ -105,9 +106,15 @@ const links = [
 		}
 	}
 
+	@media (min-width: 48.01rem) {
+		.footer-inner::before {
+			left: calc((100% - 100vw) / 2 + var(--page-inset) + clamp(1rem, 2vw, 2rem));
+			right: calc((100% - 100vw) / 2 + var(--page-inset) + clamp(1rem, 2vw, 2rem));
+		}
+	}
+
 	@media (max-width: 48rem) {
 		.footer-inner {
-			--footer-gutter: 2rem;
 			justify-content: center;
 			flex-direction: column;
 			text-align: center;
