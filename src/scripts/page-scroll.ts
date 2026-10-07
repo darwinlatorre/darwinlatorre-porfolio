@@ -109,6 +109,7 @@ const initializePageScroll = () => {
 	function endProgrammaticNavigation() {
 		bypassSectionLocks = false;
 		window.clearTimeout(bypassTimer);
+		if (mobileViewport.matches) return;
 		const pageTop = scroller?.scrollTop ?? 0;
 
 		const normalizeContentPosition = (
@@ -364,10 +365,30 @@ const initializePageScroll = () => {
 			}
 
 			const detailsIsCurrent = Math.abs(scroller.scrollTop - detailsTop) <= 2;
+			if (mobileViewport.matches && scroller.scrollTop >= aboutTop - 2 && !atPageEnd) {
+				scrollCue.href = '#site-footer';
+				scrollCue.setAttribute('aria-label', 'Continue down the portfolio');
+			}
 			scrollCue.classList.toggle(
 				'is-tree-end',
 				mobileViewport.matches && detailsIsCurrent && Boolean(treeNavigation?.isAtEnd()),
 			);
+		}
+
+		if (mobileViewport.matches) {
+			// Flowing sections must stay visible and focusable while partly in view.
+			for (const section of [homeDetails, about, projects, experience, services, certificates]) {
+				if (section) section.inert = false;
+			}
+			for (const element of [
+				homeDetailsContent, aboutMarker, aboutDescription, aboutStatCommand,
+				aboutSocialCommand, aboutTerminalCommand, ...aboutStatValues, ...aboutSocials,
+				experienceCommand, ...experienceEntries, experienceSummary, experienceReady,
+				servicesTitle, ...serviceCards, servicesTerminal, ...projectCards,
+				certificatesCommand, ...certificateRules, ...certificateItems, certificatesReady,
+			]) reveal(element, 1);
+			if (aboutLine) aboutLine.style.transform = 'scaleY(1)';
+			return;
 		}
 
 		if (homeDetailsContent) {
@@ -434,7 +455,7 @@ const initializePageScroll = () => {
 		frameId = window.requestAnimationFrame(render);
 	};
 	const enforceSectionBoundary = (content: HTMLElement | null | undefined, sectionTop: number) => {
-		if (!content || bypassSectionLocks) return;
+		if (!content || bypassSectionLocks || mobileViewport.matches) return;
 
 		const { atStart, atEnd } = getScrollState(content);
 		const pageTop = scroller.scrollTop;
@@ -469,7 +490,7 @@ const initializePageScroll = () => {
 		});
 	}
 	const contentResizeObserver =
-		typeof ResizeObserver !== 'undefined' ? new ResizeObserver(requestRender) : null;
+		typeof ResizeObserver !== 'undefined' ? new ResizeObserver(handleResize) : null;
 	if (aboutContent) {
 		contentResizeObserver?.observe(aboutContent);
 		if (aboutContent.firstElementChild) {
@@ -527,7 +548,7 @@ const initializePageScroll = () => {
 	});
 	window.addEventListener('resize', handleResize, { signal: abortController.signal });
 	reducedMotion.addEventListener('change', requestRender, { signal: abortController.signal });
-	mobileViewport.addEventListener('change', requestRender, { signal: abortController.signal });
+	mobileViewport.addEventListener('change', handleResize, { signal: abortController.signal });
 	document.addEventListener(
 		'keydown',
 		(event) => {
@@ -628,6 +649,14 @@ const initializePageScroll = () => {
 	scrollCue?.addEventListener(
 		'click',
 		(event) => {
+			if (mobileViewport.matches && scroller.scrollTop >= aboutTop - 2) {
+				event.preventDefault();
+				scroller.scrollBy({
+					top: scroller.clientHeight * 0.8,
+					behavior: reducedMotion.matches ? 'auto' : 'smooth',
+				});
+				return;
+			}
 			const inDetails = scroller.scrollTop / Math.max(detailsTop, 1) >= 0.5;
 			const inCertificates = scroller.scrollTop >= certificatesTop - 2;
 			const inProjects = scroller.scrollTop >= projectsTop - 2 && scroller.scrollTop < experienceTop - 2;

@@ -398,6 +398,10 @@ const initializeTerminal = (root: HTMLElement) => {
 		() => {
 			window.clearTimeout(focusTimer);
 			focusTimer = window.setTimeout(() => {
+				if (window.matchMedia('(max-width: 48rem)').matches) {
+					input.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+					return;
+				}
 				if (!scrollContainer) return;
 				const inputTop =
 					input.getBoundingClientRect().top -

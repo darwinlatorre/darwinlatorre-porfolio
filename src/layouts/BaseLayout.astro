@@ -1,6 +1,7 @@
 ---
 import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
+import { profile, projects, socialLinks } from '../data/portfolio';
 import '../styles/variables.css';
 import '../styles/global.css';
 
@@ -10,9 +11,50 @@ interface Props {
 }
 
 const {
-	title = 'Darwin Latorre',
-	description = "Darwin Latorre's personal portfolio and selected work.",
+	title = 'Darwin Latorre | DevOps & Backend Engineer',
+	description = 'Darwin Latorre, DevOps and Backend Engineer. Explore projects and experience with AWS, GCP, Kubernetes, Terraform, CI/CD, Java and Spring Boot.',
 } = Astro.props;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
+const imageUrl = new URL('/social-card.png', Astro.site).href;
+const structuredData = {
+	'@context': 'https://schema.org',
+	'@graph': [
+		{
+			'@type': 'Person',
+			'@id': `${canonicalUrl}#person`,
+			name: profile.name,
+			url: canonicalUrl,
+			jobTitle: profile.role,
+			description: profile.description,
+			email: profile.email,
+			sameAs: socialLinks.map(({ href }) => href),
+			knowsAbout: ['DevOps', 'Backend Development', 'AWS', 'Google Cloud', 'Kubernetes', 'Terraform', 'CI/CD', 'Java', 'Spring Boot'],
+		},
+		{
+			'@type': 'WebSite',
+			'@id': `${canonicalUrl}#website`,
+			url: canonicalUrl,
+			name: `${profile.name} — Portfolio`,
+			inLanguage: 'en',
+			publisher: { '@id': `${canonicalUrl}#person` },
+		},
+		{
+			'@type': 'ProfilePage',
+			'@id': `${canonicalUrl}#webpage`,
+			url: canonicalUrl,
+			name: title,
+			description,
+			isPartOf: { '@id': `${canonicalUrl}#website` },
+			mainEntity: { '@id': `${canonicalUrl}#person` },
+			hasPart: projects.map((project) => ({
+				'@type': 'CreativeWork',
+				name: project.name,
+				description: project.description,
+				url: project.href,
+			})),
+		},
+	],
+};
 ---
 
 <!doctype html>
@@ -23,6 +65,25 @@ const {
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
+		<meta name="author" content={profile.name} />
+		<meta name="robots" content="index, follow, max-image-preview:large" />
+		<link rel="canonical" href={canonicalUrl} />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Darwin Latorre" />
+		<meta property="og:locale" content="en_US" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonicalUrl} />
+		<meta property="og:image" content={imageUrl} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:image:alt" content="Darwin Latorre — DevOps & Backend Engineer" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={imageUrl} />
+		<meta name="twitter:image:alt" content="Darwin Latorre — DevOps & Backend Engineer" />
+		<script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData).replace(/</g, '\\u003c')} />
 		<meta name="theme-color" content="#0c0c11" />
 		<title>{title}</title>
 		<SpeedInsights />

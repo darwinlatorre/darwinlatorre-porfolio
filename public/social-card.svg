@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0c0c11"/>
+  <rect x="28" y="28" width="1144" height="574" rx="8" fill="none" stroke="#30303b" stroke-width="2"/>
+  <g font-family="monospace">
+    <text x="90" y="165" fill="#9999aa" font-size="26">$ whoami</text>
+    <text x="90" y="275" fill="#eeeef4" font-size="72">Darwin Latorre<tspan fill="#a78bfa">_</tspan></text>
+    <text x="90" y="355" fill="#a78bfa" font-size="36">DevOps &amp; Backend Engineer</text>
+    <text x="90" y="440" fill="#9999aa" font-size="24">AWS · GCP · Kubernetes · Terraform · Java</text>
+    <text x="90" y="535" fill="#eeeef4" font-size="24">darwinlatorre.com</text>
+  </g>
+</svg>
