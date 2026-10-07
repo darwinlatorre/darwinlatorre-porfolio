@@ -2,8 +2,8 @@
 import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
 import { profile, projects, socialLinks } from '../data/portfolio';
-import '../styles/variables.css';
 import '../styles/global.css';
+import '../styles/variables.css';
 
 interface Props {
 	title?: string;
@@ -11,7 +11,7 @@ interface Props {
 }
 
 const {
-	title = 'darwinlatorre_',
+	title = 'Darwinlatorre_',
 	description = 'Darwin Latorre, DevOps and Backend Engineer. Explore projects and experience with AWS, GCP, Kubernetes, Terraform, CI/CD, Java and Spring Boot.',
 } = Astro.props;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
