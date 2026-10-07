@@ -325,7 +325,6 @@ const initializeTerminal = (root: HTMLElement) => {
 
 	root.dataset.interactionsReady = 'true';
 	const abortController = new AbortController();
-	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 	let focusTimer = 0;
 	let historyIndex = commandHistory.length;
 	let draft = '';
@@ -406,7 +405,7 @@ const initializeTerminal = (root: HTMLElement) => {
 					scrollContainer.scrollTop;
 				scrollContainer.scrollTo({
 					top: Math.max(0, inputTop - scrollContainer.clientHeight * 0.45),
-					behavior: reducedMotion.matches ? 'auto' : 'smooth',
+					behavior: 'instant',
 				});
 			}, 250);
 		},

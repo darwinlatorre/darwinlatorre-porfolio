@@ -1,9 +1,8 @@
 interface SectionScrollOptions {
 	scroller: HTMLElement;
 	mobileViewport: MediaQueryList;
-	reducedMotion: MediaQueryList;
 	signal: AbortSignal;
-	beforeNavigate: () => void;
+	onNavigate: () => void;
 }
 
 interface TouchGesture {
@@ -12,92 +11,99 @@ interface TouchGesture {
 	panes: HTMLElement[];
 	startX: number;
 	startY: number;
-	x: number;
-	y: number;
-	downBudget: number;
-	upBudget: number;
+	lastY: number;
+	lastTime: number;
+	velocity: number;
+	axis: 'horizontal' | 'vertical' | null;
+	transitioned: boolean;
 }
 
-// Keep native scrolling inside panes and hand off only deliberate edge gestures.
 export const initializeSectionScroll = ({
-	scroller, mobileViewport, reducedMotion, signal, beforeNavigate,
+	scroller, mobileViewport, signal, onNavigate,
 }: SectionScrollOptions) => {
 	const sections = Array.from(scroller.querySelectorAll<HTMLElement>('.screen, #site-footer'));
+	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+	let activeSection = sections[0];
 	let gesture: TouchGesture | null = null;
-	let wheelSection: HTMLElement | null = null;
-	let wheelAmount = 0;
+	let momentumFrame = 0;
+	let wheelLocked = false;
 	let lastWheelTime = 0;
-	let navigationUntil = 0;
-	let pendingTouch: { section: HTMLElement; direction: number } | null = null;
-	let settleTimer = 0;
-	const cancelTouch = () => {
-		gesture = null;
-		pendingTouch = null;
-		window.clearTimeout(settleTimer);
-	};
 
-	const getSection = (target: EventTarget | null) =>
-		target instanceof Element ? target.closest<HTMLElement>('.screen, #site-footer') : null;
-	const getPanes = (section: HTMLElement, target: Element) => {
+	const stopMomentum = () => {
+		window.cancelAnimationFrame(momentumFrame);
+		momentumFrame = 0;
+	};
+	const sectionTop = (section: HTMLElement) => Math.max(0, Math.min(
+		scroller.scrollHeight - scroller.clientHeight,
+		section.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop,
+	));
+	const getActiveSection = () => {
+		if (Math.abs(sectionTop(activeSection) - scroller.scrollTop) > 2) {
+			activeSection = sections.reduce((closest, section) =>
+				Math.abs(sectionTop(section) - scroller.scrollTop) < Math.abs(sectionTop(closest) - scroller.scrollTop)
+					? section : closest,
+			);
+		}
+		return activeSection;
+	};
+	const mainPane = (section: HTMLElement) => section.querySelector<HTMLElement>(
+		section.hasAttribute('data-home-details') ? '[data-tree-scroll]' : '[data-terminal-scroll], [data-projects-content]',
+	);
+	const getPanes = (section: HTMLElement, target?: Element) => {
 		const panes: HTMLElement[] = [];
-		for (let element = target.closest<HTMLElement>('*'); element && element !== section; element = element.parentElement) {
-			if (element.scrollHeight > element.clientHeight + 2 && /^(auto|scroll)$/.test(getComputedStyle(element).overflowY)) {
-				panes.push(element);
+		if (target && section.contains(target)) {
+			for (let element = target.closest<HTMLElement>('*'); element && element !== section; element = element.parentElement) {
+				if (element.scrollHeight > element.clientHeight + 2 && /^(auto|scroll)$/.test(getComputedStyle(element).overflowY)) panes.push(element);
 			}
 		}
-		const mainPane = section.querySelector<HTMLElement>(
-			'[data-terminal-scroll], [data-projects-content], [data-home-details-content]',
-		);
-		if (mainPane && !panes.includes(mainPane) && mainPane.scrollHeight > mainPane.clientHeight + 2) panes.push(mainPane);
+		const pane = mainPane(section);
+		if (pane && !panes.includes(pane)) panes.push(pane);
 		return panes;
 	};
 	const remaining = (pane: HTMLElement, direction: number) => direction > 0
 		? Math.max(0, pane.scrollHeight - pane.clientHeight - pane.scrollTop)
 		: Math.max(0, pane.scrollTop);
-	const atEdge = (panes: HTMLElement[], direction: number) =>
-		panes.every((pane) => remaining(pane, direction) <= 2);
-	const navigate = (section: HTMLElement, direction: number) => {
-		const now = performance.now();
-		if (now < navigationUntil) return;
-		const target = sections[sections.indexOf(section) + direction];
-		if (!target) return;
-		const sectionTop = section.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
-		// The browser may already have carried this gesture to the adjacent snap.
-		if (direction * -sectionTop > scroller.clientHeight * 0.5) return;
-		navigationUntil = now + 750;
-		beforeNavigate();
-		const pane = target.querySelector<HTMLElement>('[data-terminal-scroll], [data-projects-content]');
+	const activate = (section: HTMLElement, direction: number, keyboard = false) => {
+		activeSection = section;
+		const pane = mainPane(section);
 		if (pane) pane.scrollTop = direction > 0 ? 0 : pane.scrollHeight;
-		target.scrollIntoView({
-			block: target.id === 'site-footer' ? 'end' : 'start',
-			behavior: reducedMotion.matches ? 'auto' : 'smooth',
-		});
+		scroller.scrollTo({ top: sectionTop(section), behavior: 'instant' });
+		scroller.dataset.activeSection = section.id || 'home';
+		onNavigate();
+		if (keyboard && pane?.hasAttribute('tabindex')) pane.focus({ preventScroll: true });
 	};
-	const settleTouch = () => {
-		window.clearTimeout(settleTimer);
-		if (!pendingTouch) return;
-		// Let native momentum/snap settle before transferring the gesture. This also
-		// prevents an instant reduced-motion jump from receiving the old momentum.
-		settleTimer = window.setTimeout(() => {
-			const transition = pendingTouch;
-			pendingTouch = null;
-			if (transition) navigate(transition.section, transition.direction);
-		}, 140);
+	const navigate = (section: HTMLElement, direction: number, keyboard = false) => {
+		const next = sections[sections.indexOf(section) + direction];
+		if (!next) return false;
+		activate(next, direction, keyboard);
+		return true;
+	};
+	const scrollPane = (section: HTMLElement, panes: HTMLElement[], amount: number, keyboard = false) => {
+		const direction = Math.sign(amount);
+		if (!direction) return false;
+		let delta = Math.abs(amount);
+		for (const pane of panes) {
+			const consumed = Math.min(delta, remaining(pane, direction));
+			pane.scrollTop += consumed * direction;
+			delta -= consumed;
+			if (remaining(pane, direction) > 2) return false;
+		}
+		// Reaching the edge is enough: no additional swipe, timeout or animation.
+		return navigate(section, direction, keyboard);
 	};
 
+	scroller.dataset.sectionScrollReady = 'true';
 	scroller.addEventListener('touchstart', (event) => {
-		cancelTouch();
+		stopMomentum();
+		gesture = null;
 		if (!mobileViewport.matches || event.touches.length !== 1 || !(event.target instanceof Element)) return;
 		if (event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
-		const section = getSection(event.target);
-		if (!section) return;
 		const touch = event.touches[0];
-		const panes = getPanes(section, event.target);
+		const section = getActiveSection();
 		gesture = {
-			identifier: touch.identifier, section, panes,
-			startX: touch.clientX, startY: touch.clientY, x: touch.clientX, y: touch.clientY,
-			downBudget: panes.reduce((total, pane) => total + remaining(pane, 1), 0),
-			upBudget: panes.reduce((total, pane) => total + remaining(pane, -1), 0),
+			identifier: touch.identifier, section, panes: getPanes(section, event.target),
+			startX: touch.clientX, startY: touch.clientY, lastY: touch.clientY,
+			lastTime: performance.now(), velocity: 0, axis: null, transitioned: false,
 		};
 	}, { passive: true, signal });
 	scroller.addEventListener('touchmove', (event) => {
@@ -105,47 +111,95 @@ export const initializeSectionScroll = ({
 		if (event.touches.length !== 1) { gesture = null; return; }
 		const touch = Array.from(event.touches).find(({ identifier }) => identifier === gesture?.identifier);
 		if (!touch) return;
-		gesture.x = touch.clientX;
-		gesture.y = touch.clientY;
-	}, { passive: true, signal });
+		const deltaX = touch.clientX - gesture.startX;
+		const deltaY = gesture.startY - touch.clientY;
+		if (!gesture.axis) {
+			if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < 10) return;
+			gesture.axis = Math.abs(deltaX) > Math.abs(deltaY) ? 'horizontal' : 'vertical';
+		}
+		if (gesture.axis === 'horizontal') return;
+		event.preventDefault();
+		if (gesture.transitioned) return;
+		const now = performance.now();
+		const amount = gesture.lastY - touch.clientY;
+		gesture.velocity = amount / Math.max(now - gesture.lastTime, 1);
+		gesture.lastY = touch.clientY;
+		gesture.lastTime = now;
+		gesture.transitioned = scrollPane(gesture.section, gesture.panes, amount);
+	}, { passive: false, signal });
 	scroller.addEventListener('touchend', () => {
 		const completed = gesture;
 		gesture = null;
-		if (!completed) return;
-		const deltaY = completed.startY - completed.y;
-		const deltaX = completed.startX - completed.x;
-		// Horizontal carousel swipes and taps must never change vertical sections.
-		if (Math.abs(deltaY) <= Math.abs(deltaX) * 1.25) return;
-		const direction = deltaY > 0 ? 1 : -1;
-		const budget = direction > 0 ? completed.downBudget : completed.upBudget;
-		if (Math.abs(deltaY) - budget < 48 || !atEdge(completed.panes, direction)) return;
-		pendingTouch = { section: completed.section, direction };
-		settleTouch();
+		if (!completed || completed.axis !== 'vertical' || completed.transitioned || reducedMotion.matches || performance.now() - completed.lastTime > 80) return;
+		let velocity = Math.max(-2.5, Math.min(2.5, completed.velocity));
+		let lastTime = performance.now();
+		const glide = (now: number) => {
+			const elapsed = Math.min(now - lastTime, 32);
+			lastTime = now;
+			velocity *= Math.pow(0.92, elapsed / 16);
+			if (Math.abs(velocity) < 0.08 || activeSection !== completed.section || scrollPane(completed.section, completed.panes, velocity * elapsed)) {
+				momentumFrame = 0;
+				return;
+			}
+			momentumFrame = window.requestAnimationFrame(glide);
+		};
+		momentumFrame = window.requestAnimationFrame(glide);
 	}, { passive: true, signal });
-	scroller.addEventListener('scroll', settleTouch, { capture: true, passive: true, signal });
-	scroller.addEventListener('touchcancel', cancelTouch, { passive: true, signal });
-	scroller.addEventListener('focusin', cancelTouch, { signal });
-	mobileViewport.addEventListener('change', cancelTouch, { signal });
-	signal.addEventListener('abort', cancelTouch, { once: true });
+	const cancelGesture = () => { gesture = null; stopMomentum(); };
+	scroller.addEventListener('touchcancel', cancelGesture, { passive: true, signal });
+	scroller.addEventListener('focusin', cancelGesture, { signal });
+	mobileViewport.addEventListener('change', cancelGesture, { signal });
 
-	scroller.addEventListener('wheel', (event) => {
-		if (event.ctrlKey || Math.abs(event.deltaY) <= Math.abs(event.deltaX) || !(event.target instanceof Element)) return;
-		const section = getSection(event.target);
-		if (!section) return;
+	document.addEventListener('wheel', (event) => {
+		if (document.querySelector('dialog[open]') || event.ctrlKey || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+		event.preventDefault();
+		stopMomentum();
 		const now = performance.now();
-		if (now < navigationUntil) { event.preventDefault(); return; }
-		const direction = event.deltaY > 0 ? 1 : -1;
-		const panes = getPanes(section, event.target);
-		if (!atEdge(panes, direction)) { wheelAmount = 0; return; }
-		if (section !== wheelSection || now - lastWheelTime > 250 || Math.sign(wheelAmount) !== direction) wheelAmount = 0;
-		wheelSection = section;
+		if (now - lastWheelTime > 180) wheelLocked = false;
 		lastWheelTime = now;
+		if (wheelLocked) return;
+		const section = getActiveSection();
 		const delta = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? event.deltaY * 16
 			: event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? event.deltaY * scroller.clientHeight : event.deltaY;
-		wheelAmount += delta;
-		if (Math.abs(wheelAmount) < 80) return;
-		event.preventDefault();
-		wheelAmount = 0;
-		navigate(section, direction);
+		wheelLocked = scrollPane(section, getPanes(section, event.target instanceof Element ? event.target : undefined), delta);
 	}, { passive: false, signal });
+
+	document.addEventListener('keydown', (event) => {
+		if (document.querySelector('dialog[open]') || event.altKey || event.ctrlKey || event.metaKey) return;
+		if (event.target instanceof Element) {
+			if (event.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+			if (event.key === ' ' && event.target.closest('button, summary')) return;
+		}
+		const section = getActiveSection();
+		const pane = mainPane(section);
+		const height = pane?.clientHeight || scroller.clientHeight;
+		const amounts: Record<string, number> = { ArrowDown: 48, ArrowUp: -48, PageDown: height * 0.8, PageUp: -height * 0.8 };
+		const amount = event.key === ' ' ? height * (event.shiftKey ? -0.8 : 0.8) : amounts[event.key];
+		if (!amount) return;
+		event.preventDefault();
+		stopMomentum();
+		scrollPane(section, getPanes(section, event.target instanceof Element ? event.target : undefined), amount, true);
+	}, { signal });
+
+	signal.addEventListener('abort', () => {
+		cancelGesture();
+		delete scroller.dataset.sectionScrollReady;
+		delete scroller.dataset.activeSection;
+	}, { once: true });
+
+	return {
+		navigateTo: (target: HTMLElement) => {
+			cancelGesture();
+			wheelLocked = false;
+			const section = target.closest<HTMLElement>('.screen, #site-footer') || target.querySelector<HTMLElement>('.screen');
+			if (!section) return;
+			activate(section, 1);
+			if (target !== section) target.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'center' });
+		},
+		scrollBy: (amount: number) => {
+			cancelGesture();
+			const section = getActiveSection();
+			scrollPane(section, getPanes(section), amount);
+		},
+	};
 };

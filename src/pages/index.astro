@@ -45,7 +45,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 		overflow-x: hidden;
 		overflow-y: auto;
 		flex-direction: column;
-		scroll-behavior: smooth;
+		scroll-behavior: auto;
 		scroll-snap-type: y mandatory;
 		scrollbar-width: none;
 	}
@@ -55,15 +55,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 	}
 
 	@media (max-width: 48rem) {
+		.page-scroll[data-section-scroll-ready='true'] {
+			/* The active pane owns vertical gestures; horizontal carousels stay native. */
+			touch-action: pan-x pinch-zoom;
+		}
 		/* Let touch scrolling chain to the next snap target at content edges. */
 		.page-scroll :global(.is-scroll-contained) {
 			overscroll-behavior-y: auto;
 		}
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.page-scroll {
-			scroll-behavior: auto;
-		}
-	}
 </style>
