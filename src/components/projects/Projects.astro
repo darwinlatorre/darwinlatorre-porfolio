@@ -1,5 +1,6 @@
 ---
 import AuthPreview from './AuthPreview.astro';
+import WorkflowPreview from './WorkflowPreview.astro';
 import { siGithub } from 'simple-icons';
 import { profile, projects } from '../../data/portfolio';
 ---
@@ -19,6 +20,8 @@ import { profile, projects } from '../../data/portfolio';
 						<div class="project-preview" aria-hidden="true" inert>
 							{project.preview ? (
 								<img src={project.preview} alt="" width="850" height="1400" loading="lazy" decoding="async" draggable="false" />
+							) : project.id === 'project-sdd-workflow' ? (
+								<WorkflowPreview />
 							) : (
 								<AuthPreview />
 							)}
@@ -160,7 +163,7 @@ import { profile, projects } from '../../data/portfolio';
 		max-height: var(--project-card-max-height);
 		min-height: 0;
 		margin-inline: auto;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: repeat(4, minmax(0, 1fr));
 		grid-template-rows: minmax(0, 1fr);
 		align-self: center;
 		gap: var(--projects-gap);
@@ -362,7 +365,7 @@ import { profile, projects } from '../../data/portfolio';
 			--projects-grid-width: min(var(--projects-max-width), calc(min(96rem, 100cqw) - 2 * var(--projects-inline-padding)));
 			/* Match the screenshots' 850×1400 ratio plus the collapsed details row. */
 			--project-fitted-height: calc(
-				((var(--projects-grid-width) - 2 * var(--projects-gap)) / 3 - 2px) * 1400 / 850
+				((var(--projects-grid-width) - 3 * var(--projects-gap)) / 4 - 2px) * 1400 / 850
 				+ var(--project-name-font-size) * 1.4 + 1.6rem + 3px
 			);
 

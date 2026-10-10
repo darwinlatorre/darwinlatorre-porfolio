@@ -1,0 +1,136 @@
+<div class="workflow-preview">
+	<div class="workflow-header">
+		<svg class="workflow-mark" viewBox="0 0 128 128" fill="none">
+			<path d="M24 16H64L88 40V80L64 104H24L8 88V32ZM64 24H104L120 40V96L104 112H64L40 88V48Z" stroke="currentColor" stroke-width="6" stroke-linejoin="round" />
+			<path class="mark-route" d="M20 64H44L64 44L84 64H108" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+		</svg>
+		<span>SDD / OPENCODE</span>
+	</div>
+
+	<div class="workflow-heading">
+		<p>Spec first.<br />Code follows.</p>
+		<span>SPEC-DRIVEN DEVELOPMENT</span>
+	</div>
+
+	<div class="spec-sheet">
+		<div class="sheet-heading"><span>specs / feature</span><span>MD</span></div>
+		<div class="spec-file"><span>01</span><span>requirements.md</span></div>
+		<div class="spec-file"><span>02</span><span>design.md</span></div>
+		<div class="spec-file"><span>03</span><span>tasks.md</span></div>
+		<div class="approval"><span class="approval-symbol">↳</span> human approval</div>
+	</div>
+
+	<div class="workflow-bottom">
+		<div class="handoff"><span>IMPLEMENT</span><span>→</span><span>VERIFY</span></div>
+		<p>Persistent context.<br />Scoped evidence.</p>
+	</div>
+</div>
+
+<style>
+	.workflow-preview {
+		--workflow-unit: min(1rem, 3cqh, 4.8cqw);
+		--workflow-ink: #e4dfd7;
+		--workflow-muted: #a29b92;
+		--workflow-copper: #ce946c;
+		--workflow-rule: #3c3832;
+
+		display: flex;
+		height: 100%;
+		padding: calc(var(--workflow-unit) * 1.6);
+		flex-direction: column;
+		justify-content: space-between;
+		gap: calc(var(--workflow-unit) * 1.5);
+		background: #191815;
+		color: var(--workflow-ink);
+		font-size: var(--workflow-unit);
+		line-height: 1.5;
+	}
+
+	.workflow-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--workflow-unit);
+		color: var(--workflow-muted);
+		font-size: calc(var(--workflow-unit) * 0.57);
+		letter-spacing: 0.08em;
+	}
+
+	.workflow-mark {
+		width: calc(var(--workflow-unit) * 2.8);
+		height: calc(var(--workflow-unit) * 2.8);
+		flex-shrink: 0;
+		color: var(--workflow-ink);
+	}
+
+	.mark-route { stroke: var(--workflow-copper); }
+
+	.workflow-heading p {
+		margin: 0 0 calc(var(--workflow-unit) * 0.7);
+		font-size: calc(var(--workflow-unit) * 2.1);
+		font-weight: 400;
+		letter-spacing: -0.065em;
+		line-height: 1.15;
+	}
+
+	.workflow-heading > span {
+		color: var(--workflow-copper);
+		font-size: calc(var(--workflow-unit) * 0.55);
+		letter-spacing: 0.06em;
+	}
+
+	.spec-sheet {
+		border: 1px solid var(--workflow-rule);
+		background: #201e1a;
+	}
+
+	.sheet-heading {
+		display: flex;
+		padding: calc(var(--workflow-unit) * 0.75);
+		justify-content: space-between;
+		border-bottom: 1px solid var(--workflow-rule);
+		color: var(--workflow-muted);
+		font-size: calc(var(--workflow-unit) * 0.62);
+	}
+
+	.sheet-heading span:last-child { color: var(--workflow-copper); }
+
+	.spec-file {
+		display: flex;
+		padding: calc(var(--workflow-unit) * 0.6) calc(var(--workflow-unit) * 0.75);
+		gap: calc(var(--workflow-unit) * 0.85);
+		font-size: calc(var(--workflow-unit) * 0.75);
+	}
+
+	.spec-file > span:first-child { color: var(--workflow-muted); }
+
+	.approval {
+		padding: calc(var(--workflow-unit) * 0.7) calc(var(--workflow-unit) * 0.75);
+		border-top: 1px solid var(--workflow-rule);
+		color: var(--workflow-copper);
+		font-size: calc(var(--workflow-unit) * 0.68);
+	}
+
+	.approval-symbol { margin-right: calc(var(--workflow-unit) * 0.4); }
+
+	.workflow-bottom {
+		padding-top: calc(var(--workflow-unit) * 0.85);
+		border-top: 1px solid var(--workflow-rule);
+	}
+
+	.handoff {
+		display: flex;
+		align-items: center;
+		gap: calc(var(--workflow-unit) * 0.7);
+		font-size: calc(var(--workflow-unit) * 0.65);
+		letter-spacing: 0.04em;
+	}
+
+	.handoff span:nth-child(2) { color: var(--workflow-copper); }
+
+	.workflow-bottom p {
+		margin: calc(var(--workflow-unit) * 0.65) 0 0;
+		color: var(--workflow-muted);
+		font-size: calc(var(--workflow-unit) * 0.65);
+	}
+</style>

@@ -2,6 +2,7 @@
 import { ChevronDown, FileText, Folder, House } from '@lucide/astro';
 import { certificates, projects } from '../../data/portfolio';
 
+const projectItems = projects.filter(({ id }) => id !== 'project-portfolio');
 const certificateItems = certificates.filter(({ id }) =>
 	['certificate-aws', 'certificate-1', 'certificate-2'].includes(id),
 );
@@ -33,7 +34,7 @@ const certificateItems = certificates.filter(({ id }) =>
 			</button>
 			<div id="projects-tree" class="tree-children">
 				<div class="tree-children-inner">
-					{projects.map((project) => (
+					{projectItems.map((project) => (
 						<a href={`#${project.id}`}>
 							<FileText class="tree-icon" size={16} stroke-width={1.5} aria-hidden="true" />
 							<span>{project.name}</span>
