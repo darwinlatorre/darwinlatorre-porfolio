@@ -26,6 +26,14 @@ export const socialLinks = [
 
 export const projects = [
 	{
+		id: 'project-sdd-workflow',
+		name: 'SDD-WorkFlow',
+		description: 'Framework de Spec-Driven Development y Harness Engineering para OpenCode: especificaciones, contexto persistente y verificación incremental con aprobación humana.',
+		href: 'https://github.com/darwinlatorre/ssd-workflow',
+		repository: null,
+		preview: null,
+	},
+	{
 		id: 'project-z3ntry',
 		name: 'z3ntry',
 		description: 'Sitio de Z3nTry sobre ciberseguridad, desarrollo y diseño.',
