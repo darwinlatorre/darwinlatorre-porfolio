@@ -62,6 +62,13 @@ const { id = 'site-menu' } = Astro.props;
 </script>
 
 <style>
+	/* Phones navigate through the swipe drawer instead. */
+	@media (max-width: 48rem) {
+		.menu-shell {
+			display: none;
+		}
+	}
+
 	.menu-shell {
 		position: fixed;
 		top: calc(var(--page-inset) + var(--control-offset));

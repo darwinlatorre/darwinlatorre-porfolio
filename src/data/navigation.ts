@@ -3,7 +3,6 @@ export const portfolioSections = [
 	{ id: 'about', label: 'About' },
 	{ id: 'projects', label: 'Projects' },
 	{ id: 'experience', label: 'Experience' },
-	{ id: 'services', label: 'Services' },
 	{ id: 'certificates', label: 'Certificates' },
 ] as const;
 

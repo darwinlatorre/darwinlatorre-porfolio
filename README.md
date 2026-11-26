@@ -1,6 +1,6 @@
 # Darwin Latorre Portfolio
 
-Personal portfolio for Darwin Latorre, a DevOps and Backend Engineer. Built with Astro, it presents professional experience, selected projects, services, and certifications through a terminal-inspired interface.
+Personal portfolio for Darwin Latorre, a DevOps and Backend Engineer. Built with Astro, it presents professional experience, selected projects and certifications through a terminal-inspired interface.
 
 **Live site:** [darwinlatorre.com](https://darwinlatorre.com)
 
@@ -68,20 +68,22 @@ docker compose down
 ```text
 src/
   components/   UI organized by portfolio section
-  data/         Profile, projects, services, and certificate content
+  data/         Profile, projects, experience, certificates, navigation, and themes
   layouts/      Shared Astro page layout
   pages/        Site entry points
-  scripts/      Terminal, navigation, and scroll interactions
-  styles/       Global styles and design tokens
-  types/        Shared TypeScript types
+  scripts/      Terminal, navigation, scroll, theme, and sound interactions
+  styles/       Global styles, design tokens, and theme palettes
 public/         Static assets and downloadable CV
 ```
 
 ## Maintaining the Code
 
-- `src/data/portfolio.ts` is the shared source for profile, project, experience, service, and certificate content.
+- `src/data/portfolio.ts` is the shared source for profile, project, experience, and certificate content.
 - `src/data/navigation.ts` defines the section IDs and labels used by the menu, terminal commands, and scroll cue. The page markup in `src/pages/index.astro` must follow that order; Home contains two screens.
-- `src/scripts/page-scroll.ts` controls reveals and shared UI; `section-scroll.ts` controls section navigation and nested scrolling. Scrolling happens inside `[data-page-scroll]`.
+- `src/scripts/page-scroll.ts` controls reveals and shared UI; `home-snap.ts` snaps between the two Home screens, and every section after them scrolls freely. Scrolling happens inside `[data-page-scroll]`.
+- `src/scripts/command-typing.ts` types each section's prompt command when it scrolls into view; the section output prints after it.
+- The terminal (`src/scripts/terminal-interactions.ts`) is global: bottom left on desktop from About onward, and inside the swipe drawer (`src/scripts/drawer.ts`) on phones. Run `help` to list commands, including `theme` and `sound`.
+- Themes live in `src/data/themes.ts` and as `[data-theme]` palettes in `src/styles/variables.css`; the choice is saved in `localStorage` and applied before first paint in `BaseLayout.astro`.
 - `src/scripts/dialog.ts` shares dialog focus restoration and cleanup between the CV and technology dialogs.
 - TypeScript checks unused locals and parameters. For scroll or dialog changes, also verify mobile and desktop, keyboard navigation, fragment links, and reduced motion in a browser.
 

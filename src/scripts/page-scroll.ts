@@ -1,7 +1,7 @@
 import { createClipboardFeedback } from './clipboard';
 import { profile } from '../data/portfolio';
 import { initializeTreeNavigation, type TreeNavigation } from './tree-navigation';
-import { initializeSectionScroll } from './section-scroll';
+import { initializeHomeSnap } from './home-snap';
 import { portfolioSections } from '../data/navigation';
 
 const initializePageScroll = () => {
@@ -11,6 +11,7 @@ const initializePageScroll = () => {
 	scroller.dataset.interactionsReady = 'true';
 
 	const sharedName = document.querySelector<HTMLElement>('[data-shared-name]');
+	const topScrim = document.querySelector<HTMLElement>('[data-top-scrim]');
 	const nameAction = sharedName?.querySelector<HTMLButtonElement>('[data-name-action]');
 	const copyStatus = document.querySelector<HTMLElement>('[data-copy-status]');
 	const menu = document.querySelector<HTMLElement>('[data-menu]');
@@ -18,38 +19,25 @@ const initializePageScroll = () => {
 	const scrollCue = document.querySelector<HTMLAnchorElement>('[data-shared-scroll-cue]');
 	const initialLabel = scrollCue?.querySelector<HTMLElement>('[data-scroll-initial]');
 	const discoverLabel = scrollCue?.querySelector<HTMLElement>('[data-scroll-discover]');
+	const floatingTerminal = document.querySelector<HTMLElement>('[data-terminal-floating]');
+	const terminals = document.querySelectorAll<HTMLElement>('[data-terminal-root]');
 	const homeDetails = document.querySelector<HTMLElement>('[data-home-details]');
 	const homeDetailsContent = homeDetails?.querySelector<HTMLElement>('[data-home-details-content]');
 	const treeScroll = homeDetails?.querySelector<HTMLElement>('[data-tree-scroll]');
 	const about = document.querySelector<HTMLElement>('[data-about]');
-	const aboutContent = about?.querySelector<HTMLElement>('[data-about-content]');
 	const aboutMarker = about?.querySelector<HTMLElement>('[data-about-marker]');
 	const aboutLine = about?.querySelector<HTMLElement>('[data-about-line]');
 	const aboutDescription = about?.querySelector<HTMLElement>('[data-about-description]');
-	const aboutStatCommand = about?.querySelector<HTMLElement>('[data-about-stat-command]');
-	const aboutSocialCommand = about?.querySelector<HTMLElement>('[data-about-social-command]');
-	const aboutTerminalCommand = about?.querySelector<HTMLElement>('[data-about-terminal-command]');
 	const aboutStatValues = about?.querySelectorAll<HTMLElement>('[data-about-stat-value]') ?? [];
 	const aboutSocials = about?.querySelectorAll<HTMLElement>('[data-about-social]') ?? [];
 	const experience = document.querySelector<HTMLElement>('[data-experience]');
-	const experienceContent = experience?.querySelector<HTMLElement>('[data-experience-content]');
 	const experienceCommand = experience?.querySelector<HTMLElement>('[data-experience-command]');
 	const experienceEntries =
 		experience?.querySelectorAll<HTMLElement>('[data-experience-entry]') ?? [];
 	const experienceSummary = experience?.querySelector<HTMLElement>('[data-experience-summary]');
-	const experienceReady = experience?.querySelector<HTMLElement>('[data-experience-ready]');
-	const services = document.querySelector<HTMLElement>('[data-services]');
-	const servicesContent = services?.querySelector<HTMLElement>('[data-services-content]');
-	const servicesTitle = services?.querySelector<HTMLElement>('[data-services-title]');
-	const serviceCards = services?.querySelectorAll<HTMLElement>('[data-service-card]') ?? [];
-	const servicesTerminal = services?.querySelector<HTMLElement>('[data-services-terminal]');
 	const projects = document.querySelector<HTMLElement>('[data-projects]');
-	const projectsContent = projects?.querySelector<HTMLElement>('[data-projects-content]');
 	const projectCards = projects?.querySelectorAll<HTMLElement>('[data-project-card]') ?? [];
 	const certificates = document.querySelector<HTMLElement>('[data-certificates]');
-	const certificatesContent = certificates?.querySelector<HTMLElement>(
-		'[data-certificates-content]',
-	);
 	const certificatesCommand = certificates?.querySelector<HTMLElement>(
 		'[data-certificates-command]',
 	);
@@ -57,33 +45,13 @@ const initializePageScroll = () => {
 		certificates?.querySelectorAll<HTMLElement>('[data-certificates-rule]') ?? [];
 	const certificateItems =
 		certificates?.querySelectorAll<HTMLElement>('[data-certificate-item]') ?? [];
-	const certificatesReady = certificates?.querySelector<HTMLElement>('[data-certificates-ready]');
-	const contentBySection = {
-		about: aboutContent,
-		projects: projectsContent,
-		experience: experienceContent,
-		services: servicesContent,
-		certificates: certificatesContent,
-	};
-	const contentSections = portfolioSections.flatMap((section) => section.id === 'home' ? [] : [{
-		...section,
-		content: contentBySection[section.id],
-	}]);
-	const contentPanes = contentSections.map(({ content }) => content)
-		.filter((content): content is HTMLElement => Boolean(content));
+	const sectionElements = portfolioSections.flatMap(({ id }) => {
+		const element = document.getElementById(id);
+		return element ? [{ id, element }] : [];
+	});
 	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 	const mobileViewport = window.matchMedia('(max-width: 48rem)');
 	const abortController = new AbortController();
-	const paneFocusTargets = Array.from(scroller.querySelectorAll<HTMLElement>(
-		'[data-about-content], [data-projects-content], [data-experience-content], ' +
-		'[data-services-content], [data-certificates-content], .description-output p[tabindex]',
-	)).map((element) => ({ element, tabindex: element.getAttribute('tabindex') }));
-	const updatePaneFocusability = () => {
-		for (const { element, tabindex } of paneFocusTargets) {
-			if (mobileViewport.matches || tabindex === null) element.removeAttribute('tabindex');
-			else element.setAttribute('tabindex', tabindex);
-		}
-	};
 	const clipboard = nameAction
 		? createClipboardFeedback({
 				trigger: nameAction,
@@ -101,15 +69,24 @@ const initializePageScroll = () => {
 	let aboutTop = scroller.clientHeight * 2;
 	let projectsTop = scroller.clientHeight * 3;
 	let experienceTop = scroller.clientHeight * 4;
-	let servicesTop = scroller.clientHeight * 5;
-	let certificatesTop = scroller.clientHeight * 6;
+	let certificatesTop = scroller.clientHeight * 5;
+	let sectionTops: Array<{ id: string; top: number }> = [];
 	let treeNavigation: TreeNavigation | null = null;
+	let lastNameStyle = '';
+	let lastRenderTop = scroller.scrollTop;
+	let directionTravel = 0;
+	let nameTucked = false;
 
 	const clamp = (value: number) => Math.min(1, Math.max(0, value));
 	const range = (value: number, start: number, end: number) =>
 		clamp((value - start) / (end - start));
-	const sectionProgress = (start: number, end: number) => {
-		const progress = clamp((scroller.scrollTop - start) / Math.max(end - start, 1));
+	const elementTop = (element: HTMLElement) =>
+		element.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
+	// 0 when the section top enters at the viewport bottom, 1 when it reaches the top.
+	const entryProgress = (top: number) => {
+		const progress = clamp(
+			(scroller.scrollTop - top + scroller.clientHeight) / Math.max(scroller.clientHeight, 1),
+		);
 		return reducedMotion.matches ? (progress >= 0.5 ? 1 : 0) : progress;
 	};
 	const getFragmentTarget = (hash: string) => {
@@ -121,22 +98,13 @@ const initializePageScroll = () => {
 			return null;
 		}
 	};
+	// Last progress written per element: most frames leave reveals at 0 or 1, so skip the writes.
+	const revealed = new WeakMap<HTMLElement, number>();
 	const reveal = (element: HTMLElement | null | undefined, progress: number, offset = 18) => {
-		if (!element) return;
+		if (!element || revealed.get(element) === progress) return;
+		revealed.set(element, progress);
 		element.style.opacity = `${progress}`;
 		element.style.transform = `translateY(${offset * (1 - progress)}px)`;
-	};
-	const getScrollState = (content: HTMLElement | null | undefined) => {
-		if (!content) return { scrollable: false, atStart: true, atEnd: true };
-
-		const scrollable = content.scrollHeight > content.clientHeight + 1;
-		return {
-			scrollable,
-			atStart: !scrollable || content.scrollTop <= 1,
-			atEnd:
-				!scrollable ||
-				content.scrollTop + content.clientHeight >= content.scrollHeight - 1,
-		};
 	};
 
 	const measure = () => {
@@ -149,24 +117,14 @@ const initializePageScroll = () => {
 		}
 
 		endTop = menu ? Number.parseFloat(getComputedStyle(menu).top) : 24;
-		detailsTop = homeDetails
-			? homeDetails.getBoundingClientRect().top + scroller.scrollTop
-			: scroller.clientHeight;
-		aboutTop = about
-			? about.getBoundingClientRect().top + scroller.scrollTop
-			: detailsTop + scroller.clientHeight;
-		projectsTop = projects
-			? projects.getBoundingClientRect().top + scroller.scrollTop
-			: aboutTop + scroller.clientHeight;
-		experienceTop = experience
-			? experience.getBoundingClientRect().top + scroller.scrollTop
-			: projectsTop + scroller.clientHeight;
-		servicesTop = services
-			? services.getBoundingClientRect().top + scroller.scrollTop
-			: experienceTop + scroller.clientHeight;
+		detailsTop = homeDetails ? elementTop(homeDetails) : scroller.clientHeight;
+		aboutTop = about ? elementTop(about) : detailsTop + scroller.clientHeight;
+		projectsTop = projects ? elementTop(projects) : aboutTop + scroller.clientHeight;
+		experienceTop = experience ? elementTop(experience) : projectsTop + scroller.clientHeight;
 		certificatesTop = certificates
-			? certificates.getBoundingClientRect().top + scroller.scrollTop
-			: servicesTop + scroller.clientHeight;
+			? elementTop(certificates)
+			: experienceTop + scroller.clientHeight;
+		sectionTops = sectionElements.map(({ id, element }) => ({ id, top: elementTop(element) }));
 	};
 
 	const render = () => {
@@ -178,30 +136,26 @@ const initializePageScroll = () => {
 		const rawProgress = clamp(scroller.scrollTop / Math.max(detailsTop, 1));
 		const progress = reducedMotion.matches ? (rawProgress >= 0.5 ? 1 : 0) : rawProgress;
 		const inDetails = rawProgress >= 0.5;
-		const aboutProgress = sectionProgress(detailsTop, aboutTop);
-		const projectsProgress = sectionProgress(aboutTop, projectsTop);
-		const experienceProgress = sectionProgress(projectsTop, experienceTop);
-		const servicesProgress = sectionProgress(experienceTop, servicesTop);
-		const certificatesProgress = sectionProgress(servicesTop, certificatesTop);
-		const sectionTops = {
-			about: aboutTop,
-			projects: projectsTop,
-			experience: experienceTop,
-			services: servicesTop,
-			certificates: certificatesTop,
-		};
-		const sectionStates = contentSections.map((section) => ({
-			...section,
-			top: sectionTops[section.id],
-			scrollState: getScrollState(section.content),
-		}));
-		const currentSectionIndex = sectionStates.findLastIndex(({ top }) => scroller.scrollTop >= top - 2);
-		const currentSection = sectionStates[currentSectionIndex];
-		const nextSection = sectionStates[currentSectionIndex + 1];
+		const aboutProgress = entryProgress(aboutTop);
+		const projectsProgress = entryProgress(projectsTop);
+		const experienceProgress = entryProgress(experienceTop);
+		const certificatesProgress = entryProgress(certificatesTop);
 
-		for (const { content, scrollState } of sectionStates) {
-			content?.classList.toggle('is-scroll-contained',
-				scrollState.scrollable && !scrollState.atStart && !scrollState.atEnd);
+		if (sharedName) {
+			// Phones hide the name while reading down past Home; desktop keeps it pinned.
+			const delta = scroller.scrollTop - lastRenderTop;
+			lastRenderTop = scroller.scrollTop;
+			directionTravel = Math.sign(delta) === Math.sign(directionTravel) ? directionTravel + delta : delta;
+			const pastHome = scroller.scrollTop > aboutTop - scroller.clientHeight / 2;
+			if (!mobileViewport.matches || !pastHome) nameTucked = false;
+			else if (directionTravel > 12) nameTucked = true;
+			else if (directionTravel < -12) nameTucked = false;
+			sharedName.classList.toggle('is-tucked', nameTucked);
+		}
+		if (topScrim) {
+			// The band only appears once section content can pass under the pinned name.
+			topScrim.classList.toggle('is-visible', aboutProgress >= 0.85);
+			topScrim.classList.toggle('is-tucked', nameTucked);
 		}
 
 		if (sharedName && nameAction) {
@@ -209,10 +163,14 @@ const initializePageScroll = () => {
 			const fontSize = startFontSize + (endFontSize - startFontSize) * progress;
 			const top = startTop + (endTop - startTop) * progress;
 			const translateY = -50 * (1 - progress);
+			const nameStyle = `${top}|${fontSize}|${translateY}`;
 
-			sharedName.style.top = `${top}px`;
-			sharedName.style.fontSize = `${fontSize}px`;
-			sharedName.style.transform = `translate(-50%, ${translateY}%)`;
+			if (nameStyle !== lastNameStyle) {
+				lastNameStyle = nameStyle;
+				sharedName.style.top = `${top}px`;
+				sharedName.style.fontSize = `${fontSize}px`;
+				sharedName.style.transform = `translate(-50%, ${translateY}%)`;
+			}
 			nameAction.setAttribute(
 				'aria-label',
 				inDetails
@@ -245,44 +203,43 @@ const initializePageScroll = () => {
 					? 1
 					: 0
 				: clamp((rawProgress - 0.65) / 0.35);
+			const cueOpacity = 1 - range(aboutProgress, 0.05, 0.4);
+			const cueHidden = cueOpacity <= 0;
 
-			const aboutLabelOpacity = 1 - range(aboutProgress, 0.05, 0.4);
-
-			initialLabel.style.opacity = `${(1 - labelTransition) * aboutLabelOpacity}`;
+			initialLabel.style.opacity = `${(1 - labelTransition) * cueOpacity}`;
 			initialLabel.style.transform = `translateY(${-3 * labelTransition}px)`;
-			discoverLabel.style.opacity = `${labelTransition * aboutLabelOpacity}`;
+			discoverLabel.style.opacity = `${labelTransition * cueOpacity}`;
 			discoverLabel.style.transform = `translateY(${3 * (1 - labelTransition)}px)`;
-			const atPageEnd =
-				scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 2;
-
-			scrollCue.classList.toggle('is-terminal', atPageEnd);
-			scrollCue.classList.toggle('is-hidden', atPageEnd);
-			scrollCue.inert = atPageEnd;
-			if (atPageEnd) {
-				scrollCue.removeAttribute('href');
-				scrollCue.setAttribute('aria-label', 'End of current portfolio content');
-			} else if (currentSection) {
-				if (currentSection.scrollState.atEnd) {
-					scrollCue.href = `#${nextSection?.id ?? 'site-footer'}`;
-					scrollCue.setAttribute('aria-label', nextSection
-						? `Go to the ${nextSection.label} section` : 'Go to the site footer');
-				} else {
-					scrollCue.href = `#${currentSection.id}`;
-					scrollCue.setAttribute('aria-label', `Continue through the ${currentSection.label} content`);
-				}
-			} else {
-				scrollCue.href = inDetails ? '#about' : '#home-details';
-				scrollCue.setAttribute(
-					'aria-label',
-					inDetails ? 'Go to the About section' : 'Go to the next Home view',
-				);
-			}
+			scrollCue.classList.toggle('is-hidden', cueHidden);
+			scrollCue.inert = cueHidden;
+			scrollCue.href = inDetails ? '#about' : '#home-details';
+			scrollCue.setAttribute(
+				'aria-label',
+				inDetails ? 'Go to the About section' : 'Go to the next Home view',
+			);
 
 			const detailsIsCurrent = Math.abs(scroller.scrollTop - detailsTop) <= 2;
 			scrollCue.classList.toggle(
 				'is-tree-end',
 				mobileViewport.matches && detailsIsCurrent && Boolean(treeNavigation?.isAtEnd()),
 			);
+		}
+
+		const currentSection = sectionTops.findLast(
+			({ top }) => scroller.scrollTop + scroller.clientHeight / 2 >= top,
+		);
+		if (currentSection) {
+			for (const terminal of terminals) terminal.dataset.terminalContext = currentSection.id;
+		}
+
+		if (floatingTerminal) {
+			const terminalHidden = aboutProgress < 0.5;
+			floatingTerminal.classList.toggle('is-visible', !terminalHidden);
+			if (terminalHidden && document.activeElement instanceof HTMLElement && floatingTerminal.contains(document.activeElement)) {
+				document.activeElement.blur();
+			}
+			floatingTerminal.inert = terminalHidden;
+			floatingTerminal.setAttribute('aria-hidden', String(terminalHidden));
 		}
 
 		if (homeDetailsContent) {
@@ -296,43 +253,25 @@ const initializePageScroll = () => {
 		reveal(aboutMarker, markerProgress, 8);
 		if (aboutLine) aboutLine.style.transform = `scaleY(${markerProgress})`;
 		reveal(aboutDescription, range(aboutProgress, 0.35, 0.6), 22);
-
-		reveal(aboutStatCommand, range(aboutProgress, 0.48, 0.64), 10);
-		const statValueProgress = range(aboutProgress, 0.55, 0.74);
-		for (const value of aboutStatValues) reveal(value, statValueProgress, 14);
-		reveal(aboutSocialCommand, range(aboutProgress, 0.62, 0.76), 10);
+		const statValueProgress = range(aboutProgress, 0.5, 0.7);
+		for (const value of aboutStatValues) reveal(value, statValueProgress, 12);
 		aboutSocials.forEach((social, index) => {
 			const start = 0.65 + index * 0.055;
 			reveal(social, range(aboutProgress, start, start + 0.18), 14);
 		});
-		reveal(aboutTerminalCommand, range(aboutProgress, 0.82, 0.98), 10);
 
-		if (about) about.inert = aboutProgress < 0.65 || projectsProgress >= 0.2;
-		if (experience) {
-			experience.inert = experienceProgress < 0.65 || servicesProgress >= 0.2;
-		}
+		projectCards.forEach((card, index) => {
+			const start = 0.3 + index * 0.12;
+			reveal(card, range(projectsProgress, start, start + 0.3), 18);
+		});
+
 		reveal(experienceCommand, range(experienceProgress, 0.18, 0.38), 8);
 		experienceEntries.forEach((entry, index) => {
 			const start = 0.3 + index * 0.13;
 			reveal(entry, range(experienceProgress, start, start + 0.24), 20);
 		});
 		reveal(experienceSummary, range(experienceProgress, 0.68, 0.86), 12);
-		reveal(experienceReady, range(experienceProgress, 0.82, 0.98), 8);
 
-		if (services) services.inert = servicesProgress < 0.65 || certificatesProgress >= 0.2;
-		reveal(servicesTitle, range(servicesProgress, 0.16, 0.34), 10);
-		serviceCards.forEach((card, index) => {
-			const start = 0.28 + index * 0.1;
-			reveal(card, range(servicesProgress, start, start + 0.3), 22);
-		});
-		reveal(servicesTerminal, range(servicesProgress, 0.76, 0.96), 8);
-
-		if (projects) projects.inert = projectsProgress < 0.65 || experienceProgress >= 0.2;
-		projectCards.forEach((card, index) => {
-			const start = 0.3 + index * 0.12;
-			reveal(card, range(projectsProgress, start, start + 0.3), 18);
-		});
-		if (certificates) certificates.inert = certificatesProgress < 0.65;
 		reveal(certificatesCommand, range(certificatesProgress, 0.18, 0.36), 8);
 		certificateRules.forEach((rule, index) => {
 			reveal(rule, range(certificatesProgress, 0.38 + index * 0.32, 0.56 + index * 0.3), 0);
@@ -341,7 +280,6 @@ const initializePageScroll = () => {
 			const start = 0.44 + index * 0.065;
 			reveal(item, range(certificatesProgress, start, start + 0.2), 16);
 		});
-		reveal(certificatesReady, range(certificatesProgress, 0.82, 0.98), 8);
 	};
 
 	const requestRender = () => {
@@ -354,15 +292,14 @@ const initializePageScroll = () => {
 		requestRender();
 	};
 
-	const sectionScroll = initializeSectionScroll({
-		scroller, mobileViewport,
-		signal: abortController.signal,
-		onNavigate: () => {
-			// Update inert states before section-scroll restores keyboard focus.
-			window.cancelAnimationFrame(frameId);
-			render();
-		},
-	});
+	const homeSnap = homeDetails
+		? initializeHomeSnap({ scroller, details: homeDetails, treeScroll, signal: abortController.signal })
+		: null;
+	const scrollToTop = (top: number) => {
+		if (homeSnap) homeSnap.scrollTo(top);
+		else scroller.scrollTo({ top, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+	};
+	const navigateTo = (target: HTMLElement) => scrollToTop(elementTop(target));
 
 	if (homeDetails && treeScroll) {
 		treeNavigation = initializeTreeNavigation({
@@ -372,34 +309,18 @@ const initializePageScroll = () => {
 			signal: abortController.signal,
 		});
 	}
-	const contentResizeObserver =
+	// Section heights change with viewport size and expanded content (e.g. experience details).
+	const sectionResizeObserver =
 		typeof ResizeObserver !== 'undefined' ? new ResizeObserver(handleResize) : null;
-	for (const content of contentPanes) {
-		contentResizeObserver?.observe(content);
-		for (const child of content.children) contentResizeObserver?.observe(child);
-	}
+	for (const { element } of sectionElements) sectionResizeObserver?.observe(element);
 
 	scroller.addEventListener('scroll', requestRender, {
 		passive: true,
 		signal: abortController.signal,
 	});
-	scroller.addEventListener('pointerdown', (event) => {
-		if (!(event.target instanceof Element)) return;
-		if (!event.target.closest('[data-project-card]')) return;
-		if (event.target.closest('a, button, input, select, textarea, summary')) return;
-		// A decorative card must not focus its scrollable ancestor on pointer press.
-		// Vertical gestures are handled by section-scroll; horizontal panning stays native.
-		event.preventDefault();
-	}, { signal: abortController.signal });
-	for (const content of contentPanes) {
-		content.addEventListener('scroll', requestRender, { passive: true, signal: abortController.signal });
-	}
 	window.addEventListener('resize', handleResize, { signal: abortController.signal });
 	reducedMotion.addEventListener('change', requestRender, { signal: abortController.signal });
-	mobileViewport.addEventListener('change', () => {
-		updatePaneFocusability();
-		handleResize();
-	}, { signal: abortController.signal });
+	mobileViewport.addEventListener('change', handleResize, { signal: abortController.signal });
 
 	nameAction?.addEventListener(
 		'click',
@@ -410,8 +331,7 @@ const initializePageScroll = () => {
 				return;
 			}
 
-			const home = document.getElementById('home');
-			if (home) sectionScroll.navigateTo(home);
+			scrollToTop(0);
 		},
 		{ signal: abortController.signal },
 	);
@@ -423,7 +343,7 @@ const initializePageScroll = () => {
 			if (!target) return;
 
 			window.history.pushState(null, '', `#${targetId}`);
-			sectionScroll.navigateTo(target);
+			navigateTo(target);
 		},
 		{ signal: abortController.signal },
 	);
@@ -437,7 +357,7 @@ const initializePageScroll = () => {
 			if (!target) return;
 			event.preventDefault();
 			window.history.pushState(null, '', link.hash);
-			sectionScroll.navigateTo(target);
+			navigateTo(target);
 		},
 		{ capture: true, signal: abortController.signal },
 	);
@@ -445,7 +365,7 @@ const initializePageScroll = () => {
 		'hashchange',
 		() => {
 			const target = getFragmentTarget(location.hash);
-			if (target) sectionScroll.navigateTo(target);
+			if (target) navigateTo(target);
 		},
 		{ signal: abortController.signal },
 	);
@@ -454,7 +374,17 @@ const initializePageScroll = () => {
 		'click',
 		(event) => {
 			event.preventDefault();
-			sectionScroll.scrollBy(scroller.clientHeight * 0.8);
+			const treeHasMore = mobileViewport.matches && treeScroll && treeNavigation && !treeNavigation.isAtEnd();
+			const atDetails = Math.abs(scroller.scrollTop - detailsTop) <= 2;
+			if (atDetails && treeHasMore) {
+				treeScroll.scrollBy({
+					top: treeScroll.clientHeight * 0.8,
+					behavior: reducedMotion.matches ? 'instant' : 'smooth',
+				});
+				return;
+			}
+			const target = getFragmentTarget(scrollCue.hash);
+			if (target) navigateTo(target);
 		},
 		{ signal: abortController.signal },
 	);
@@ -464,28 +394,23 @@ const initializePageScroll = () => {
 		() => {
 			abortController.abort();
 			treeNavigation?.disconnect();
-			contentResizeObserver?.disconnect();
+			sectionResizeObserver?.disconnect();
 			clipboard?.dispose();
 			window.cancelAnimationFrame(frameId);
 			delete scroller.dataset.interactionsReady;
-			for (const { element, tabindex } of paneFocusTargets) {
-				if (tabindex === null) element.removeAttribute('tabindex');
-				else element.setAttribute('tabindex', tabindex);
-			}
 		},
 		{ once: true },
 	);
 
-	updatePaneFocusability();
 	measure();
 	const initialTarget = getFragmentTarget(location.hash);
-	if (initialTarget) sectionScroll.navigateTo(initialTarget);
+	if (initialTarget) navigateTo(initialTarget);
 	requestRender();
 
 	if (!location.hash && homeDetails && scroller.scrollTop <= 2) {
 		const introTimer = window.setTimeout(() => {
 			if (location.hash || scroller.scrollTop > 2 || abortController.signal.aborted) return;
-			sectionScroll.navigateTo(homeDetails);
+			navigateTo(homeDetails);
 		}, 800);
 		const cancelIntro = () => window.clearTimeout(introTimer);
 		for (const event of ['pointerdown', 'touchstart', 'wheel', 'keydown', 'hashchange']) {

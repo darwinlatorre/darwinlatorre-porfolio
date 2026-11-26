@@ -15,4 +15,10 @@ import HomeDetails from './HomeDetails.astro';
 		flex: 0 0 auto;
 		flex-direction: column;
 	}
+
+	/* Home and its details are fixed viewport views; later sections grow with content. */
+	.home > :global(.screen) {
+		height: 100vh;
+		height: 100dvh;
+	}
 </style>

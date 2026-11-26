@@ -2,6 +2,7 @@
 import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
 import { profile, projects, seo, socialLinks } from '../data/portfolio';
+import { defaultTheme, themes, themeStorageKey } from '../data/themes';
 import '../styles/global.css';
 import '../styles/variables.css';
 
@@ -16,7 +17,8 @@ const {
 } = Astro.props;
 const siteUrl = new URL('/', Astro.site).href;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site).href;
-const imageUrl = new URL('/social-card.png', Astro.site).href;
+// The version query makes link previews pick up a new card instead of a cached one.
+const imageUrl = new URL('/social-card.png?v=2', Astro.site).href;
 const structuredData = {
 	'@context': 'https://schema.org',
 	'@graph': [
@@ -94,14 +96,25 @@ const structuredData = {
 		<meta property="og:image:type" content="image/png" />
 		<meta property="og:image:width" content="1200" />
 		<meta property="og:image:height" content="630" />
-		<meta property="og:image:alt" content="Darwin Latorre — DevOps & Backend Engineer" />
+		<meta property="og:image:alt" content={seo.title} />
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content={title} />
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:image" content={imageUrl} />
-		<meta name="twitter:image:alt" content="Darwin Latorre — DevOps & Backend Engineer" />
+		<meta name="twitter:image:alt" content={seo.title} />
 		<script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData).replace(/</g, '\\u003c')} />
 		<meta name="theme-color" content="#0c0c11" />
+		<script is:inline define:vars={{ themeStorageKey, storedThemes: themes.map(({ id }) => id), defaultTheme }}>
+			// Apply the saved theme before first paint so the default one never flashes.
+			try {
+				const saved = localStorage.getItem(themeStorageKey);
+				if (saved && saved !== defaultTheme && storedThemes.includes(saved)) {
+					document.documentElement.dataset.theme = saved;
+				}
+			} catch {
+				// Storage unavailable: keep the default theme.
+			}
+		</script>
 		<title>{title}</title>
 		<SpeedInsights />
 		<Analytics />

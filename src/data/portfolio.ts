@@ -21,7 +21,6 @@ export const seo = {
 export const socialLinks = [
 	{ label: 'LinkedIn', href: 'https://www.linkedin.com/in/darwinlatorre/' },
 	{ label: 'GitHub', href: profile.githubHref },
-	{ label: 'X', href: 'https://x.com/latorre_darwin' },
 ] as const;
 
 export const projects = [
@@ -63,71 +62,46 @@ export const experiences = [
 	{
 		role: 'Java Developer',
 		company: 'Freelance',
+		companyHref: null,
 		location: 'darwinlatorre',
 		start: '2026-06',
 		end: '2026-07',
 		startLabel: 'Jun 2026',
 		endLabel: 'Currently',
-		highlights: [
-			'Performed adjustments and maintenance on the backend of an e-commerce platform developed with Java and Spring Boot.',
-			'Implemented adjustments, bug fixes, and deployments on GCP using Cloud Run, Cloud SQL, Artifact Registry, and Secret Manager.',
-			'Maintained authentication solutions in Spring Boot, from custom implementations to Keycloak integrations.',
-		],
+		summary:
+			'Maintain and evolve the Java and Spring Boot backend of an e-commerce platform, from bug fixes and authentication with Keycloak to deployments on GCP.',
+		stack: ['Java', 'Spring Boot', 'Keycloak', 'GCP', 'Cloud Run', 'Cloud SQL'],
 	},
 	{
 		role: 'DevOps Engineer',
 		company: 'Asmet Salud EPS',
+		companyHref: 'https://www.asmetsalud.com/',
 		location: null,
 		start: '2025-01',
 		end: '2026-03',
 		startLabel: 'Jan 2025',
 		endLabel: 'Mar 2026',
-		highlights: [
-			'Implemented CI/CD pipelines with Jenkins and GitLab for deploying Spring Boot microservices on AWS using EKS.',
-			'Managed on-premises Kubernetes clusters running production Spring Boot microservices, monitored with Prometheus and Grafana.',
-			'Provisioned and maintained AWS infrastructure using Terraform and Terragrunt, including EKS, IAM, Secrets Manager, VPC, and RDS.',
-			'Collaborated with development teams using GitLab, Jira, and Agile methodologies.',
-		],
+		summary:
+			'Built CI/CD pipelines and Terraform-managed AWS infrastructure for Spring Boot microservices on EKS, and ran production Kubernetes clusters with monitoring.',
+		stack: ['Jenkins', 'GitLab CI/CD', 'AWS', 'EKS', 'Kubernetes', 'Terraform', 'Terragrunt', 'Prometheus', 'Grafana'],
 	},
 	{
 		role: 'IT Infrastructure Professional',
 		company: 'Asmet Salud EPS',
+		companyHref: 'https://www.asmetsalud.com/',
 		location: null,
 		start: '2024-06',
 		end: '2024-12',
 		startLabel: 'Jun 2024',
 		endLabel: 'Dec 2024',
-		highlights: [
-			'Developed a password management system with high availability (HA) and a disaster recovery plan (DRP).',
-			'Managed AWS and on-premises infrastructure, Active Directory, networks, backups, and database backups.',
-			'Migrated JBoss and WebLogic applications from Java 7 to Java 11, including servers and code.',
-		],
+		summary:
+			'Managed AWS and on-premises infrastructure, built a highly available password management system with disaster recovery, and migrated JBoss and WebLogic apps from Java 7 to Java 11.',
+		stack: ['AWS', 'Active Directory', 'JBoss', 'WebLogic', 'Java'],
 	},
 ] as const;
 
 export const experienceSummary =
 	'AWS, GCP, Kubernetes, Terraform, Jenkins, Spring Boot, GitLab CI/CD';
-
-export const services = [
-	{
-		title: 'Backend Development',
-		description:
-			'Desarrollo, mantenimiento y evolución de aplicaciones backend con Java y Spring Boot.',
-	},
-	{
-		title: 'Cloud & DevOps',
-		description: 'Implementación y mejora de infraestructura y procesos de despliegue en la nube.',
-	},
-	{
-		title: 'CRM & Email Configuration',
-		description:
-			'Configuration and customization of Zoho CRM, customer management, automations, email setup, notifications, and integrations with external services.',
-	},
-	{
-		title: 'Monitoring & Observability',
-		description: 'Configuración de monitoreo para aplicaciones e infraestructura.',
-	},
-] as const;
 
 export const certificates = [
 	{

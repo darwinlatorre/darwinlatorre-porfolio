@@ -10,6 +10,7 @@
 	</button>
 </h1>
 <span class="copy-status" role="status" aria-live="polite" data-copy-status></span>
+<div class="top-scrim" aria-hidden="true" data-top-scrim></div>
 
 <style>
 	.shared-name {
@@ -28,6 +29,69 @@
 		letter-spacing: -0.045em;
 		line-height: 1;
 		pointer-events: none;
+		transition: opacity 220ms ease, translate 260ms var(--ease-out);
+	}
+
+	/* Phones: tucked away while reading down, back as soon as the reader scrolls up. */
+	.shared-name.is-tucked {
+		opacity: 0;
+		translate: 0 -0.75rem;
+		transition-duration: 160ms, 200ms;
+	}
+
+	.shared-name.is-tucked .name-action {
+		pointer-events: none;
+	}
+
+	/* Keyboard focus always brings it back. */
+	.shared-name.is-tucked:focus-within {
+		opacity: 1;
+		translate: none;
+	}
+
+	/*
+	 * Thin band behind the pinned name (and the desktop menu button) once the reader is past Home.
+	 * Content fades and blurs under it; the mask avoids a hard bottom edge.
+	 */
+	.top-scrim {
+		position: fixed;
+		top: var(--page-inset);
+		right: var(--page-inset);
+		left: var(--page-inset);
+		z-index: 25;
+		height: calc(var(--control-offset) + 3.25rem);
+		border-radius: var(--radius-frame) var(--radius-frame) 0 0;
+		background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+		-webkit-backdrop-filter: blur(6px);
+		backdrop-filter: blur(6px);
+		-webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+		mask-image: linear-gradient(to bottom, #000 55%, transparent);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 240ms ease, translate 260ms var(--ease-out);
+	}
+
+	.top-scrim.is-visible {
+		opacity: 1;
+	}
+
+	.top-scrim.is-visible.is-tucked {
+		opacity: 0;
+		translate: 0 -0.75rem;
+		transition-duration: 160ms, 200ms;
+	}
+
+	@media (max-width: 48rem) {
+		.top-scrim {
+			height: calc(var(--control-offset) + 2.5rem);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.shared-name,
+		.top-scrim {
+			transition: none;
+		}
 	}
 
 	.name-action {

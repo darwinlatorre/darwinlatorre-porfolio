@@ -94,6 +94,10 @@ const technologies = [
 	</div>
 </dialog>
 
+<script>
+	import '../../scripts/technology-dialog';
+</script>
+
 <style>
 	.technology-dialog {
 		width: min(62rem, calc(100vw - 2rem));
@@ -117,6 +121,11 @@ const technologies = [
 
 	.technology-dialog[open] {
 		animation: dialog-enter 220ms var(--ease-out) both;
+	}
+
+	/* The whole window renders like terminal output: top to bottom, in a few chunks. */
+	.technology-dialog[open] .technology-window {
+		animation: window-render 520ms steps(8, end) backwards;
 	}
 
 	.technology-window {
@@ -222,7 +231,7 @@ const technologies = [
 	}
 
 	.technology-image {
-		filter: drop-shadow(0 0 5px rgb(169 110 211 / 12%));
+		filter: drop-shadow(0 0 5px var(--color-accent-glow));
 	}
 
 	.technology-image.is-wide {
@@ -245,6 +254,16 @@ const technologies = [
 		gap: 1rem;
 		color: var(--color-text-muted);
 		font-size: clamp(0.72rem, 1.1vw, 0.85rem);
+	}
+
+	@keyframes window-render {
+		from {
+			clip-path: inset(0 0 100% 0);
+		}
+
+		to {
+			clip-path: inset(0 0 0 0);
+		}
 	}
 
 	@keyframes dialog-enter {
@@ -290,7 +309,8 @@ const technologies = [
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.technology-dialog[open] {
+		.technology-dialog[open],
+		.technology-dialog[open] .technology-window {
 			animation: none;
 		}
 

@@ -1,0 +1,287 @@
+---
+import { Folder, House } from '@lucide/astro';
+import GlobalTerminal from '../terminal/GlobalTerminal.astro';
+import ThemeSwitcher from './ThemeSwitcher.astro';
+import { portfolioSections } from '../../data/navigation';
+
+const sectionLinks = portfolioSections.filter(({ id }) => id !== 'home');
+---
+
+<div class="mobile-drawer" data-drawer>
+	<button
+		class="drawer-handle"
+		type="button"
+		aria-label="Open navigation and terminal"
+		aria-controls="mobile-drawer-panel"
+		aria-expanded="false"
+		data-drawer-open
+	>
+		<span class="handle-grip" aria-hidden="true"></span>
+	</button>
+
+	<div class="drawer-backdrop" aria-hidden="true" data-drawer-backdrop></div>
+
+	<aside
+		id="mobile-drawer-panel"
+		class="drawer-panel"
+		aria-label="Navigation and terminal"
+		aria-hidden="true"
+		inert
+		data-drawer-panel
+	>
+		<nav class="drawer-nav" aria-label="Mobile navigation">
+			<p class="drawer-path" aria-hidden="true">
+				<span class="drawer-prompt">darwinlatorre ~/portfolio $</span> ls
+			</p>
+			<ul class="drawer-tree">
+				<li>
+					<a href="#home-details" data-drawer-link="home">
+						<House class="drawer-icon" size={18} stroke-width={1.5} aria-hidden="true" />
+						<span>Home</span>
+					</a>
+				</li>
+				{
+					sectionLinks.map(({ id, label }) => (
+						<li class="drawer-branch">
+							<a href={`#${id}`} data-drawer-link={id}>
+								<Folder class="drawer-icon" size={18} stroke-width={1.5} aria-hidden="true" />
+								<span>{label}</span>
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</nav>
+
+		<ThemeSwitcher variant="inline" />
+
+		<div class="drawer-terminal">
+			<GlobalTerminal variant="docked" />
+		</div>
+	</aside>
+</div>
+
+<script>
+	import '../../scripts/drawer';
+</script>
+
+<style>
+	.mobile-drawer {
+		display: none;
+	}
+
+	@media (max-width: 48rem) {
+		.mobile-drawer {
+			display: block;
+		}
+	}
+
+	/* Edge grip: a visible cue for the swipe and the trigger for keyboard and screen readers. */
+	.drawer-handle {
+		position: fixed;
+		top: 50%;
+		left: var(--page-inset);
+		z-index: 45;
+		display: grid;
+		width: 2.75rem;
+		height: 3.5rem;
+		padding: 0;
+		place-items: center start;
+		border: 0;
+		background: transparent;
+		cursor: pointer;
+		transform: translateY(-50%);
+		transition: opacity var(--duration-fast) ease;
+	}
+
+	.handle-grip {
+		width: 3px;
+		height: 1.75rem;
+		margin-left: 0.3rem;
+		border-radius: 3px;
+		background: var(--color-accent-muted);
+		box-shadow: 0 0 0.6rem var(--color-accent-glow);
+		animation: grip-hint 2.6s ease-in-out 1.2s 2;
+	}
+
+	.drawer-handle:focus-visible {
+		outline: 2px solid var(--color-accent);
+		outline-offset: -2px;
+	}
+
+	.is-open .drawer-handle {
+		opacity: 0;
+	}
+
+	.drawer-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 55;
+		background: rgb(8 8 12 / 62%);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 200ms ease;
+	}
+
+	.is-open .drawer-backdrop {
+		opacity: 1;
+		pointer-events: auto;
+		transition-duration: 280ms;
+	}
+
+	.drawer-panel {
+		position: fixed;
+		top: calc(var(--drawer-viewport-top, 0px) + var(--page-inset));
+		left: var(--page-inset);
+		height: calc(var(--drawer-viewport-height, 100dvh) - 2 * var(--page-inset));
+		z-index: 60;
+		display: flex;
+		width: min(20rem, calc(100vw - 4rem));
+		padding: 1.5rem 1.25rem max(1.25rem, env(safe-area-inset-bottom));
+		flex-direction: column;
+		gap: 1.5rem;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		border-right: var(--border-width) solid var(--color-border);
+		background: var(--color-surface-raised);
+		transform: translateX(calc(-100% - var(--page-inset)));
+		transition: transform 200ms ease-in;
+	}
+
+	.is-open .drawer-panel {
+		transform: none;
+		transition: transform 280ms var(--ease-out);
+	}
+
+	.drawer-nav {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.drawer-path {
+		margin: 0;
+		color: var(--color-text-secondary);
+		font-size: 0.8rem;
+		line-height: 1.5;
+	}
+
+	.drawer-prompt {
+		color: var(--color-accent);
+	}
+
+	.drawer-tree {
+		position: relative;
+		display: grid;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	/*
+	 * File-tree rail: it drops from the Home icon and ends at the last folder's connector,
+	 * so the final branch reads as a corner (└) like the desktop menu.
+	 */
+	.drawer-tree {
+		--tree-row: 2.75rem;
+		--tree-icon: 1.125rem;
+		--tree-rail-x: calc(var(--tree-icon) / 2);
+		--tree-indent: 1.75rem;
+	}
+
+	.drawer-tree::before {
+		position: absolute;
+		top: calc(var(--tree-row) / 2 + var(--tree-icon) / 2 + 0.2rem);
+		bottom: calc(var(--tree-row) / 2);
+		left: var(--tree-rail-x);
+		border-left: 1px dotted var(--color-accent-muted);
+		content: '';
+	}
+
+	.drawer-branch {
+		position: relative;
+		padding-left: var(--tree-indent);
+	}
+
+	/* Horizontal connector from the rail to each folder icon. */
+	.drawer-branch::before {
+		position: absolute;
+		top: 50%;
+		left: var(--tree-rail-x);
+		width: calc(var(--tree-indent) - var(--tree-rail-x) - 0.3rem);
+		border-top: 1px dotted var(--color-accent-muted);
+		content: '';
+	}
+
+	.drawer-tree a {
+		display: flex;
+		min-height: var(--tree-row);
+		align-items: center;
+		gap: 0.75rem;
+		color: var(--color-text-secondary);
+		font-size: 0.95rem;
+		text-decoration: none;
+		transition: color var(--duration-fast) ease;
+	}
+
+	.drawer-tree a[aria-current='true'] {
+		color: var(--color-text);
+	}
+
+	.drawer-tree a[aria-current='true'] :global(.drawer-icon) {
+		color: var(--color-accent);
+	}
+
+	.drawer-tree a:focus-visible {
+		outline: 2px solid var(--color-accent-muted);
+		outline-offset: 2px;
+	}
+
+	:global(.drawer-icon) {
+		flex: 0 0 auto;
+		color: var(--color-accent-muted);
+	}
+
+	.drawer-terminal {
+		margin-top: auto;
+		padding-top: 1.25rem;
+		border-top: 1px dashed var(--color-accent-muted);
+	}
+
+	/*
+	 * Typing mode: while the terminal input has focus, the drawer becomes a full terminal so
+	 * the output gets the whole space above the keyboard. Navigation returns on blur.
+	 */
+	.drawer-panel:has(.drawer-terminal input:focus) .drawer-nav,
+	.drawer-panel:has(.drawer-terminal input:focus) :global(.theme-switcher) {
+		display: none;
+	}
+
+	.drawer-panel:has(.drawer-terminal input:focus) .drawer-terminal {
+		padding-top: 0;
+		border-top: 0;
+	}
+
+	@keyframes grip-hint {
+		0%,
+		100% {
+			transform: translateX(0);
+		}
+
+		50% {
+			transform: translateX(4px);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.handle-grip {
+			animation: none;
+		}
+
+		.drawer-backdrop,
+		.drawer-panel,
+		.is-open .drawer-backdrop,
+		.is-open .drawer-panel {
+			transition: none;
+		}
+	}
+</style>
