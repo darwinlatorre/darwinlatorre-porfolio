@@ -12,21 +12,54 @@
 	--color-border: #4d3659;
 	--color-accent-glow: rgb(169 110 211 / 18%);
 	--color-accent-glow-faint: rgb(169 110 211 / 16%);
-	--service-border: color-mix(in srgb, var(--color-accent) 78%, var(--color-text));
+	--color-pending: #dc7fc3;
 
 	--font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 		'Liberation Mono', monospace;
 	--terminal-font-size: clamp(0.86rem, 1.15vw, 1.04rem);
-	--section-heading-font-size: clamp(1.15rem, 1.8vw, 1.55rem);
 	--page-inset: clamp(0.5rem, 1vw, 1rem);
 	--control-offset: clamp(1.25rem, 2.5vw, 2.35rem);
 	--content-max-width: 78rem;
 	--content-gutter: clamp(2rem, 7vw, 6rem);
+	/* Vertical rhythm between content sections; the start space clears the fixed header. */
+	--section-space-start: clamp(4.5rem, 9vh, 7rem);
+	--section-space-end: clamp(2.5rem, 6vh, 4.5rem);
 	--border-width: 1px;
 	--radius-small: 2px;
 	--radius-frame: 3px;
 	--duration-fast: 180ms;
 	--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Alternative themes, chosen from the theme switcher or the `theme` terminal command. */
+:root[data-theme='blue'] {
+	/* Sober navy: deep slate surfaces with a desaturated steel-blue accent. */
+	--color-background: #070a0f;
+	--color-surface: #0a0e15;
+	--color-surface-raised: #0f141c;
+	--color-text: #dfe5ec;
+	--color-text-muted: #7d8896;
+	--color-accent: #6b93c4;
+	--color-accent-muted: #2c4056;
+	--color-border: #1c2836;
+	--color-accent-glow: rgb(107 147 196 / 14%);
+	--color-accent-glow-faint: rgb(107 147 196 / 12%);
+	--color-pending: #c9a25f;
+}
+
+:root[data-theme='mono'] {
+	/* Linear-inspired grays: near-black base, cool gray text tiers and quiet borders. */
+	--color-background: #08090a;
+	--color-surface: #0f1011;
+	--color-surface-raised: #161718;
+	--color-text: #f7f8f8;
+	--color-text-muted: #8a8f98;
+	--color-accent: #d0d6e0;
+	--color-accent-muted: #62666d;
+	--color-border: #23252a;
+	--color-accent-glow: rgb(208 214 224 / 10%);
+	--color-accent-glow-faint: rgb(208 214 224 / 8%);
+	--color-pending: #a8adb6;
 }
 
 @media (max-width: 64rem) {
@@ -38,5 +71,7 @@
 @media (max-width: 48rem) {
 	:root {
 		--content-gutter: 2rem;
+		--section-space-start: 4.75rem;
+		--section-space-end: 2.25rem;
 	}
 }

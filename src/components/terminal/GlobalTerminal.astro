@@ -1,0 +1,291 @@
+---
+interface Props {
+	/** `floating` is the desktop overlay; `docked` lives inside the mobile drawer. */
+	variant?: 'floating' | 'docked';
+}
+
+const { variant = 'floating' } = Astro.props;
+const docked = variant === 'docked';
+const inputId = `${variant}-terminal-command`;
+const responseId = `${variant}-terminal-response`;
+---
+
+<section
+	class:list={['global-terminal', { 'is-docked': docked }]}
+	aria-label="Portfolio terminal"
+	aria-hidden={docked ? undefined : 'true'}
+	inert={!docked}
+	data-terminal-root
+	data-terminal-floating={docked ? undefined : ''}
+	data-terminal-context="about"
+>
+	<div
+		id={responseId}
+		class="terminal-response"
+		role="status"
+		aria-live="polite"
+		aria-atomic="true"
+		data-terminal-response
+		hidden
+	></div>
+	<form class="command-form" data-terminal-form>
+		<label class="command-line" for={inputId}>
+			<span class="prompt">$</span>
+			<span class="terminal-input-shell">
+				<input
+					id={inputId}
+					name="command"
+					type="text"
+					placeholder="help"
+					autocomplete="off"
+					spellcheck="false"
+					enterkeyhint="send"
+					aria-describedby={responseId}
+					aria-label="Portfolio terminal command"
+					data-terminal-input
+				/>
+				<span class="cursor-track" aria-hidden="true">
+					<span class="input-mirror" data-terminal-mirror></span>
+					<span class="terminal-cursor">_</span>
+				</span>
+			</span>
+		</label>
+	</form>
+</section>
+
+<script>
+	import '../../scripts/terminal-interactions';
+</script>
+
+<style>
+	.global-terminal {
+		--terminal-edge: calc(var(--page-inset) + var(--control-offset));
+		--global-terminal-font-size: 0.86rem;
+
+		position: fixed;
+		bottom: var(--terminal-edge);
+		left: var(--terminal-edge);
+		z-index: 40;
+		display: grid;
+		width: min(44rem, calc(100vw - 2 * var(--terminal-edge)));
+		gap: 0.5rem;
+		opacity: 0;
+		pointer-events: none;
+		transform: translateY(0.5rem);
+		transition:
+			opacity var(--duration-fast) ease,
+			transform var(--duration-fast) var(--ease-out);
+	}
+
+	.global-terminal.is-visible,
+	.global-terminal.is-docked {
+		opacity: 1;
+		pointer-events: auto;
+		transform: none;
+	}
+
+	.global-terminal.is-docked {
+		position: static;
+		width: 100%;
+	}
+
+	/* Inside the drawer the output may use most of the visible height (keyboard included). */
+	.is-docked .terminal-response {
+		max-height: calc(var(--drawer-viewport-height, 100dvh) * 0.4);
+	}
+
+	.is-docked:has(input:focus) .terminal-response {
+		max-height: calc(var(--drawer-viewport-height, 100dvh) - 7rem);
+	}
+
+	/*
+	 * Reading backdrop for the floating terminal: while a command prints output, the page
+	 * behind is dimmed and blurred. It fades in from the top edge so it never shows a hard line.
+	 */
+	.global-terminal:not(.is-docked)::before {
+		position: absolute;
+		z-index: -1;
+		/* Reaches down and left to the page frame so nothing peeks under the prompt. */
+		inset: -3rem -2rem calc(var(--control-offset) * -1) calc(var(--control-offset) * -1);
+		border-radius: var(--radius-frame);
+		background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+		-webkit-backdrop-filter: blur(8px);
+		backdrop-filter: blur(8px);
+		-webkit-mask-image: linear-gradient(to bottom, transparent, #000 3rem);
+		mask-image: linear-gradient(to bottom, transparent, #000 3rem);
+		content: '';
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 220ms ease;
+	}
+
+	.global-terminal:not(.is-docked):has(.terminal-response:not([hidden]))::before {
+		opacity: 1;
+	}
+
+	.command-form {
+		margin: 0;
+	}
+
+	.command-line {
+		display: flex;
+		width: 100%;
+		margin: 0;
+		align-items: baseline;
+		gap: 0.65rem;
+		color: var(--color-text-secondary);
+		font-size: var(--global-terminal-font-size);
+		letter-spacing: 0.01em;
+		line-height: 1.45;
+	}
+
+	.prompt {
+		display: inline-flex;
+		flex: 0 0 auto;
+		color: var(--color-accent);
+	}
+
+	.terminal-input-shell {
+		position: relative;
+		display: block;
+		min-width: 4rem;
+		flex: 1 1 auto;
+		overflow: hidden;
+	}
+
+	input {
+		position: relative;
+		z-index: 1;
+		display: block;
+		width: 100%;
+		min-width: 0;
+		padding: 0;
+		border: 0;
+		outline: 0;
+		background: transparent;
+		caret-color: transparent;
+		color: inherit;
+		font: inherit;
+		letter-spacing: inherit;
+		line-height: inherit;
+	}
+
+	input::placeholder {
+		color: inherit;
+		opacity: 1;
+	}
+
+	input:focus {
+		caret-color: var(--color-accent);
+	}
+
+	.terminal-input-shell:focus-within .cursor-track {
+		visibility: hidden;
+	}
+
+	.cursor-track {
+		position: absolute;
+		z-index: 2;
+		inset: 0;
+		display: flex;
+		align-items: baseline;
+		overflow: hidden;
+		font: inherit;
+		line-height: inherit;
+		pointer-events: none;
+	}
+
+	.input-mirror {
+		visibility: hidden;
+		flex: 0 0 auto;
+		white-space: pre;
+	}
+
+	.terminal-cursor {
+		flex: 0 0 auto;
+		color: var(--color-accent);
+		animation: terminal-cursor-blink 1.1s step-end infinite;
+	}
+
+	.terminal-response {
+		display: grid;
+		max-height: min(40vh, 18rem);
+		margin: 0;
+		padding: 0.35rem 0 0.35rem 1rem;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		border-left: 1px solid var(--color-accent-muted);
+		gap: 0.45rem;
+		color: var(--color-text-muted);
+		font-size: var(--global-terminal-font-size);
+		line-height: 1.45;
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-accent-muted) transparent;
+	}
+
+	.terminal-response[hidden] {
+		display: none;
+	}
+
+	.terminal-response :global(p),
+	.terminal-response :global(ul) {
+		margin: 0;
+	}
+
+	.terminal-response :global(ul) {
+		display: grid;
+		padding-left: 1.15rem;
+		gap: 0.25rem;
+	}
+
+	.terminal-response :global(a) {
+		width: fit-content;
+		color: var(--color-accent);
+		text-underline-offset: 0.2em;
+	}
+
+	.terminal-response :global(a:focus-visible) {
+		outline: 1px solid var(--color-accent-muted);
+		outline-offset: 3px;
+	}
+
+	@keyframes terminal-cursor-blink {
+		0%,
+		48% {
+			opacity: 1;
+		}
+
+		49%,
+		100% {
+			opacity: 0.12;
+		}
+	}
+
+	@media (max-width: 48rem) {
+		/* On phones the terminal is only reachable from the drawer. */
+		.global-terminal:not(.is-docked) {
+			display: none;
+		}
+
+		.terminal-input-shell {
+			font-size: 1rem;
+		}
+
+		input {
+			font-size: inherit;
+			appearance: none;
+			border-radius: 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.global-terminal,
+		.global-terminal::before {
+			transition: none;
+		}
+
+		.terminal-cursor {
+			animation: none;
+		}
+	}
+</style>

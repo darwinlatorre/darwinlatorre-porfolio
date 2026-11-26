@@ -24,6 +24,8 @@ body::after {
 	inset: var(--page-inset);
 	border: var(--border-width) solid var(--color-border);
 	border-radius: var(--radius-frame);
+	/* Paint the gutter outside the frame so scrolling content never shows beyond it. */
+	box-shadow: 0 0 0 100vmax var(--color-background);
 	content: '';
 	pointer-events: none;
 }
@@ -32,14 +34,101 @@ button {
 	font: inherit;
 }
 
+/*
+ * Terminal render: each line prints left to right in a few chunks, one line after another.
+ * Set by markRenderLines() in terminal-interactions.ts with a per-line `--line` index.
+ */
+.render-line {
+	/* `backwards`: the clip only applies while printing, so list bullets return afterwards. */
+	animation: line-render 240ms steps(5, end) backwards;
+	animation-delay: calc(var(--line, 0) * 55ms);
+}
+
+@keyframes line-render {
+	from {
+		clip-path: inset(0 100% 0 0);
+	}
+
+	to {
+		clip-path: inset(0 0 0 0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.render-line {
+		animation: none;
+	}
+}
+
+/* Section commands type themselves in once they scroll into view (scripts/command-typing.ts). */
+[data-typed-command][data-typing-ready] {
+	display: inline-block;
+	width: 0;
+	overflow: hidden;
+	vertical-align: bottom;
+	white-space: nowrap;
+}
+
+[data-typed-command].is-typing {
+	border-right: 2px solid var(--color-accent);
+	animation:
+		command-type calc(var(--chars) * 32ms) steps(var(--chars), end) forwards,
+		command-caret 0.7s step-end infinite;
+}
+
+[data-typed-command].is-typed {
+	width: auto;
+	overflow: visible;
+}
+
+/* The command's output stays unprinted until the command finishes typing, then prints in. */
+.command-line:has([data-typed-command][data-typing-ready]:not(.is-typed)) ~ * {
+	visibility: hidden;
+}
+
+.command-line:has([data-typed-command].is-typed) ~ * {
+	animation: command-output 360ms var(--ease-out) both;
+}
+
+@keyframes command-output {
+	from {
+		opacity: 0;
+		clip-path: inset(0 0 100% 0);
+	}
+
+	to {
+		opacity: 1;
+		clip-path: inset(0 0 0 0);
+	}
+}
+
+@keyframes command-type {
+	to {
+		/* 1ch per character plus the prompt line's letter-spacing and the caret. */
+		width: calc(var(--chars) * (1ch + 0.02em) + 2px);
+	}
+}
+
+@keyframes command-caret {
+	50% {
+		border-right-color: transparent;
+	}
+}
+
+/* Added for a moment while the theme changes so colors cross-fade instead of snapping. */
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+	transition:
+		color 200ms ease,
+		background-color 200ms ease,
+		border-color 200ms ease,
+		fill 200ms ease !important;
+}
+
 .screen {
 	position: relative;
 	width: 100%;
-	min-height: 100vh;
-	min-height: 100dvh;
-	flex: 0 0 100vh;
-	flex-basis: 100dvh;
-	scroll-snap-align: start;
-	scroll-snap-stop: always;
+	flex: none;
 	background: var(--color-surface);
 }

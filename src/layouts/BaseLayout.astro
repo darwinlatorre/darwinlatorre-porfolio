@@ -2,6 +2,7 @@
 import Analytics from '@vercel/analytics/astro';
 import SpeedInsights from '@vercel/speed-insights/astro';
 import { profile, projects, seo, socialLinks } from '../data/portfolio';
+import { defaultTheme, themes, themeStorageKey } from '../data/themes';
 import '../styles/global.css';
 import '../styles/variables.css';
 
@@ -102,6 +103,17 @@ const structuredData = {
 		<meta name="twitter:image:alt" content="Darwin Latorre — DevOps & Backend Engineer" />
 		<script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData).replace(/</g, '\\u003c')} />
 		<meta name="theme-color" content="#0c0c11" />
+		<script is:inline define:vars={{ themeStorageKey, storedThemes: themes.map(({ id }) => id), defaultTheme }}>
+			// Apply the saved theme before first paint so the default one never flashes.
+			try {
+				const saved = localStorage.getItem(themeStorageKey);
+				if (saved && saved !== defaultTheme && storedThemes.includes(saved)) {
+					document.documentElement.dataset.theme = saved;
+				}
+			} catch {
+				// Storage unavailable: keep the default theme.
+			}
+		</script>
 		<title>{title}</title>
 		<SpeedInsights />
 		<Analytics />

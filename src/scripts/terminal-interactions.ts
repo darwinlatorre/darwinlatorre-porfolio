@@ -3,12 +3,12 @@ import {
 	experiences,
 	experienceSummary,
 	profile,
-	services,
 	socialLinks,
 } from '../data/portfolio';
-import type { PortfolioSection, TerminalContext } from '../types/terminal';
-import { isPortfolioSection, portfolioSections } from '../data/navigation';
-import { createDialogController } from './dialog';
+import { isPortfolioSection, portfolioSections, type PortfolioSection } from '../data/navigation';
+import { applyTheme, getTheme } from './theme';
+import { isSoundEnabled, playCue, setSoundEnabled } from './sound';
+import { isThemeId, themes, type ThemeId } from '../data/themes';
 
 type TerminalResult =
 	| { type: 'text'; text: string }
@@ -23,7 +23,8 @@ type TerminalAction =
 	| { type: 'navigate'; target: PortfolioSection }
 	| { type: 'open'; href: string }
 	| { type: 'email'; href: string }
-	| { type: 'technologies' };
+	| { type: 'technologies' }
+	| { type: 'theme'; theme: ThemeId };
 
 interface CommandExecution {
 	result?: TerminalResult;
@@ -33,7 +34,7 @@ interface CommandExecution {
 interface TerminalCommand {
 	usage: string;
 	description: string;
-	execute: (args: string[], context: TerminalContext) => CommandExecution;
+	execute: (args: string[], context: PortfolioSection) => CommandExecution;
 }
 
 declare global {
@@ -77,12 +78,6 @@ const getShowResult = (target: PortfolioSection): TerminalResult => {
 					),
 					`Summary: ${experienceSummary}`,
 				],
-			};
-		case 'services':
-			return {
-				type: 'list',
-				title: 'Services',
-				items: services.map((service) => `${service.title}: ${service.description}`),
 			};
 		case 'certificates':
 			return {
@@ -209,6 +204,26 @@ const commands: Record<string, TerminalCommand> = {
 			action: { type: 'navigate', target: 'projects' },
 		}),
 	},
+	theme: {
+		usage: `theme [${themes.map(({ id }) => id).join('|')}]`,
+		description: 'Show or change the color theme.',
+		execute: ([name, ...extra]) => {
+			const usage = `usage: theme <${themes.map(({ id }) => id).join('|')}>`;
+			if (!name) return { result: text(`current theme: ${getTheme()}. ${usage}`) };
+			if (extra.length > 0 || !isThemeId(name)) return { result: text(usage) };
+			return { result: text(`theme set to ${name}`), action: { type: 'theme', theme: name } };
+		},
+	},
+	sound: {
+		usage: 'sound [on|off]',
+		description: 'Turn interface sounds on or off.',
+		execute: ([state, ...extra]) => {
+			if (!state) return { result: text(`sound: ${isSoundEnabled() ? 'on' : 'off'}. usage: sound <on|off>`) };
+			if (extra.length > 0 || (state !== 'on' && state !== 'off')) return { result: text('usage: sound <on|off>') };
+			setSoundEnabled(state === 'on');
+			return { result: text(`sound ${state}`) };
+		},
+	},
 	history: {
 		usage: 'history',
 		description: 'Show commands used in this session.',
@@ -227,10 +242,26 @@ const commands: Record<string, TerminalCommand> = {
 	},
 };
 
+// Each printed line renders in small chunks, one line after another (see `.render-line`).
+const markRenderLines = (lines: Iterable<HTMLElement>) => {
+	let index = 0;
+	for (const line of lines) {
+		line.style.setProperty('--line', String(index++));
+		line.classList.add('render-line');
+	}
+};
+
 const renderResult = (container: HTMLElement, result?: TerminalResult) => {
+	const wasOpen = !container.hidden;
 	container.replaceChildren();
 	container.hidden = !result;
-	if (!result) return;
+	if (!result) {
+		if (wasOpen) playCue('close');
+		return;
+	}
+	playCue('open');
+	// Runs once the lines below are appended.
+	queueMicrotask(() => markRenderLines(container.querySelectorAll<HTMLElement>('p, li')));
 
 	if (result.type === 'text') {
 		const paragraph = document.createElement('p');
@@ -287,26 +318,31 @@ const runAction = (action?: TerminalAction) => {
 		case 'technologies':
 			document.dispatchEvent(new CustomEvent('portfolio:open-technologies'));
 			break;
+		case 'theme':
+			applyTheme(action.theme);
+			break;
 	}
 };
 
 const initializeTerminal = (root: HTMLElement) => {
 	if (root.dataset.interactionsReady === 'true') return;
 
-	const context = root.dataset.terminalContext;
 	const form = root.querySelector<HTMLFormElement>('[data-terminal-form]');
 	const input = root.querySelector<HTMLInputElement>('[data-terminal-input]');
 	const mirror = root.querySelector<HTMLElement>('[data-terminal-mirror]');
 	const response = root.querySelector<HTMLElement>('[data-terminal-response]');
-	const scrollContainer = root.closest<HTMLElement>('[data-terminal-scroll]');
-	if (!context || !isPortfolioSection(context) || context === 'home' || context === 'projects' || !form || !input || !mirror || !response) return;
+	if (!form || !input || !mirror || !response) return;
 
 	root.dataset.interactionsReady = 'true';
 	const abortController = new AbortController();
-	let focusTimer = 0;
 	let historyIndex = commandHistory.length;
 	let draft = '';
 
+	// The page scroll keeps this attribute in sync with the section in view.
+	const getContext = (): PortfolioSection => {
+		const context = root.dataset.terminalContext;
+		return context && isPortfolioSection(context) ? context : 'about';
+	};
 	const syncCursor = () => {
 		mirror.textContent = input.value;
 	};
@@ -329,14 +365,11 @@ const initializeTerminal = (root: HTMLElement) => {
 			const [commandName, ...args] = rawCommand.toLowerCase().split(' ');
 			const command = Object.hasOwn(commands, commandName) ? commands[commandName] : undefined;
 			const execution = command
-				? command.execute(args, context)
+				? command.execute(args, getContext())
 				: { result: text(`command not found: ${commandName}. Use "help" to list commands.`) };
 
 			renderResult(response, execution.result);
-			if (execution.action?.type === 'navigate') {
-				window.clearTimeout(focusTimer);
-				input.blur();
-			}
+			if (execution.action?.type === 'navigate') input.blur();
 			runAction(execution.action);
 		},
 		{ signal: abortController.signal },
@@ -370,71 +403,37 @@ const initializeTerminal = (root: HTMLElement) => {
 	);
 
 	input.addEventListener('input', syncCursor, { signal: abortController.signal });
+	// Clicking anywhere outside the terminal closes its output and releases the input.
+	document.addEventListener(
+		'pointerdown',
+		(event) => {
+			if (event.target instanceof Node && root.contains(event.target)) return;
+			renderResult(response);
+			input.blur();
+		},
+		{ signal: abortController.signal },
+	);
 	input.addEventListener(
 		'focus',
 		() => {
 			historyIndex = commandHistory.length;
-			window.clearTimeout(focusTimer);
-			focusTimer = window.setTimeout(() => {
-				// Scroll only the terminal pane; scrollIntoView also moves the snap parent.
-				if (!scrollContainer) return;
-				const inputTop =
-					input.getBoundingClientRect().top -
-					scrollContainer.getBoundingClientRect().top +
-					scrollContainer.scrollTop;
-				scrollContainer.scrollTo({
-					top: Math.max(0, inputTop - scrollContainer.clientHeight * 0.45),
-					behavior: 'instant',
-				});
-			}, 250);
 		},
 		{ signal: abortController.signal },
 	);
-	input.addEventListener('blur', () => window.clearTimeout(focusTimer), {
-		signal: abortController.signal,
-	});
 
 	document.addEventListener(
 		'astro:before-swap',
 		() => {
 			abortController.abort();
-			window.clearTimeout(focusTimer);
 			delete root.dataset.interactionsReady;
 		},
 		{ once: true },
 	);
 };
 
-const initializeTechnologyDialog = () => {
-	const dialog = document.querySelector<HTMLDialogElement>('[data-technologies-dialog]');
-	if (!dialog || dialog.dataset.interactionsReady === 'true') return;
-
-	dialog.dataset.interactionsReady = 'true';
-	const closeButton = dialog.querySelector<HTMLButtonElement>('[data-technologies-close]');
-	const abortController = new AbortController();
-	const controller = createDialogController({ dialog, closeButton, signal: abortController.signal });
-
-	document.addEventListener('portfolio:open-technologies', controller.open, {
-		signal: abortController.signal,
-	});
-	document.querySelectorAll<HTMLElement>('[data-technologies-open]').forEach((trigger) => {
-		trigger.addEventListener('click', controller.open, { signal: abortController.signal });
-	});
-
-	document.addEventListener(
-		'astro:before-swap',
-		() => {
-			abortController.abort();
-			delete dialog.dataset.interactionsReady;
-		},
-		{ once: true },
-	);
-};
-
-const initializeTerminalInteractions = () => {
+const initializeTerminals = () => {
 	document.querySelectorAll<HTMLElement>('[data-terminal-root]').forEach(initializeTerminal);
-	initializeTechnologyDialog();
 };
 
-initializeTerminalInteractions();
-document.addEventListener('astro:page-load', initializeTerminalInteractions);
+initializeTerminals();
+document.addEventListener('astro:page-load', initializeTerminals);

@@ -4,19 +4,24 @@ import Certificates from '../components/certificates/Certificates.astro';
 import Experience from '../components/experience/Experience.astro';
 import Home from '../components/home/Home.astro';
 import Projects from '../components/projects/Projects.astro';
-import Services from '../components/services/Services.astro';
 import TechnologyDialog from '../components/about/TechnologyDialog.astro';
 import MenuButton from '../components/shell/MenuButton.astro';
+import MobileDrawer from '../components/shell/MobileDrawer.astro';
+import ThemeSwitcher from '../components/shell/ThemeSwitcher.astro';
 import SharedName from '../components/shell/SharedName.astro';
 import SharedScrollCue from '../components/shell/SharedScrollCue.astro';
+import GlobalTerminal from '../components/terminal/GlobalTerminal.astro';
 import SiteFooter from '../components/shell/SiteFooter.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout>
 	<MenuButton id="site-menu" />
+	<MobileDrawer />
+	<ThemeSwitcher />
 	<SharedName />
 	<SharedScrollCue />
+	<GlobalTerminal />
 	<TechnologyDialog />
 
 	<main class="page-scroll" data-page-scroll>
@@ -24,16 +29,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 		<About />
 		<Projects />
 		<Experience />
-		<Services />
 		<Certificates />
 		<SiteFooter />
 	</main>
 </BaseLayout>
 
 <script>
-	import '../scripts/terminal-interactions';
-	import '../scripts/cv-dialog';
 	import '../scripts/page-scroll';
+	import '../scripts/command-typing';
 </script>
 
 <style>
@@ -45,24 +48,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 		overflow-x: hidden;
 		overflow-y: auto;
 		flex-direction: column;
-		scroll-behavior: auto;
-		scroll-snap-type: y mandatory;
 		scrollbar-width: none;
 	}
 
 	.page-scroll::-webkit-scrollbar {
 		display: none;
 	}
-
-	@media (max-width: 48rem) {
-		.page-scroll[data-section-scroll-ready='true'] {
-			/* The active pane owns vertical gestures; horizontal carousels stay native. */
-			touch-action: pan-x pinch-zoom;
-		}
-		/* Section-scroll controls edge handoff; nested panes must not trap gestures. */
-		.page-scroll :global(.is-scroll-contained) {
-			overscroll-behavior-y: auto;
-		}
-	}
-
 </style>
