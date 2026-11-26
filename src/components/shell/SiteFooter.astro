@@ -34,7 +34,6 @@ const links = [
 <style>
 	.site-footer {
 		--footer-gutter: var(--content-gutter);
-		--footer-tuck: calc(var(--page-inset) + 3.25rem);
 		flex: none;
 		background: var(--color-surface);
 	}
@@ -97,12 +96,6 @@ const links = [
 
 	.footer-sep {
 		color: var(--color-accent-muted);
-	}
-
-	@media (min-width: 48rem) {
-		.site-footer {
-			margin-top: calc(-1 * var(--footer-tuck));
-		}
 	}
 
 	@media (min-width: 48.01rem) {

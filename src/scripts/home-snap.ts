@@ -1,6 +1,7 @@
 interface HomeSnapOptions {
 	scroller: HTMLElement;
 	details: HTMLElement;
+	about?: HTMLElement | null;
 	treeScroll?: HTMLElement | null;
 	signal: AbortSignal;
 }
@@ -17,9 +18,9 @@ const settleDelay = 140;
 const snapTimeout = 1000;
 
 /**
- * Snaps between #home and #home-details; below #home-details the page scrolls natively.
+ * Snaps between #home, #home-details and the top of #about; below #about the page scrolls natively.
  */
-export const initializeHomeSnap = ({ scroller, details, treeScroll, signal }: HomeSnapOptions): HomeSnap => {
+export const initializeHomeSnap = ({ scroller, details, about, treeScroll, signal }: HomeSnapOptions): HomeSnap => {
 	const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 	let pendingTop: number | null = null;
 	let pendingTimer = 0;
@@ -31,9 +32,16 @@ export const initializeHomeSnap = ({ scroller, details, treeScroll, signal }: Ho
 	let touching = false;
 	let touch: { x: number; y: number; handled: boolean } | null = null;
 
-	const detailsTop = () =>
-		details.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
-	const inSnapZone = () => scroller.scrollTop > 1 && scroller.scrollTop < detailsTop() - 1;
+	const offsetTop = (element: HTMLElement) =>
+		element.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop;
+	const detailsTop = () => offsetTop(details);
+	// Without #about the last snap point is #home-details itself.
+	const aboutTop = () => (about ? offsetTop(about) : detailsTop());
+	const near = (top: number, point: number) => Math.abs(top - point) <= 1;
+	const inSnapZone = () => {
+		const top = scroller.scrollTop;
+		return top > 1 && top < aboutTop() - 1 && !near(top, detailsTop());
+	};
 	const treeCanScroll = (direction: number, element: EventTarget | null) => {
 		if (!treeScroll || !(element instanceof Node) || !treeScroll.contains(element)) return false;
 		return direction > 0
@@ -43,9 +51,17 @@ export const initializeHomeSnap = ({ scroller, details, treeScroll, signal }: Ho
 	// Returns where a scroll intent should snap, or null when native scrolling applies.
 	const snapDestination = (direction: number, element: EventTarget | null) => {
 		const top = scroller.scrollTop;
-		const end = detailsTop();
-		if (top < end - 1) return direction > 0 ? end : 0;
-		if (top <= end + 1 && direction < 0 && !treeCanScroll(direction, element)) return 0;
+		const middle = detailsTop();
+		const end = aboutTop();
+		if (top < middle - 1) return direction > 0 ? middle : 0;
+		if (near(top, middle)) {
+			// The mobile tree pane scrolls on its own before the page moves on.
+			if (treeCanScroll(direction, element)) return null;
+			if (direction < 0) return 0;
+			return end > middle + 1 ? end : null;
+		}
+		if (top < end - 1) return direction > 0 ? end : middle;
+		if (near(top, end) && direction < 0) return middle;
 		return null;
 	};
 	const clearPending = () => {
@@ -83,7 +99,9 @@ export const initializeHomeSnap = ({ scroller, details, treeScroll, signal }: Ho
 		settleTimer = window.setTimeout(() => {
 			// Scrollbar drags, momentum and native keys may stop between both views.
 			if (touching || pendingTop !== null || !inSnapZone()) return;
-			scrollTo(lastDirection > 0 ? detailsTop() : 0);
+			const middle = detailsTop();
+			if (scroller.scrollTop < middle) scrollTo(lastDirection > 0 ? middle : 0);
+			else scrollTo(lastDirection > 0 ? aboutTop() : middle);
 		}, settleDelay);
 	};
 
@@ -103,7 +121,7 @@ export const initializeHomeSnap = ({ scroller, details, treeScroll, signal }: Ho
 		const now = performance.now();
 		if (now - lastWheelTime > wheelIdleGap) wheelLocked = false;
 		lastWheelTime = now;
-		// Trackpad inertia after a snap must not carry the page past #home-details.
+		// Trackpad inertia after a snap must not carry the page past the snap point.
 		if (wheelLocked) {
 			event.preventDefault();
 			return;

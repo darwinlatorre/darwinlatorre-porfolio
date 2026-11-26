@@ -20,13 +20,40 @@ const initializeCommandTyping = () => {
 		}
 	}, { threshold: 1 });
 
+	const pending = new Set(commands);
 	for (const command of commands) {
 		command.style.setProperty('--chars', String(command.textContent?.length ?? 0));
 		command.dataset.typingReady = '';
 		observer.observe(command);
 	}
 
-	document.addEventListener('astro:before-swap', () => observer.disconnect(), { once: true });
+	// A jump (deep link, `go certificates`) can skip a command without it ever being fully in
+	// view; once it is above the viewport, print it at once so its output is not left hidden.
+	const scroller = document.querySelector<HTMLElement>('[data-page-scroll]');
+	const abortController = new AbortController();
+	let frameId = 0;
+	const printSkipped = () => {
+		frameId = 0;
+		for (const command of pending) {
+			if (command.classList.contains('is-typing') || command.classList.contains('is-typed')) {
+				pending.delete(command);
+			} else if (command.getBoundingClientRect().bottom < 0) {
+				observer.unobserve(command);
+				command.classList.add('is-typed');
+				pending.delete(command);
+			}
+		}
+		if (pending.size === 0) abortController.abort();
+	};
+	scroller?.addEventListener('scroll', () => {
+		frameId ||= window.requestAnimationFrame(printSkipped);
+	}, { passive: true, signal: abortController.signal });
+
+	document.addEventListener('astro:before-swap', () => {
+		observer.disconnect();
+		abortController.abort();
+		window.cancelAnimationFrame(frameId);
+	}, { once: true });
 };
 
 initializeCommandTyping();
