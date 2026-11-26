@@ -60,9 +60,10 @@ import { certificates } from '../../data/portfolio';
 </section>
 
 <style>
+	/* The last section gets a generous bottom space so it does not sit right on the footer. */
 	.certificates {
 		display: grid;
-		grid-template-rows: var(--section-space-start) auto var(--section-space-end);
+		grid-template-rows: var(--section-space-start) auto clamp(4.5rem, 14vh, 9rem);
 	}
 
 	.certificates-content {

@@ -88,7 +88,8 @@ const descriptionParts = profile.description.split(
 		--about-measure: 46rem;
 
 		display: grid;
-		grid-template-rows: var(--section-space-start) auto var(--section-space-end);
+		/* Extra top space: About is a snap point, so its command sits a little below the header. */
+		grid-template-rows: calc(var(--section-space-start) + clamp(1.5rem, 4vh, 3rem) + 30px) auto var(--section-space-end);
 	}
 
 	.about-content {

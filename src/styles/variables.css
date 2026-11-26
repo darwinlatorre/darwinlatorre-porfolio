@@ -20,7 +20,7 @@
 	--page-inset: clamp(0.5rem, 1vw, 1rem);
 	--control-offset: clamp(1.25rem, 2.5vw, 2.35rem);
 	--content-max-width: 78rem;
-	--content-gutter: clamp(2rem, 7vw, 6rem);
+	--content-gutter: clamp(2rem, calc(7vw - 2rem), 4rem);
 	/* Vertical rhythm between content sections; the start space clears the fixed header. */
 	--section-space-start: clamp(4.5rem, 9vh, 7rem);
 	--section-space-end: clamp(2.5rem, 6vh, 4.5rem);

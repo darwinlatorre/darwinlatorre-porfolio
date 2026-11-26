@@ -80,7 +80,7 @@ public/         Static assets and downloadable CV
 
 - `src/data/portfolio.ts` is the shared source for profile, project, experience, and certificate content.
 - `src/data/navigation.ts` defines the section IDs and labels used by the menu, terminal commands, and scroll cue. The page markup in `src/pages/index.astro` must follow that order; Home contains two screens.
-- `src/scripts/page-scroll.ts` controls reveals and shared UI; `home-snap.ts` snaps between the two Home screens, and every section after them scrolls freely. Scrolling happens inside `[data-page-scroll]`.
+- `src/scripts/page-scroll.ts` controls reveals and shared UI; `home-snap.ts` snaps between the two Home screens and the top of About, and everything after that scrolls freely. Scrolling happens inside `[data-page-scroll]`.
 - `src/scripts/command-typing.ts` types each section's prompt command when it scrolls into view; the section output prints after it.
 - The terminal (`src/scripts/terminal-interactions.ts`) is global: bottom left on desktop from About onward, and inside the swipe drawer (`src/scripts/drawer.ts`) on phones. Run `help` to list commands, including `theme` and `sound`.
 - Themes live in `src/data/themes.ts` and as `[data-theme]` palettes in `src/styles/variables.css`; the choice is saved in `localStorage` and applied before first paint in `BaseLayout.astro`.

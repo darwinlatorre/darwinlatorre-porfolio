@@ -400,8 +400,8 @@ import { profile, projects } from '../../data/portfolio';
 	@media (min-width: 48.01rem) {
 		.projects-content {
 			--projects-column: calc(min(var(--content-max-width), 100cqw) - 2 * var(--content-gutter));
-			/* 90% of a quarter of the column: four cards still fit, with a little air at the end. */
-			--project-card-width: max(14rem, calc((var(--projects-column) - 3 * var(--projects-gap)) / 4 * 0.9));
+			/* A full quarter of the column: four cards span the content width. */
+			--project-card-width: max(15rem, calc((var(--projects-column) - 3 * var(--projects-gap)) / 4));
 			/* Titles scale with the card so names like "darwinlatorre_" stay on one line. */
 			--project-name-font-size: clamp(1.05rem, calc(var(--project-card-width) * 0.08), 1.6rem);
 
@@ -426,6 +426,12 @@ import { profile, projects } from '../../data/portfolio';
 
 		.project-card {
 			scroll-snap-align: start;
+		}
+
+		/* A smaller size fits about twice the characters per line in the narrow card. */
+		.project-description {
+			font-size: 0.82rem;
+			line-height: 1.55;
 		}
 
 		/* The GitHub bar spans exactly the card row (or the full column when the row scrolls). */

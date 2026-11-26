@@ -89,6 +89,17 @@ const initializePageScroll = () => {
 		);
 		return reducedMotion.matches ? (progress >= 0.5 ? 1 : 0) : progress;
 	};
+	// Content reveal: 0 when the section top enters at the viewport bottom, 1 once it has risen
+	// 40% of the viewport, so content is in place well before it reaches the middle. The end is
+	// clamped to the last reachable scroll position so the final section always finishes.
+	const revealProgress = (top: number) => {
+		const height = scroller.clientHeight;
+		const maxScroll = scroller.scrollHeight - height;
+		const end = Math.min(top - height * 0.6, maxScroll);
+		const start = Math.min(top - height, end - 1);
+		const progress = clamp((scroller.scrollTop - start) / (end - start));
+		return reducedMotion.matches ? (progress > 0 ? 1 : 0) : progress;
+	};
 	const getFragmentTarget = (hash: string) => {
 		if (!hash.startsWith('#') || hash.length <= 1) return null;
 
@@ -137,9 +148,11 @@ const initializePageScroll = () => {
 		const progress = reducedMotion.matches ? (rawProgress >= 0.5 ? 1 : 0) : rawProgress;
 		const inDetails = rawProgress >= 0.5;
 		const aboutProgress = entryProgress(aboutTop);
-		const projectsProgress = entryProgress(projectsTop);
-		const experienceProgress = entryProgress(experienceTop);
-		const certificatesProgress = entryProgress(certificatesTop);
+		const aboutReveal = revealProgress(aboutTop);
+		const projectsProgress = revealProgress(projectsTop);
+		const experienceProgress = revealProgress(experienceTop);
+		const certificatesProgress = revealProgress(certificatesTop);
+		const atPageEnd = scroller.scrollTop >= scroller.scrollHeight - scroller.clientHeight - 24;
 
 		if (sharedName) {
 			// Phones hide the name while reading down past Home; desktop keeps it pinned.
@@ -153,8 +166,9 @@ const initializePageScroll = () => {
 			sharedName.classList.toggle('is-tucked', nameTucked);
 		}
 		if (topScrim) {
-			// The band only appears once section content can pass under the pinned name.
-			topScrim.classList.toggle('is-visible', aboutProgress >= 0.85);
+			// The band only appears once content scrolls past the About snap point and can pass under
+			// the pinned name; at the snap point itself the About command stays clear of it.
+			topScrim.classList.toggle('is-visible', scroller.scrollTop > aboutTop + 8);
 			topScrim.classList.toggle('is-tucked', nameTucked);
 		}
 
@@ -233,7 +247,8 @@ const initializePageScroll = () => {
 		}
 
 		if (floatingTerminal) {
-			const terminalHidden = aboutProgress < 0.5;
+			// Shown from About on, and put away again once the page bottom (footer) is reached.
+			const terminalHidden = aboutProgress < 0.5 || atPageEnd;
 			floatingTerminal.classList.toggle('is-visible', !terminalHidden);
 			if (terminalHidden && document.activeElement instanceof HTMLElement && floatingTerminal.contains(document.activeElement)) {
 				document.activeElement.blur();
@@ -243,25 +258,26 @@ const initializePageScroll = () => {
 		}
 
 		if (homeDetailsContent) {
-			const exitProgress = range(aboutProgress, 0, 0.2);
+			// Home details fade only as About takes over the screen, so the hand-off never shows a gap.
+			const exitProgress = range(aboutProgress, 0.3, 0.7);
 			homeDetailsContent.style.opacity = `${1 - exitProgress}`;
 			homeDetailsContent.style.transform = `translateY(${-8 * exitProgress}px)`;
 		}
-		if (homeDetails) homeDetails.inert = aboutProgress >= 0.2;
+		if (homeDetails) homeDetails.inert = aboutProgress >= 0.5;
 
-		const markerProgress = range(aboutProgress, 0.2, 0.4);
+		const markerProgress = range(aboutReveal, 0.05, 0.25);
 		reveal(aboutMarker, markerProgress, 8);
 		if (aboutLine) aboutLine.style.transform = `scaleY(${markerProgress})`;
-		reveal(aboutDescription, range(aboutProgress, 0.35, 0.6), 22);
-		const statValueProgress = range(aboutProgress, 0.5, 0.7);
+		reveal(aboutDescription, range(aboutReveal, 0.15, 0.4), 22);
+		const statValueProgress = range(aboutReveal, 0.3, 0.5);
 		for (const value of aboutStatValues) reveal(value, statValueProgress, 12);
 		aboutSocials.forEach((social, index) => {
-			const start = 0.65 + index * 0.055;
-			reveal(social, range(aboutProgress, start, start + 0.18), 14);
+			const start = 0.4 + index * 0.055;
+			reveal(social, range(aboutReveal, start, start + 0.18), 14);
 		});
 
 		projectCards.forEach((card, index) => {
-			const start = 0.3 + index * 0.12;
+			const start = 0.15 + index * 0.1;
 			reveal(card, range(projectsProgress, start, start + 0.3), 18);
 		});
 
@@ -293,7 +309,7 @@ const initializePageScroll = () => {
 	};
 
 	const homeSnap = homeDetails
-		? initializeHomeSnap({ scroller, details: homeDetails, treeScroll, signal: abortController.signal })
+		? initializeHomeSnap({ scroller, details: homeDetails, about, treeScroll, signal: abortController.signal })
 		: null;
 	const scrollToTop = (top: number) => {
 		if (homeSnap) homeSnap.scrollTo(top);
