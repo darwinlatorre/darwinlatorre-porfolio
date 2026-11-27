@@ -34,12 +34,23 @@ import { profile } from '../../data/portfolio';
 		<div class="navigation reveal" data-tree-scroll data-nosnippet>
 			<FileTree />
 		</div>
+
+		<iframe
+			class="greeting-frame"
+			title="Greeting animation"
+			aria-hidden="true"
+			tabindex="-1"
+			data-src="/greeting/saludo.html"
+			data-greeting-frame
+		></iframe>
 	</div>
 
 	<CvDialog />
 </section>
 
 <script>
+	import { playGreeting } from '../../scripts/greeting';
+
 	const initializeHomeDetails = () => {
 		const homeDetailsScreens = document.querySelectorAll<HTMLElement>('[data-home-details]');
 
@@ -50,6 +61,8 @@ import { profile } from '../../data/portfolio';
 			const observer = new IntersectionObserver((entries) => {
 				if (!entries.some(({ isIntersecting }) => isIntersecting)) return;
 				section.classList.add('is-visible');
+				const content = section.querySelector<HTMLElement>('[data-home-details-content]');
+				if (content) playGreeting(content);
 				observer.disconnect();
 			}, { threshold: 0.35 });
 
@@ -87,6 +100,8 @@ import { profile } from '../../data/portfolio';
 		grid-template-columns: minmax(0, 1.08fr) 1px minmax(18rem, 0.82fr);
 		align-items: center;
 		gap: clamp(2.5rem, 5vw, 5.5rem);
+		/* Lets the falling tree start from above this box (cqh). */
+		container-type: size;
 		scrollbar-width: none;
 	}
 
@@ -157,6 +172,59 @@ import { profile } from '../../data/portfolio';
 
 	.navigation {
 		justify-self: start;
+	}
+
+	/* The greeting shares the tree's cell, as tall as the divider, and drops out of view through its bottom edge. */
+	.navigation,
+	.greeting-frame {
+		grid-area: 1 / 3;
+	}
+
+	.greeting-frame {
+		width: 100%;
+		height: min(52vh, 29rem);
+		border: 0;
+		/* Raised so the character stands level with the bottom of the command buttons. */
+		translate: 0 -13%;
+		/* Matches saludo.html's own scheme, so the browser keeps the frame transparent. */
+		color-scheme: light;
+		pointer-events: none;
+	}
+
+	[data-greeting='playing'] :global(.file-tree) {
+		visibility: hidden;
+	}
+
+	/*
+	 * Falls from above the content box, squashes the character on impact and settles. The tree sits above the
+	 * animation and hides it, so its bottom edge reads as pushing the character down.
+	 */
+	[data-greeting='landing'] :global(.file-tree) {
+		position: relative;
+		z-index: 1;
+		/* The same surface .screen paints, so the falling tree matches the section. */
+		background: var(--color-surface);
+		transform-origin: bottom;
+		animation: tree-stomp 600ms cubic-bezier(0.5, 0, 0.75, 0) both;
+	}
+
+	@keyframes tree-stomp {
+		0% {
+			transform: translateY(-100cqh);
+		}
+		40% {
+			transform: translateY(0);
+			animation-timing-function: var(--ease-out);
+		}
+		60% {
+			transform: scale(1.03, 0.9);
+		}
+		80% {
+			transform: scale(0.99, 1.02);
+		}
+		100% {
+			transform: none;
+		}
 	}
 
 	.home-details[data-animate='true'] .reveal {
@@ -279,6 +347,19 @@ import { profile } from '../../data/portfolio';
 			min-height: 0;
 			margin: 0 auto;
 			overflow: hidden;
+		}
+
+		.navigation,
+		.greeting-frame {
+			grid-area: 3 / 1;
+		}
+
+		/* The tree fills the last row here, so the animation fits the tree's own box. */
+		.greeting-frame {
+			width: min(23rem, 100%);
+			height: 100%;
+			margin: 0 auto;
+			translate: none;
 		}
 
 	}
