@@ -196,8 +196,9 @@ import { profile } from '../../data/portfolio';
 	}
 
 	/*
-	 * Falls from above the content box, squashes the character on impact and settles. The tree sits above the
-	 * animation and hides it, so its bottom edge reads as pushing the character down.
+	 * Falls from above the content box onto the character's head (--greeting-reach, set by greeting.ts), pushes it down
+	 * as fast as it drops, squashes on landing and settles. The tree sits above the animation and hides it, so its
+	 * bottom edge reads as pushing the character down.
 	 */
 	[data-greeting='landing'] :global(.file-tree) {
 		position: relative;
@@ -205,21 +206,28 @@ import { profile } from '../../data/portfolio';
 		/* The same surface .screen paints, so the falling tree matches the section. */
 		background: var(--color-surface);
 		transform-origin: bottom;
-		animation: tree-stomp 600ms cubic-bezier(0.5, 0, 0.75, 0) both;
+		animation: tree-stomp 700ms both;
 	}
 
+	/* From 1.5 s of the greeting: on the head at 1.68 s, landed at 1.91 s, as the character leaves the view. */
 	@keyframes tree-stomp {
 		0% {
 			transform: translateY(-100cqh);
+			animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
 		}
-		40% {
+		26% {
+			transform: translateY(var(--greeting-reach, -50%));
+			/* The character's own drop: an ease-in quad. */
+			animation-timing-function: cubic-bezier(0.11, 0, 0.5, 0);
+		}
+		58% {
 			transform: translateY(0);
 			animation-timing-function: var(--ease-out);
 		}
-		60% {
+		73% {
 			transform: scale(1.03, 0.9);
 		}
-		80% {
+		86% {
 			transform: scale(0.99, 1.02);
 		}
 		100% {
