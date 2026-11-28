@@ -1,8 +1,12 @@
-# Darwin Latorre Portfolio
+# Darwin Latorre — Personal Portfolio
 
-Personal portfolio for Darwin Latorre, a DevOps and Backend Engineer. Built with Astro, it presents professional experience, selected projects and certifications through a terminal-inspired interface.
+Hey, I'm Darwin! Building this portfolio gave me a chance to bring something I use every day—the terminal—into a more creative project. I turned a file tree into a way to explore my work, added a handful of commands to try, and built in themes so you can make the place feel a little more like your own.
 
-**Live site:** [darwinlatorre.com](https://darwinlatorre.com)
+I'm still working on it and having fun with the little details. Hope you enjoy it ✨
+
+[Visit darwinlatorre.com](https://darwinlatorre.com)
+
+[![Portfolio homepage showing the terminal-inspired introduction and file-tree navigation](docs/images/portfolio-home.webp)](https://darwinlatorre.com)
 
 ## Tech Stack
 
